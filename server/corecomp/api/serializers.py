@@ -41,7 +41,7 @@ class SignUp(serializers.ModelSerializer):
             "required": "Email is required",
             "blank": "Email is required",
             "null": "Email is required",
-            "min_length": "Password must be at least 9 characters",
+            "min_length": "Password must be at least 8 characters",
         }
     )
 
@@ -55,7 +55,7 @@ class SignUp(serializers.ModelSerializer):
             "required": "Email is required",
             "blank": "Email is required",
             "null": "Email is required",
-            "min_length": "Password must be at least 9 characters",
+            "min_length": "Password must be at least 8 characters",
         }
     )
 
