@@ -2,19 +2,24 @@ import {useState} from "react"
 
 
 function SignUp() {
+    // payload
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState(null);
+    // validation
+    const [usernameError, setUsernameError] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
 
     async function handleSubmit(event) {
         event.preventDefault();
-        if (password != confirmPassword) {
-            setError("Passwords don't match");
-            return
-        }
-
+        setUsernameError("");
+        setEmailError("");
+        setPasswordError("");
+        setConfirmPasswordError("");
         const payload = {email: email, username: username, password: password, confirmPassword: confirmPassword};
         try {
             const response = await fetch("http://127.0.0.1:8000/api/sign-up", {
@@ -26,6 +31,29 @@ function SignUp() {
             });
             const data = await response.json();
             console.log(data);
+
+            if (!response.ok) {
+                for (const field in data) {
+                    if (field == "username") {
+                        setUsernameError(data.username);
+                    }
+                    if (field == "email") {
+                        setEmailError(data.email);
+                    }
+                    if (field == "password") {
+                        setPasswordError(data.password)
+                    }
+                    if (field == "confirmPassword") {
+                        setConfirmPasswordError(data.confirmPassword);
+                    }
+                    if (field == "non_field_errors") {
+                        setPasswordError(data.non_field_errors);
+                        setConfirmPasswordError(data.non_field_errors);
+                    }
+                }
+
+            }
+
         } catch (error) {
             console.error("Error:", error);
         }
@@ -38,19 +66,22 @@ function SignUp() {
                 <label>
                     Email:
                     <input value={email} onChange={(event) => setEmail(event.target.value)}></input>
+                    {emailError ? <h3>{emailError}</h3> : <h3></h3>}
                 </label>
                 <label>
                     Username:
                     <input value={username} onChange={(event) => setUsername(event.target.value)}></input>
+                    {usernameError ? <h3>{usernameError}</h3> : <h3></h3>}
                 </label>
                 <label>
                     Password:
                     <input value={password} onChange={(event) => setPassword(event.target.value)}></input>
-                    {error ? <h3>error</h3> : <h3></h3>}
+                    {passwordError ? <h3>{passwordError}</h3> : <h3></h3>}
                 </label>
                 <label>
                     Comfirm Password:
                     <input value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)}></input>
+                    {confirmPasswordError ? <h3>{confirmPasswordError}</h3> : <h3></h3>}
                 </label>
                 <button type="submit">Sign up</button>
             </form>
