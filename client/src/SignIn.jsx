@@ -1,7 +1,8 @@
 import {useState} from "react"
-
+import {useNavigate} from "react-router-dom"
 
 function SignIn() {
+    const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     // validation
@@ -31,6 +32,8 @@ function SignIn() {
             sessionStorage.setItem("access", data.access);
             sessionStorage.setItem("refresh", data.refresh);
             console.log(sessionStorage);
+            // redirect user to their "search" page
+            navigate("/search");
         } catch (error) {
             console.error("Error:", error);
         }
