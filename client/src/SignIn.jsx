@@ -4,6 +4,8 @@ import {useState} from "react"
 function SignIn() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    // validation
+    const [error, setError] = useState("");
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -16,6 +18,14 @@ function SignIn() {
                 },
                 body: JSON.stringify(payload),
             });
+            // if account not found
+            if (!response.ok) {
+                setError("Username or/and password is incorrect");
+                setUsername("");
+                setPassword("");
+                return
+            }
+
             const data = await response.json();
             // development phase
             sessionStorage.setItem("access", data.access);
@@ -30,6 +40,7 @@ function SignIn() {
         <div>
             <h1>Sign In</h1>
             <form onSubmit={handleSubmit}>
+                {error ? <h3>{error}</h3> : <h3></h3>}
                 <label>
                     Username:
                     <input value={username} onChange={(event) => setUsername(event.target.value)}></input>
