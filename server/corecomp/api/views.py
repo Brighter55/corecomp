@@ -20,6 +20,12 @@ def sign_up(request):
         return Response({"success": "User has been created!"}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def search(request):
+    user = request.user.username
+    data = json.loads(request.body)
+    ticker = data["company"]
+    return Response({"success": f"Hey this is from django and the user trying to access is {user} and the ticker of a company is {ticker}"})
 
 
