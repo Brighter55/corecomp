@@ -2,7 +2,7 @@ import {BrowserRouter, Routes, Route} from "react-router-dom"
 import Homepage from "./Homepage.jsx"
 import SignIn from "./SignIn.jsx"
 import SignUp from "./SignUp.jsx"
-import Search from "./Search.jsx"
+import Search from "./Search/Search.jsx"
 
 function App() {
   return (

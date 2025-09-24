@@ -1,0 +1,13 @@
+.header {
+    min-height: 7%;
+    border: 2px solid black;
+    display: flex;
+    align-items: center;
+}
+
+.brand {
+    font-size: 30px;
+    text-decoration: none;
+    font-family: "Segoe Ui", Arial, sans-serif;
+    font-weight: bold;
+}
