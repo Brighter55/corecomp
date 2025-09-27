@@ -33,7 +33,7 @@ function SignIn() {
             sessionStorage.setItem("refresh", data.refresh);
             console.log(sessionStorage);
             // redirect user to their "search" page
-            navigate("/search");
+            navigate("/overview");
         } catch (error) {
             console.error("Error:", error);
         }

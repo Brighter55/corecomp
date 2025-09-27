@@ -22,10 +22,14 @@ def sign_up(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def search(request):
+def overview(request):
     user = request.user.username
     data = json.loads(request.body)
     ticker = data["company"]
-    return Response({"success": f"Hey this is from django and the user trying to access is {user} and the ticker of a company is {ticker}"})
+    period = data["period"]
+    return Response({"success": f"Hey this is from django and the user trying to access is {user} and the ticker of a company is {ticker}, and the peirod chosen is {period}"}, status=status.HTTP_200_OK)
 
-
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def is_authorized(request):
+    return Response(status=status.HTTP_200_OK)

@@ -4,7 +4,7 @@ function AppHeader() {
 
     return (
         <header className={styles.header}>
-            <a href="/search" className={styles.brand} >CoreComp</a>
+            <a href="/overview" className={styles.brand} >CoreComp</a>
         </header>
     )
 }

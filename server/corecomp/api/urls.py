@@ -7,5 +7,7 @@ urlpatterns = [
     path("sign-up", views.sign_up),
     path("sign-in", TokenObtainPairView.as_view()),
     # Search page
-    path("search", views.search),
+    path("overview", views.overview),
+    # Check if user is authorized
+    path("is-authorized", views.is_authorized),
 ]
