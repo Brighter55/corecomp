@@ -2,7 +2,7 @@ import {BrowserRouter, Routes, Route} from "react-router-dom"
 import Homepage from "./Homepage.jsx"
 import SignIn from "./SignIn.jsx"
 import SignUp from "./SignUp.jsx"
-import Search from "./Search/Search.jsx"
+import Overview from "./Overview/Overview.jsx"
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
         <Route path="/" element={<Homepage></Homepage>} />
         <Route path="/sign-in" element={<SignIn></SignIn>} />
         <Route path="/sign-up" element={<SignUp></SignUp>} />
-        <Route path="/search" element={<Search></Search>} />
+        <Route path="/overview" element={<Overview></Overview>} />
       </Routes>
     </BrowserRouter>
   )
