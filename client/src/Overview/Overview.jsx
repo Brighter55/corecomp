@@ -4,6 +4,11 @@ import {useEffect} from "react"
 import AppHeader from "../AppHeader/AppHeader.jsx"
 import styles from "./Overview.module.css"
 import PeriodSwitch from "./PeriodSwitch.jsx"
+import About from "./About.jsx"
+import Fundamentals from "./Fundamentals.jsx"
+
+// pictures
+import logo from "../assets/logoPlaceholder.png"
 
 function Overview() {
     // when opens up the page check if user is authorized
@@ -56,6 +61,15 @@ function Overview() {
                 <form className={styles.form} onSubmit={handleSearchSubmit}>
                     <input value={company} onChange={(event) => {setCompany(event.target.value)}} className={styles.searchBar} type="search" />
                 </form>
+                <div className={styles.introduction}>
+                    <img src={logo} className={styles.logo}></img>
+                    <div className={styles.introductionText}>
+                        <h2 style={{margin: "20px 0"}}>Microsoft | MSFT</h2>
+                        <h2 style={{margin: "20px 0"}}>500 <span style={{fontSize: "25px"}}>USD</span></h2>
+                    </div>
+                </div>
+                <About></About>
+                <Fundamentals></Fundamentals>
                 <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
             </div>
         </>
