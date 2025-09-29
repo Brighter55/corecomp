@@ -31,13 +31,14 @@ function Overview() {
         isAuthorized();
     }, []);
 
-    const [company, setCompany] = useState("");
+    const [symbol, setSymbol] = useState("");
     const [period, setPeriod] = useState("annually");
+    const [reports, setReports] = useState([]);
 
     async function handleSearchSubmit(event) {
         event.preventDefault();
 
-        const payload = {company: company, period: period};
+        const payload = {symbol: symbol, period: period};
         try {
             const response = await fetch("http://127.0.0.1:8000/api/overview", {
                 method: "POST",
@@ -48,7 +49,8 @@ function Overview() {
                 body: JSON.stringify(payload),
             });
             const data = await response.json();
-            console.log(data.success);
+            setReports(data);
+            console.log(data);
         } catch (error) {
             console.error("Error:", error)
         }
@@ -59,7 +61,7 @@ function Overview() {
             <AppHeader></AppHeader>
             <div className={styles.overviewContent}>
                 <form className={styles.form} onSubmit={handleSearchSubmit}>
-                    <input value={company} onChange={(event) => {setCompany(event.target.value)}} className={styles.searchBar} type="search" />
+                    <input value={symbol} onChange={(event) => {setSymbol(event.target.value)}} className={styles.searchBar} type="search" />
                 </form>
                 <div className={styles.introduction}>
                     <img src={logo} className={styles.logo}></img>
