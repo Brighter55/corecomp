@@ -6,6 +6,9 @@ import styles from "./Overview.module.css"
 import PeriodSwitch from "./PeriodSwitch.jsx"
 import About from "./About.jsx"
 import Fundamentals from "./Fundamentals.jsx"
+import TotalRevenueGraph from "./TotalRevenueGraph.jsx"
+import NetIncomeGraph from "./NetIncomeGraph.jsx"
+
 
 // pictures
 import logo from "../assets/logoPlaceholder.png"
@@ -73,6 +76,10 @@ function Overview() {
                 <About></About>
                 <Fundamentals></Fundamentals>
                 <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
+                <div className={styles.graphs}>
+                    <TotalRevenueGraph reports={reports}></TotalRevenueGraph>
+                    <NetIncomeGraph reports={reports}></NetIncomeGraph>
+                </div>
             </div>
         </>
     )

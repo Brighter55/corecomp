@@ -79,3 +79,8 @@
     display: flex;
     justify-content: space-between;
 }
+
+.graphs {
+    display: flex;
+    width: calc(100vw - 3vw);
+}
