@@ -4,16 +4,6 @@ import styles from "./Overview.module.css"
 
 function NetIncomeGraph(props) {
 
-    function countDigits(value) {
-        if (value === 0) {
-            return 1;
-        }
-        return Math.floor(Math.log10(Math.abs(value))) + 1;
-    }
-
-    const desiredTickCount = 5;
-    const xAxisInterval = Math.floor(props.reports.length / desiredTickCount);
-
     return (
         <div className={styles.graph}>
             <h2>Net Income</h2>

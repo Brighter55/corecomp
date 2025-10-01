@@ -4,13 +4,6 @@ import styles from "./Overview.module.css"
 
 function TotalRevenueGraph(props) {
 
-    function countDigits(value) {
-        if (value === 0) {
-            return 1;
-        }
-        return Math.floor(Math.log10(Math.abs(value))) + 1;
-    }
-
     return (
         <div className={styles.graph}>
             <h2>Revenue</h2>
