@@ -84,3 +84,10 @@
     display: flex;
     width: calc(100vw - 3vw);
 }
+
+.graph {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 33%;
+}
