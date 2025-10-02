@@ -1,8 +1,17 @@
 import React from 'react';
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from "./Overview.module.css"
+import CustomBar from "./CustomBar.jsx"
+import CustomActiveBar from "./CustomActiveBar.jsx"
 
 function NetIncomeGraph(props) {
+
+    function countDigits(value) {
+        if (value === 0) {
+            return 1;
+        }
+        return Math.floor(Math.log10(Math.abs(value))) + 1;
+    }
 
     return (
         <div className={styles.graph}>
@@ -29,7 +38,7 @@ function NetIncomeGraph(props) {
                         if (countDigits(value) >= 7) {return `${value / 1000000}M`}
                         return value
                     }}/>
-                    <Bar dataKey="netIncome" fill="#A3B18A" activeBar={<Rectangle fill="#588157" stroke="#DAD7CD" />} />
+                    <Bar dataKey="netIncome" shape={<CustomBar></CustomBar>} activeBar={<CustomActiveBar></CustomActiveBar>} />
                 </BarChart>
             </ResponsiveContainer>
         </div>
