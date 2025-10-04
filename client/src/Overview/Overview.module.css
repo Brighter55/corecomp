@@ -83,6 +83,7 @@
 .graphs {
     display: flex;
     width: calc(100vw - 3vw);
+    flex-wrap: wrap;
 }
 
 .graph {

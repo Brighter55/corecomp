@@ -9,6 +9,8 @@ import Fundamentals from "./Fundamentals.jsx"
 import TotalRevenueGraph from "./TotalRevenueGraph.jsx"
 import NetIncomeGraph from "./NetIncomeGraph.jsx"
 import OperatingCashflowGraph from "./OperatingCashflowGraph.jsx"
+import CapitalExpendituresGraph from "./CapitalExpendituresGraph.jsx"
+import FreeCashflowGraph from "./FreeCashflowGraph.jsx"
 
 // pictures
 import logo from "../assets/logoPlaceholder.png"
@@ -80,6 +82,8 @@ function Overview() {
                     <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
                     <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
                     <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
+                    <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
+                    <FreeCashflowGraph reports={reports.CASH_FLOW}></FreeCashflowGraph>
                 </div>
             </div>
         </>
