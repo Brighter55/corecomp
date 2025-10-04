@@ -77,8 +77,8 @@ function Overview() {
                 <Fundamentals></Fundamentals>
                 <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
                 <div className={styles.graphs}>
-                    <TotalRevenueGraph reports={reports}></TotalRevenueGraph>
-                    <NetIncomeGraph reports={reports}></NetIncomeGraph>
+                    <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
+                    <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
                 </div>
             </div>
         </>
