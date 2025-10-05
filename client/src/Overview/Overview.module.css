@@ -86,6 +86,11 @@
     flex-wrap: wrap;
 }
 
+.row {
+    display: flex;
+    width: 100%;
+}
+
 .graph {
     display: flex;
     flex-direction: column;
