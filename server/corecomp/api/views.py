@@ -70,8 +70,19 @@ def get_reports(symbol, period):
     CASH_FLOW["annualReports"] = list(reversed(CASH_FLOW["annualReports"]))
     CASH_FLOW["quarterlyReports"] = list(reversed(CASH_FLOW["quarterlyReports"]))
 
+    # Development Phase: url = f'https://www.alphavantage.co/query?function=DIVIDENDS&symbol={symbol}&apikey={api_key}'
+    url = 'https://www.alphavantage.co/query?function=DIVIDENDS&symbol=IBM&apikey=demo'
+    response = requests.get(url)
+    data = response.json()
+    DIVIDENDS = []
+    for dividend in data["data"]:
+        DIVIDENDS.append({"payment_date": dividend["payment_date"], "amount": dividend["amount"]})
+
+    DIVIDENDS = list(reversed(DIVIDENDS))
+
     # make reports to send for either occasion
     reports = {}
+    reports["DIVIDENDS"] = DIVIDENDS
     if period == "annually":
         reports["INCOME_STATEMENT"] = INCOME_STATEMENT["annualReports"]
         reports["CASH_FLOW"] = CASH_FLOW["annualReports"]

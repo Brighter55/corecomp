@@ -8,6 +8,10 @@ import About from "./About.jsx"
 import Fundamentals from "./Fundamentals.jsx"
 import TotalRevenueGraph from "./TotalRevenueGraph.jsx"
 import NetIncomeGraph from "./NetIncomeGraph.jsx"
+import OperatingCashflowGraph from "./OperatingCashflowGraph.jsx"
+import CapitalExpendituresGraph from "./CapitalExpendituresGraph.jsx"
+import FreeCashflowGraph from "./FreeCashflowGraph.jsx"
+import DividendsPayoutGraph from "./DividendsPayoutGraph.jsx"
 
 
 // pictures
@@ -75,10 +79,22 @@ function Overview() {
                 </div>
                 <About></About>
                 <Fundamentals></Fundamentals>
+                <div className={styles.graphs} >
+                    <div className={styles.row}>
+                        <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
+                    </div>
+                </div>
                 <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
                 <div className={styles.graphs}>
-                    <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
-                    <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
+                    <div className={styles.row}>
+                        <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
+                        <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
+                        <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
+                    </div>
+                     <div className={styles.row}>
+                        <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
+                        <FreeCashflowGraph reports={reports.CASH_FLOW}></FreeCashflowGraph>
+                    </div>
                 </div>
             </div>
         </>
