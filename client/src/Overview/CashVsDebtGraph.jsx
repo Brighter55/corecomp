@@ -37,8 +37,8 @@ function CashVsDebtGraph(props) {
                         return value
                     }}/>
                     <Legend />
-                    <Bar dataKey="cash" stackId="a" fill="#8884d8" />
-                    <Bar dataKey="debt" stackId="a" fill="#82ca9d" /> {/*dont have to think about negative value, handle active bar*/}
+                    <Bar dataKey="cash" stackId="a" fill="#A3B18A"  activeBar={{ fill: "#588157", stroke: "#DAD7CD", strokeWidth: 2 }}/>
+                    <Bar dataKey="debt" stackId="a" fill="#bc4749" activeBar={{ fill: "#a33d3e", stroke: "#DAD7CD", strokeWidth: 2 }}/> {/*dont have to think about negative value, handle active bar*/}
                 </BarChart>
             </ResponsiveContainer>
         </div>
