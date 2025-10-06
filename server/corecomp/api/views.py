@@ -80,15 +80,44 @@ def get_reports(symbol, period):
 
     DIVIDENDS = list(reversed(DIVIDENDS))
 
+
+    # request to BALANCE_SHEET
+    # Development Phase: url = 'https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol={symbol}&apikey={api_key}'
+    url = 'https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=IBM&apikey=demo'
+    response = requests.get(url)
+    data = response.json()
+    BALANCE_SHEET = {"annualReports": [], "quarterlyReports": []}
+    for report in data["annualReports"]:
+        date = report["fiscalDateEnding"]  # "year-month-day"
+        year = date.split("-")[0]
+        BALANCE_SHEET["annualReports"].append({
+            "date": year,
+            "cash": report["cashAndCashEquivalentsAtCarryingValue"],
+            "debt": report["shortLongTermDebtTotal"],
+            })
+    for report in data["quarterlyReports"]:
+        BALANCE_SHEET["quarterlyReports"].append({
+            "date": report["fiscalDateEnding"],
+            "cash": report["cashAndCashEquivalentsAtCarryingValue"],
+            "debt": report["shortLongTermDebtTotal"],
+        })
+
+    # prepare the data for Recharts by reversing the data
+    BALANCE_SHEET["annualReports"] = list(reversed(BALANCE_SHEET["annualReports"]))
+    BALANCE_SHEET["quarterlyReports"] = list(reversed(BALANCE_SHEET["quarterlyReports"]))
+
+
     # make reports to send for either occasion
     reports = {}
     reports["DIVIDENDS"] = DIVIDENDS
     if period == "annually":
         reports["INCOME_STATEMENT"] = INCOME_STATEMENT["annualReports"]
         reports["CASH_FLOW"] = CASH_FLOW["annualReports"]
+        reports["BALANCE_SHEET"] = BALANCE_SHEET["annualReports"]
     elif period == "quarterly":
         reports["INCOME_STATEMENT"] = INCOME_STATEMENT["quarterlyReports"]
         reports["CASH_FLOW"] = CASH_FLOW["quarterlyReports"]
+        reports["BALANCE_SHEET"] = BALANCE_SHEET["quarterlyReports"]
     return reports
 
 
