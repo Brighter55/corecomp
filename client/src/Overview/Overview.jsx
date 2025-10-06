@@ -12,6 +12,7 @@ import OperatingCashflowGraph from "./OperatingCashflowGraph.jsx"
 import CapitalExpendituresGraph from "./CapitalExpendituresGraph.jsx"
 import FreeCashflowGraph from "./FreeCashflowGraph.jsx"
 import DividendsPayoutGraph from "./DividendsPayoutGraph.jsx"
+import CashVsDebtGraph from "./CashVsDebtGraph.jsx"
 
 
 // pictures
@@ -94,6 +95,7 @@ function Overview() {
                      <div className={styles.row}>
                         <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
                         <FreeCashflowGraph reports={reports.CASH_FLOW}></FreeCashflowGraph>
+                        <CashVsDebtGraph reports={reports.BALANCE_SHEET}></CashVsDebtGraph>
                     </div>
                 </div>
             </div>
