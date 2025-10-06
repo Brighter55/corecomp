@@ -13,6 +13,7 @@ import CapitalExpendituresGraph from "./CapitalExpendituresGraph.jsx"
 import FreeCashflowGraph from "./FreeCashflowGraph.jsx"
 import DividendsPayoutGraph from "./DividendsPayoutGraph.jsx"
 import CashVsDebtGraph from "./CashVsDebtGraph.jsx"
+import SharesOutstandingGraph from "./SharesOutstandingGraph.jsx"
 
 
 // pictures
@@ -83,6 +84,7 @@ function Overview() {
                 <div className={styles.graphs} >
                     <div className={styles.row}>
                         <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
+                        <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
                     </div>
                 </div>
                 <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>

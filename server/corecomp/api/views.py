@@ -107,9 +107,22 @@ def get_reports(symbol, period):
     BALANCE_SHEET["quarterlyReports"] = list(reversed(BALANCE_SHEET["quarterlyReports"]))
 
 
+    # request to SHARES_OUTSTANDING
+    # Development Phase: url = 'https://www.alphavantage.co/query?function=SHARES_OUTSTANDING&symbol={symbol}&apikey={api_key}'
+    url = 'https://www.alphavantage.co/query?function=SHARES_OUTSTANDING&symbol=MSFT&apikey=demo'
+    response = requests.get(url)
+    data = response.json()
+    SHARES_OUTSTANDING = []
+    for report in data["data"]:
+        SHARES_OUTSTANDING.append({"date": report["date"], "shares_outstanding_basic": report["shares_outstanding_basic"]})
+
+    SHARES_OUTSTANDING = list(reversed(SHARES_OUTSTANDING))
+
+
     # make reports to send for either occasion
     reports = {}
     reports["DIVIDENDS"] = DIVIDENDS
+    reports["SHARES_OUTSTANDING"] = SHARES_OUTSTANDING
     if period == "annually":
         reports["INCOME_STATEMENT"] = INCOME_STATEMENT["annualReports"]
         reports["CASH_FLOW"] = CASH_FLOW["annualReports"]
