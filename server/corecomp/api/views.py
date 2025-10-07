@@ -119,6 +119,28 @@ def get_reports(symbol, period):
     SHARES_OUTSTANDING = list(reversed(SHARES_OUTSTANDING))
 
 
+    # request to EARNINGS
+    # Development Phase: url = 'https://www.alphavantage.co/query?function=EARNINGS&symbol={symbol}&apikey={api_key}'
+    url = 'https://www.alphavantage.co/query?function=EARNINGS&symbol=IBM&apikey=demo'
+    response = requests.get(url)
+    data = response.json()
+    EARNINGS = {"annualReports": [], "quarterlyReports": []}
+    for report in data["annualEarnings"]:
+        date = report["fiscalDateEnding"]  # "year-month-day"
+        year = date.split("-")[0]
+        EARNINGS["annualReports"].append({"date": year, "reportedEPS": report["reportedEPS"]})
+    for report in data["quarterlyEarnings"]:
+        EARNINGS["quarterlyReports"].append({
+            "date": report["fiscalDateEnding"],
+            "reportedEPS": report["reportedEPS"],
+            "estimatedEPS": report["estimatedEPS"],
+            "surprisePercentage": report["surprisePercentage"],
+            })
+
+    EARNINGS["annualReports"] = list(reversed(EARNINGS["annualReports"]))
+    EARNINGS["quarterlyReports"] = list(reversed(EARNINGS["quarterlyReports"]))
+
+
     # make reports to send for either occasion
     reports = {}
     reports["DIVIDENDS"] = DIVIDENDS
@@ -127,10 +149,12 @@ def get_reports(symbol, period):
         reports["INCOME_STATEMENT"] = INCOME_STATEMENT["annualReports"]
         reports["CASH_FLOW"] = CASH_FLOW["annualReports"]
         reports["BALANCE_SHEET"] = BALANCE_SHEET["annualReports"]
+        reports["EARNINGS"] = EARNINGS["annualReports"]
     elif period == "quarterly":
         reports["INCOME_STATEMENT"] = INCOME_STATEMENT["quarterlyReports"]
         reports["CASH_FLOW"] = CASH_FLOW["quarterlyReports"]
         reports["BALANCE_SHEET"] = BALANCE_SHEET["quarterlyReports"]
+        reports["EARNINGS"] = EARNINGS["quarterlyReports"]
     return reports
 
 
