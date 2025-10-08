@@ -14,7 +14,7 @@ import FreeCashflowGraph from "./FreeCashflowGraph.jsx"
 import DividendsPayoutGraph from "./DividendsPayoutGraph.jsx"
 import CashVsDebtGraph from "./CashVsDebtGraph.jsx"
 import SharesOutstandingGraph from "./SharesOutstandingGraph.jsx"
-
+import EPSGraph from "./EPSGraph.jsx"
 
 // pictures
 import logo from "../assets/logoPlaceholder.png"
@@ -98,6 +98,9 @@ function Overview() {
                         <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
                         <FreeCashflowGraph reports={reports.CASH_FLOW}></FreeCashflowGraph>
                         <CashVsDebtGraph reports={reports.BALANCE_SHEET}></CashVsDebtGraph>
+                    </div>
+                    <div className={styles.row}>
+                        <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
                     </div>
                 </div>
             </div>
