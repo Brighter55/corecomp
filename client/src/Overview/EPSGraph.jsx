@@ -19,8 +19,8 @@ function EPSGraph(props) {
                 {isVisible && (
                     <>
                         <p>{`Year: ${label}`}</p>
-                        <p style={report}>{`${payload[0].name}: ${payload[0].value}`}</p>
                         <p style={report}>{`${payload[1].name}: ${payload[1].value}`}</p>
+                        <p style={report}>{`${payload[0].name}: ${payload[0].value}`}</p>
                         <p style={report}>{payload[0].payload.surprisePercentage >= 0 ? "beat by" : "missed by"}: <span style={ payload[0].payload.surprisePercentage >= 0 ? {color: "green"} : {color: "red"} }>{payload[0].payload.surprisePercentage}%</span></p>
                     </>
                 )}
@@ -59,8 +59,8 @@ function EPSGraph(props) {
                     <YAxis stroke="#DAD7CD"/>
                     <Tooltip content={<CustomTooltip></CustomTooltip>} />
                     <Legend />
-                    <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={<CustomDot></CustomDot>} activeDot={<CustomActiveDot></CustomActiveDot>} legendType="circle" />
                     <Line type="monotone" dataKey="estimatedEPS" stroke="#DAD7CD" strokeWidth={0} dot={{ fill: "#DAD7CD", fillOpacity: 0.3, r: 5}} activeDot={{ r: 8, strokeWidth: 1}} legendType="circle"/>
+                    <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={<CustomDot></CustomDot>} activeDot={<CustomActiveDot></CustomActiveDot>} legendType="circle" />
                     </LineChart>
                 </ResponsiveContainer>
             </div>)
@@ -82,7 +82,7 @@ function EPSGraph(props) {
                     <YAxis stroke="#DAD7CD"/>
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#3A5A40"}} legendType="circle" />
+                    <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
                     </LineChart>
                 </ResponsiveContainer>
             </div>)
