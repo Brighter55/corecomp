@@ -141,10 +141,24 @@ def get_reports(symbol, period):
     EARNINGS["quarterlyReports"] = list(reversed(EARNINGS["quarterlyReports"]))
 
 
+    # request for PRICING
+    # Development Phase: url = f'https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol={symbol}&apikey={api_key}'
+    url = 'https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol=IBM&apikey=demo'
+    response = requests.get(url)
+    data = response.json()
+    records = data["Monthly Adjusted Time Series"]
+    PRICING = []
+    for date in records:
+        PRICING.append({"date": date, "adjusted close": records[date]["5. adjusted close"]})
+
+    PRICING = list(reversed(PRICING))
+
+
     # make reports to send for either occasion
     reports = {}
     reports["DIVIDENDS"] = DIVIDENDS
     reports["SHARES_OUTSTANDING"] = SHARES_OUTSTANDING
+    reports["PRICING"] = PRICING
     if period == "annually":
         reports["INCOME_STATEMENT"] = INCOME_STATEMENT["annualReports"]
         reports["CASH_FLOW"] = CASH_FLOW["annualReports"]

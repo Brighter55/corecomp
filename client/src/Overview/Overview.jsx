@@ -15,6 +15,7 @@ import DividendsPayoutGraph from "./DividendsPayoutGraph.jsx"
 import CashVsDebtGraph from "./CashVsDebtGraph.jsx"
 import SharesOutstandingGraph from "./SharesOutstandingGraph.jsx"
 import EPSGraph from "./EPSGraph.jsx"
+import PricingGraph from "./PricingGraph.jsx"
 
 // pictures
 import logo from "../assets/logoPlaceholder.png"
@@ -85,6 +86,7 @@ function Overview() {
                     <div className={styles.row}>
                         <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
                         <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
+                        <PricingGraph reports={reports.PRICING}></PricingGraph>
                     </div>
                 </div>
                 <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
