@@ -8,6 +8,7 @@ import json
 from dotenv import load_dotenv
 import os
 import requests
+from django.core.cache import cache
 
 load_dotenv()
 
@@ -180,8 +181,13 @@ def overview(request):
     data = json.loads(request.body)
     symbol = data["symbol"]
     period = data["period"]
+    # either get data by fetching or cache
+    key = f"fundamentals: {symbol}, {period}"
+    cached_reports = cache.get(key)
+    if cached_reports:
+        return Response(cached_reports, status=status.HTTP_200_OK)
     reports = get_reports(symbol=symbol, period=period)
-
+    cache.set(key, reports, timeout=3600)
     return Response(reports, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
