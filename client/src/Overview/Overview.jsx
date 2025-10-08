@@ -100,7 +100,7 @@ function Overview() {
                         <CashVsDebtGraph reports={reports.BALANCE_SHEET}></CashVsDebtGraph>
                     </div>
                     <div className={styles.row}>
-                        <EPSGraph reports={reports.EARNINGS}></EPSGraph>
+                        <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
                     </div>
                 </div>
             </div>
