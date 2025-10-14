@@ -154,3 +154,5 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
     }
 }
+
+AUTH_USER_MODEL = 'api.CustomUser'

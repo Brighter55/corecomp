@@ -1,6 +1,8 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+User = get_user_model()
 #SignUp: create user in auth_user
 class SignUp(serializers.ModelSerializer):
     # field definitions
@@ -80,3 +82,14 @@ class SignUp(serializers.ModelSerializer):
         model = User
         fields = ["email", "password", "username", "confirmPassword"]
 
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, data):
+        data = super().validate(data) # returns only {"access": ..., "refresh": ..} but self.user is now avialable
+        data["user_id"] = self.user.id
+        data["email"] = self.user.email
+        data["username"] = self.user.username
+        data["is_active"] = self.user.is_active
+        data["date_joined"] = self.user.date_joined
+        data["subscription_active"] = self.user.subscription_active
+        data["is_superuser"] = self.user.is_superuser
+        return data

@@ -29,6 +29,7 @@ function SignIn() {
 
             const data = await response.json();
             // development phase
+            console.log(data);
             sessionStorage.setItem("access", data.access);
             sessionStorage.setItem("refresh", data.refresh);
             console.log(sessionStorage);
