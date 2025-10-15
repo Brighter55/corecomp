@@ -10,4 +10,6 @@ urlpatterns = [
     path("overview", views.overview),
     # Check if user is authorized
     path("is-authorized", views.is_authorized),
+    # account verification
+    path("verify-email", views.verify_email),
 ]
