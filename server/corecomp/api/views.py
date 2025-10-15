@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
+from django.contrib.auth.tokens import default_token_generator
 from .serializers import SignUp, CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
@@ -31,19 +32,34 @@ def sign_up(request):
 
         User.objects.create_user(username=username, email=email, password=password, is_active=False, is_superuser=False, subscription_active=False)
         # send email verification
-        user = User.objects.get(username='example_user')
+        user = User.objects.get(username=username)
         token = default_token_generator.make_token(user)
-        link = #react link
+        link = f"http://localhost:5173/account-verification/{token}/{user.id}"
         response = requests.post(
             "https://api.mailgun.net/v3/sandboxcb8d9093dd704fa990c67dc9fb3b0e78.mailgun.org/messages",
             auth=("api", os.getenv("MAILGUN_API_KEY")),
             data={"from": "Corecomp <verify@corecomp.cc>",
                 "to": "Peter <sriphrakhunpiyawit@gmail.com>",
                 "subject": "Account Verification Email",
-                "html": get_html_message(link),
-                "text": "You have successfully created account with us, click the link below to verify your account and activate your trial"})
+             #   "html": get_html_message(link),
+                "text": f"You have successfully created account with us, click the link below to verify your account and activate your trial {link}"})
         return Response({"success": "User has been created!"}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def verify_email(request):
+    data = json.loads(request.body)
+    user_id = data["user_id"]
+    token = data["token"]
+    # get user object
+    user = User.objects.get(id=user_id)
+    if default_token_generator.check_token(user, token): # if the token belongs to this user
+        # activate account
+        return Response({"success": "yep this is valid user account is activated"}, status=status.HTTP_200_OK)
+    return Response({"error": "Nope the token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 # requests to AlphaVantage and return reports according to period
 def get_reports(symbol, period):
