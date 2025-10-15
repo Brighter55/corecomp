@@ -15,6 +15,7 @@ load_dotenv()
 User = get_user_model() # Get model listed in settings.py: AUTH_USER_MODEL = 'api.CustomUser'
 
 class CustomTokenObtainPairView(TokenObtainPairView):
+    # change to cookies once deployed
     serializer_class = CustomTokenObtainPairSerializer
 
 
@@ -29,6 +30,18 @@ def sign_up(request):
         username = serializer.validated_data["username"]
 
         User.objects.create_user(username=username, email=email, password=password, is_active=False, is_superuser=False, subscription_active=False)
+        # send email verification
+        user = User.objects.get(username='example_user')
+        token = default_token_generator.make_token(user)
+        link = #react link
+        response = requests.post(
+            "https://api.mailgun.net/v3/sandboxcb8d9093dd704fa990c67dc9fb3b0e78.mailgun.org/messages",
+            auth=("api", os.getenv("MAILGUN_API_KEY")),
+            data={"from": "Corecomp <verify@corecomp.cc>",
+                "to": "Peter <sriphrakhunpiyawit@gmail.com>",
+                "subject": "Account Verification Email",
+                "html": get_html_message(link),
+                "text": "You have successfully created account with us, click the link below to verify your account and activate your trial"})
         return Response({"success": "User has been created!"}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
