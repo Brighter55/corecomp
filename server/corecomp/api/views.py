@@ -11,12 +11,15 @@ from dotenv import load_dotenv
 import os
 import requests
 from django.core.cache import cache
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
 
 load_dotenv()
 User = get_user_model() # Get model listed in settings.py: AUTH_USER_MODEL = 'api.CustomUser'
 
 class CustomTokenObtainPairView(TokenObtainPairView):
-    # change to cookies once deployed
+    # change from default (JSON access and refresh) to cookies once deployed
     serializer_class = CustomTokenObtainPairSerializer
 
 
@@ -60,6 +63,20 @@ def verify_email(request):
         user.save()
         return Response({"success": "yep this is valid user account is activated"}, status=status.HTTP_200_OK)
     return Response({"error": "Nope the token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def google_authentication(request): #decodes the JWT to get user's info and create or retrieve account to send access and refresh
+    # get JWT from request
+    data = json.loads(request.body)
+    JWTtoken = data["JWTToken"]
+    try:
+        user_info = id_token.verify_oauth2_token(JWTtoken, google_requests.Request(), os.getenv("GOOGLE_CLIENT_ID"))
+        return Response({"success": user_info}, status=status.HTTP_200_OK)
+    except ValueError:
+        return Response({"error": "Token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 # requests to AlphaVantage and return reports according to period
 def get_reports(symbol, period):
