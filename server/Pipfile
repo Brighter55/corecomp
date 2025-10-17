@@ -11,6 +11,7 @@ psycopg2-binary = "*"
 djangorestframework = "*"
 django-cors-headers = "*"
 requests = "*"
+google-auth = {extras = ["requests"], version = "*"}
 
 [dev-packages]
 

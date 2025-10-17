@@ -25,3 +25,4 @@ client/*.sw?
 
 # keys
 .env
+client/.env

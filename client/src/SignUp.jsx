@@ -1,7 +1,9 @@
 import {useState} from "react"
-
+import {GoogleLogin} from "@react-oauth/google"
+import {useNavigate} from "react-router-dom"
 
 function SignUp() {
+    const navigate = useNavigate();
     // payload
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
@@ -85,6 +87,28 @@ function SignUp() {
                 </label>
                 <button type="submit">Sign up</button>
             </form>
+            <GoogleLogin
+                onSuccess={credentialResponse => {/*send token to django endpoint*/
+                    const payload = {JWTToken: credentialResponse.credential};
+                    async function sendJWTToken() {
+                        const response = await fetch("http://127.0.0.1:8000/api/google-authentication", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await response.json()
+                        sessionStorage.setItem("access", data.access);
+                        sessionStorage.setItem("refresh", data.refresh);
+                        navigate("/overview");
+                    }
+
+                    sendJWTToken();
+                }}
+                onError={() => console.log("Log in failed")}
+                useOneTap
+            />
         </div>
     )
 }
