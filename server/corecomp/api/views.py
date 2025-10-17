@@ -2,6 +2,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import default_token_generator
 from .serializers import SignUp, CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -72,7 +73,14 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
     JWTtoken = data["JWTToken"]
     try:
         user_info = id_token.verify_oauth2_token(JWTtoken, google_requests.Request(), os.getenv("GOOGLE_CLIENT_ID"))
-        return Response({"success": user_info}, status=status.HTTP_200_OK)
+        email = user_info["email"]
+        user, created = User.objects.get_or_create(email=email, defaults={"username": email, "email": email, "is_active": True})
+        if created:
+            user.set_unusable_password()
+            user.save()
+        # uses email to generate access and refresh tokens and return them to react
+        refresh = RefreshToken.for_user(user)
+        return Response({"access": str(refresh.access_token), "refresh": str(refresh)}, status=status.HTTP_200_OK) # TODO: return these tokens via cookies in prod.
     except ValueError:
         return Response({"error": "Token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
 

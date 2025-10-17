@@ -93,3 +93,4 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data["subscription_active"] = self.user.subscription_active
         data["is_superuser"] = self.user.is_superuser
         return data
+    

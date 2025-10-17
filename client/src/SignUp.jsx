@@ -1,7 +1,9 @@
 import {useState} from "react"
 import {GoogleLogin} from "@react-oauth/google"
+import {useNavigate} from "react-router-dom"
 
 function SignUp() {
+    const navigate = useNavigate();
     // payload
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
@@ -97,7 +99,9 @@ function SignUp() {
                             body: JSON.stringify(payload)
                         });
                         const data = await response.json()
-                        console.log(data)
+                        sessionStorage.setItem("access", data.access);
+                        sessionStorage.setItem("refresh", data.refresh);
+                        navigate("/overview");
                     }
 
                     sendJWTToken();
