@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from django.contrib.auth.tokens import default_token_generator
@@ -25,11 +25,22 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     # change from default (JSON access and refresh) to cookies once deployed
     serializer_class = CustomTokenObtainPairSerializer
 
+class IsSubscribed(BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        trial_expiry = user.date_active + timedelta(minutes=5)
+        exceed_trial = now() > trial_expiry
+        return user.is_authenticated and (user.subscription_active or not exceed_trial)
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def is_authorized(request):
-    return Response(status=status.HTTP_200_OK)
-
+def check_permission(request):
+    subscribed = IsSubscribed().has_permission(request, view=None)
+    if subscribed:
+        permission = "IsSubscribed"
+    else:
+        permission = "IsAuthenticated"
+    return Response({"permission": permission}, status=status.HTTP_200_OK)
 
 class CustomTokenRefreshView(TokenRefreshView):
     # method to deal with POST request
@@ -258,7 +269,7 @@ def get_reports(symbol, period):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsSubscribed])
 def overview(request):
     data = json.loads(request.body)
     symbol = data["symbol"]

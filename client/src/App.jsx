@@ -4,6 +4,7 @@ import SignIn from "./SignIn.jsx"
 import SignUp from "./SignUp.jsx"
 import Overview from "./Overview/Overview.jsx"
 import AccountVerification from "./AccountVerification.jsx"
+import UserAccount from "./UserAccount.jsx"
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/sign-up" element={<SignUp></SignUp>} />
         <Route path="/overview" element={<Overview></Overview>} />
         <Route path="/account-verification/:token/:user_id" element={<AccountVerification></AccountVerification>} />
+        <Route path="/user-account" element={<UserAccount></UserAccount>} />
       </Routes>
     </BrowserRouter>
   )
