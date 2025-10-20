@@ -2,10 +2,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from django.contrib.auth.tokens import default_token_generator
 from .serializers import SignUp, CustomTokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib.auth import get_user_model
 import json
 from dotenv import load_dotenv
@@ -15,6 +15,7 @@ from django.core.cache import cache
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.utils.timezone import now
+from datetime import timedelta
 
 
 load_dotenv()
@@ -24,6 +25,25 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     # change from default (JSON access and refresh) to cookies once deployed
     serializer_class = CustomTokenObtainPairSerializer
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def is_authorized(request):
+    return Response(status=status.HTTP_200_OK)
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    # method to deal with POST request
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs) # if refresh is expires or invalid then it would return 401 to react
+        if response.status_code == 200:
+            token = AccessToken(response.data["access"])  # response.data is {access: ..., refresh: ...}
+            user_id = token.payload["user_id"] # token.payload is {"exp":..., "iat": ..., "jti": ..., "token_type": "access", "user_id": ...}
+            user = User.objects.get(id=user_id)
+            trial_expiry = user.date_active + timedelta(minutes=5) # change to 30 days in prod.
+            exceed_trial = now() > trial_expiry
+            if exceed_trial and not user.subscription_active:
+                return Response({"error": "trial expired and subscription is not active"}, status=status.HTTP_403_FORBIDDEN)
+            return response # returning new pair of {"access": ..., "refresh": ...}
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -244,16 +264,21 @@ def overview(request):
     symbol = data["symbol"]
     period = data["period"]
     # either get data by fetching or cache
+    """
     key = f"fundamentals: {symbol}, {period}"
     cached_reports = cache.get(key)
     if cached_reports:
         return Response(cached_reports, status=status.HTTP_200_OK)
+
     reports = get_reports(symbol=symbol, period=period)
+    """
+    # get data from files
+    with open(f'{period}.txt', 'r') as f:
+        reports_string = f.read()
+    reports = eval(reports_string)
+    """
     cache.set(key, reports, timeout=3600)
+    """
     return Response(reports, status=status.HTTP_200_OK)
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def is_authorized(request):
-    return Response(status=status.HTTP_200_OK)
 

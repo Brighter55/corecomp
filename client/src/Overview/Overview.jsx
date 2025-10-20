@@ -33,7 +33,30 @@ function Overview() {
                     "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
                 },
             });
-            if (!response.ok) {
+            const data = await response.json();
+
+            if (data.messages[0].message === "Token is expired") {
+                const response = await fetch("http://127.0.0.1:8000/api/refresh", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({refresh: sessionStorage.getItem("refresh")})
+                });
+                if (response.status === 403) { /*Handle user's trial expires and not subscribe*/
+                    console.log("exceed trial_expiry and not pay, navigate to payment page");
+                    return;
+                } else if (!response.ok) { /*Refresh expires in general needs log in again*/
+                    console.log("refresh is invalid");
+                    navigate("/sign-in");
+                    return;
+                }
+
+                const data = await response.json();
+                sessionStorage.setItem("access", data.access);
+                sessionStorage.setItem("refresh", data.refresh);
+                console.log(`recieved new pair of tokens. {access: ${sessionStorage.getItem("access")}, refresh: ${sessionStorage.getItem("refresh")}`);
+            } else if (!response.ok) {
                 navigate("/sign-up");
             }
         }
