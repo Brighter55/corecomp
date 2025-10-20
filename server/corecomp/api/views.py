@@ -34,11 +34,6 @@ class IsSubscribed(BasePermission):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def is_authorized(request):
-    return Response(status=status.HTTP_200_OK)
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
 def check_permission(request):
     subscribed = IsSubscribed().has_permission(request, view=None)
     if subscribed:
@@ -274,7 +269,7 @@ def get_reports(symbol, period):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsSubscribed])
 def overview(request):
     data = json.loads(request.body)
     symbol = data["symbol"]
