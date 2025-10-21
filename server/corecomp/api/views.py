@@ -2,10 +2,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import default_token_generator
 from .serializers import SignUp, CustomTokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
 import json
 from dotenv import load_dotenv
@@ -16,6 +16,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.utils.timezone import now
 from datetime import timedelta
+import stripe
+
 
 
 load_dotenv()
@@ -41,20 +43,6 @@ def check_permission(request):
     else:
         permission = "IsAuthenticated"
     return Response({"permission": permission}, status=status.HTTP_200_OK)
-
-class CustomTokenRefreshView(TokenRefreshView):
-    # method to deal with POST request
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs) # if refresh is expires or invalid then it would return 401 to react
-        if response.status_code == 200:
-            token = AccessToken(response.data["access"])  # response.data is {access: ..., refresh: ...}
-            user_id = token.payload["user_id"] # token.payload is {"exp":..., "iat": ..., "jti": ..., "token_type": "access", "user_id": ...}
-            user = User.objects.get(id=user_id)
-            trial_expiry = user.date_active + timedelta(minutes=5) # change to 30 days in prod.
-            exceed_trial = now() > trial_expiry
-            if exceed_trial and not user.subscription_active:
-                return Response({"error": "trial expired and subscription is not active"}, status=status.HTTP_403_FORBIDDEN)
-            return response # returning new pair of {"access": ..., "refresh": ...}
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -117,6 +105,19 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
     except ValueError:
         return Response({"error": "Token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def checkout_session(request):
+    stripe.api_key = os.getenv("STRIPE_API_KEY")
+
+    session = stripe.checkout.Session.create(
+        mode="subscription",
+        line_items=[{"price": "price_1SKUdYLmRJ2Mkn9vCqMAU2wU", "quantity": 1}],
+        ui_mode="embedded",
+        return_url="http://localhost:5173/return/{CHECKOUT_SESSION_ID}",
+    )
+    return Response({"client_secret": session.client_secret}, status=status.HTTP_200_OK)
 
 
 # requests to AlphaVantage and return reports according to period
