@@ -119,6 +119,16 @@ def checkout_session(request):
     )
     return Response({"client_secret": session.client_secret}, status=status.HTTP_200_OK)
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def session_status(request):
+    data = json.loads(request.body)
+    session_id = data["sessionId"]
+    session = stripe.checkout.Session.retrieve(session_id)
+    customer = stripe.Customer.retrieve(session.customer)
+
+    return Response({"status": session.status, "payment_status": session.payment_status, "customer_email": customer.email}, status=status.HTTP_200_OK)
+
 
 # requests to AlphaVantage and return reports according to period
 def get_reports(symbol, period):

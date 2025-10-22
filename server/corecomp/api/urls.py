@@ -17,4 +17,5 @@ urlpatterns = [
     path("overview", views.overview),
     # stripe payment
     path("checkout-session", views.checkout_session),
+    path("session-status", views.session_status),
 ]

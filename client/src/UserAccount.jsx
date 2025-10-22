@@ -31,6 +31,7 @@ function UserAccount() {
                 "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
             },
         });
+        /*write a fallback when access expires*/
         const data = await response.json();
         setClientSecret(data.client_secret);
     }
