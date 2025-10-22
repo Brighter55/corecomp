@@ -19,7 +19,7 @@ import PricingGraph from "./PricingGraph.jsx"
 // pictures
 import logo from "../assets/logoPlaceholder.png"
 // helpers
-import {checkPermission} from "../helpers/checkPermission.js"
+import {checkPermission} from "../helpers/helper.js"
 
 function Overview() {
     // when opens up the page check if user is authorized

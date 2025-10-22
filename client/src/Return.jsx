@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRef, useState, useEffect} from "react"
-import { checkPermission } from "./helpers/checkPermission.js"
+import { checkPermission } from "./helpers/helper.js"
 
 
 function Return() {
