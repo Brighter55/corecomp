@@ -121,9 +121,11 @@ def checkout_session(request):
         line_items=[{"price": "price_1SKUdYLmRJ2Mkn9vCqMAU2wU", "quantity": 1}],
         ui_mode="embedded",
         return_url="http://localhost:5173/return/{CHECKOUT_SESSION_ID}",
-        metadata={
-            "user_id": user.id,
-        },
+        subscription_data = {
+            "metadata": {
+                "user_id": str(user.id),
+            },
+        }
     )
     return Response({"client_secret": session.client_secret}, status=status.HTTP_200_OK)
 
@@ -139,7 +141,7 @@ def session_status(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def webhook():
+def webhook(request):
     payload = request.body #JSON blob
 
     try:
@@ -165,7 +167,17 @@ def webhook():
     # Handle the event
     if event.type == 'customer.subscription.created':
         subscription = event.data.object
-        print(subscription)
+        user = User.objects.get(id=subscription["metadata"]["user_id"])
+        user.customer_id = subscription.customer
+        user.subscription_id = subscription.id
+        user.subscription_status = subscription.status
+        user.save()
+        print(f"user: {subscription['metadata']['user_id']}s subscription has been activated")
+    elif event.type in ["customer.subscription.updated", "customer.subscription.deleted"]:
+        subscription = event.data.object
+        user = User.objects.get(customer_id=subscription.customer)
+        user.subscription_status = subscription.status
+        user.save()
     else:
         print('Unhandled event type {}'.format(event.type))
 
