@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRef, useState, useEffect} from "react"
-import { checkPermission } from "./helpers/checkPermission.js"
+import { checkPermission } from "./helpers/helper.js"
 
 
 function Return() {
@@ -31,6 +31,7 @@ function Return() {
             } else if (session.status == "complete") {
                 document.getElementById('success').classList.remove('hidden');
                 document.getElementById('customer-email').textContent = session.customer_email;
+                /*send a request to Django to update database*/
                 navigate("/overview");
             }
 

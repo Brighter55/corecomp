@@ -27,12 +27,15 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     # change from default (JSON access and refresh) to cookies once deployed
     serializer_class = CustomTokenObtainPairSerializer
 
+
 class IsSubscribed(BasePermission):
     def has_permission(self, request, view):
         user = request.user
-        trial_expiry = user.date_active + timedelta(minutes=5)
-        exceed_trial = now() > trial_expiry
-        return user.is_authenticated and (user.subscription_active or not exceed_trial)
+        if user.subscription_status in ["trialing", "active"]:
+            return True
+        else:
+            return False
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -54,7 +57,7 @@ def sign_up(request):
         password = serializer.validated_data["password"]
         username = serializer.validated_data["username"]
 
-        User.objects.create_user(username=username, email=email, password=password)
+        User.objects.create_user(username=username, email=email, password=password, is_active=False)
         # send email verification
         user = User.objects.get(username=username)
         token = default_token_generator.make_token(user)
@@ -105,17 +108,24 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
     except ValueError:
         return Response({"error": "Token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
+# stripe
+stripe.api_key = os.getenv("STRIPE_API_KEY")
+endpoint_secret = os.getenv("STRIPE_ENDPOINT_SECRET")
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def checkout_session(request):
-    stripe.api_key = os.getenv("STRIPE_API_KEY")
-
+    user = request.user
     session = stripe.checkout.Session.create(
         mode="subscription",
         line_items=[{"price": "price_1SKUdYLmRJ2Mkn9vCqMAU2wU", "quantity": 1}],
         ui_mode="embedded",
         return_url="http://localhost:5173/return/{CHECKOUT_SESSION_ID}",
+        subscription_data = {
+            "metadata": {
+                "user_id": str(user.id),
+            },
+        }
     )
     return Response({"client_secret": session.client_secret}, status=status.HTTP_200_OK)
 
@@ -128,6 +138,58 @@ def session_status(request):
     customer = stripe.Customer.retrieve(session.customer)
 
     return Response({"status": session.status, "payment_status": session.payment_status, "customer_email": customer.email}, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def webhook(request):
+    payload = request.body #JSON blob
+
+    try:
+        event = stripe.Event.construct_from(  # turn JSON into Python and into stripe object to catch any error early-on
+        json.loads(payload), stripe.api_key
+        )
+    except ValueError as e:
+        # Invalid payload
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    if endpoint_secret:
+            # Only verify the event if you've defined an endpoint secret
+            # Otherwise, use the basic event deserialized with JSON
+            sig_header = request.headers.get('stripe-signature')
+            try:
+                event = stripe.Webhook.construct_event(
+                    payload, sig_header, endpoint_secret
+                )
+            except stripe.error.SignatureVerificationError as e:
+                print('⚠️  Webhook signature verification failed.' + str(e))
+                return jsonify(success=False)
+
+    # Handle the event
+    if event.type == 'customer.subscription.created':
+        subscription = event.data.object
+        user = User.objects.get(id=subscription["metadata"]["user_id"])
+        user.customer_id = subscription.customer
+        user.subscription_id = subscription.id
+        user.subscription_status = subscription.status
+        user.save()
+        print(f"user: {subscription['metadata']['user_id']}s subscription has been activated")
+    elif event.type in ["customer.subscription.updated", "customer.subscription.deleted"]:
+        subscription = event.data.object
+        user = User.objects.get(customer_id=subscription.customer)
+        user.subscription_status = subscription.status
+        user.save()
+    else:
+        print('Unhandled event type {}'.format(event.type))
+
+    return Response(status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
 
 
 # requests to AlphaVantage and return reports according to period

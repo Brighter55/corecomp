@@ -38,4 +38,3 @@ export async function checkPermission(navigate) {
         navigate("/user-account");
     }
 }
-

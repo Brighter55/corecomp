@@ -18,4 +18,5 @@ urlpatterns = [
     # stripe payment
     path("checkout-session", views.checkout_session),
     path("session-status", views.session_status),
+    path("webhook", views.webhook),
 ]
