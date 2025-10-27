@@ -19,7 +19,7 @@ import PricingGraph from "./PricingGraph.jsx"
 // pictures
 import logo from "../assets/logoPlaceholder.png"
 // helpers
-import {checkPermission} from "../helpers/helper.js"
+import {checkPermission, getNewTokens} from "../helpers/helper.js"
 
 function Overview() {
     // when opens up the page check if user is authorized
@@ -60,23 +60,7 @@ function Overview() {
             /*get new tokens if access expires*/
             if (!response.ok) {
                 if (data?.messages?.[0]?.message === "Token is expired") {
-                    const refreshResponse = await fetch("http://127.0.0.1:8000/api/refresh", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({refresh: sessionStorage.getItem("refresh")})
-                    });
-                    if (!refreshResponse.ok) { /*Refresh expires in general needs log in again*/
-                        console.log("refresh is invalid");
-                        navigate("/sign-in");
-                        return;
-                    }
-
-                    const tokens = await refreshResponse.json();
-                    sessionStorage.setItem("access", tokens.access);
-                    sessionStorage.setItem("refresh", tokens.refresh);
-                    console.log(`recieved new pair of tokens. {access: ${sessionStorage.getItem("access")}, refresh: ${sessionStorage.getItem("refresh")}`);
+                    await getNewTokens(data, navigate);
                     response = await getReports();
                     data = await response.json();
                 } else if (response.status === 403) { /*Unauthorized user, aka, don't have permission to use*/
