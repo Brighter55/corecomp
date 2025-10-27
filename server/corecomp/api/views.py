@@ -114,6 +114,14 @@ endpoint_secret = os.getenv("STRIPE_ENDPOINT_SECRET")
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
+def is_customer(request):
+    user = request.user
+    if user.customer_id: # if user has customer_id, aka, if user has subscribed before and has stripe account
+        return Response({"is_customer": True}, status=status.HTTP_200_OK)
+    return Response({"is_customer": False}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def checkout_session(request):
     user = request.user
     session = stripe.checkout.Session.create(
@@ -138,6 +146,17 @@ def session_status(request):
     customer = stripe.Customer.retrieve(session.customer)
 
     return Response({"status": session.status, "payment_status": session.payment_status, "customer_email": customer.email}, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def portal_session(request):
+    return_url = "http://localhost:5173/user-account"
+    customer_id = request.user.customer_id
+    session = stripe.billing_portal.Session.create(
+        customer=customer_id,
+        return_url=return_url,
+    )
+    return Response({"url": session.url}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -182,15 +201,6 @@ def webhook(request):
         print('Unhandled event type {}'.format(event.type))
 
     return Response(status=status.HTTP_200_OK)
-
-
-
-
-
-
-
-
-
 
 # requests to AlphaVantage and return reports according to period
 def get_reports(symbol, period):

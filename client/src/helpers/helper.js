@@ -38,3 +38,23 @@ export async function checkPermission(navigate) {
         navigate("/user-account");
     }
 }
+
+export async function getNewTokens(data, navigate) {
+    const refreshResponse = await fetch("http://127.0.0.1:8000/api/refresh", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({refresh: sessionStorage.getItem("refresh")})
+    });
+    if (!refreshResponse.ok) { /*Refresh expires in general needs log in again*/
+        console.log("refresh is invalid");
+        navigate("/sign-in");
+        return;
+    }
+
+    const tokens = await refreshResponse.json();
+    sessionStorage.setItem("access", tokens.access);
+    sessionStorage.setItem("refresh", tokens.refresh);
+    console.log(`recieved new pair of tokens. {access: ${sessionStorage.getItem("access")}, refresh: ${sessionStorage.getItem("refresh")}`);
+}
