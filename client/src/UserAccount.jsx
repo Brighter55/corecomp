@@ -13,11 +13,24 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY, {
 function UserAccount() {
     const navigate = useNavigate();
     const ran = React.useRef(false);
+    const [isCustomer, setIsCustomer] = React.useState(false);
+
+    async function checkIsCustomer() {
+        const response = await fetch("http://127.0.0.1:8000/api/is-customer", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
+            },
+        });
+        const data = await response.json();
+        setIsCustomer(data.is_customer);
+    }
 
     React.useEffect(() => {
         if (ran.current) {return;}
         ran.current = true;
         checkPermission(navigate);
+        checkIsCustomer();
     }, []);
 
 
@@ -89,8 +102,13 @@ function UserAccount() {
     }
     return (
         <>
+
             <h1>Subscription</h1>
-            <button onClick={handleSubscribeClicked}>Subscribe</button>
+            {
+                isCustomer ? <button>Manage your billing</button>
+                :
+                <button onClick={handleSubscribeClicked}>Subscribe</button>
+            }
         </>
     )
 }
