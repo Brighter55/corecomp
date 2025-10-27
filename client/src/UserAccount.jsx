@@ -75,12 +75,35 @@ function UserAccount() {
     }
 
     async function handleManageClicked() {
-        const response = await fetch("http://127.0.0.1:8000/api/create-portal", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
-            },
-        });
+        async function getPortalSession() {
+            const response = await fetch("http://127.0.0.1:8000/api/portal-session", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
+                },
+            });
+            return response;
+        }
+
+        let response = await getPortalSession();
+        let data = await response.json();
+
+        /*get new tokens if access expires*/
+        if (!response.ok) {
+            if (data?.messages?.[0]?.message === "Token is expired") {
+                await getNewTokens(data, navigate);
+                response = await getPortalSession();
+                data = await response.json();
+            } else if (response.status === 403) { /*Unauthorized user, aka, don't have permission to use*/
+                navigate("/user-account");
+            } else {
+                navigate("/sign-up");
+            }
+        }
+        /*--------------*/
+
+        const portalURL = data.url;
+        window.location.href = portalURL;
     }
 
 
