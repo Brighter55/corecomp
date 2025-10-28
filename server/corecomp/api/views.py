@@ -116,7 +116,7 @@ endpoint_secret = os.getenv("STRIPE_ENDPOINT_SECRET")
 @permission_classes([IsAuthenticated])
 def is_customer(request):
     user = request.user
-    if user.customer_id: # if user has customer_id, aka, if user has subscribed before and has stripe account
+    if user.subscription_status in ["trialing", "active"]: # if user has customer_id, aka, if user has subscribed before and has stripe account
         return Response({"is_customer": True}, status=status.HTTP_200_OK)
     return Response({"is_customer": False}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -126,10 +126,11 @@ def checkout_session(request):
     user = request.user
     session = stripe.checkout.Session.create(
         mode="subscription",
-        line_items=[{"price": "price_1SKUdYLmRJ2Mkn9vCqMAU2wU", "quantity": 1}],
+        line_items=[{"price": "price_1SN5QcLmRJ2Mkn9vd7R1eYYd", "quantity": 1}],
         ui_mode="embedded",
         return_url="http://localhost:5173/return/{CHECKOUT_SESSION_ID}",
         subscription_data = {
+            "trial_period_days": 7,
             "metadata": {
                 "user_id": str(user.id),
             },
