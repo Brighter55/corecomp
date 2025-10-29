@@ -1,9 +1,17 @@
-    import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from "./Overview.module.css"
+import TimeRanges from "./TimeRanges/TimeRanges.jsx"
+import {useState} from "react"
 function PricingGraph(props) {
+    const [timeRange, setTimeRange] = useState("all");
+
     return (
         <div className={styles.graph}>
-            <h2>Adjusted Monthly Pricing</h2>
+            <div className={styles.titleAndTimeRanges}>
+                <h2 className={styles.title}>Adjusted Monthly Pricing</h2>
+                <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}/>
+            </div>
+
             <ResponsiveContainer width="100%" height={400}>
                 <LineChart
                     data={props.reports}
