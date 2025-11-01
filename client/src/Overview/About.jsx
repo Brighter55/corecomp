@@ -1,8 +1,8 @@
 import styles from "./Overview.module.css"
 
-function About() {
+function About({style}) {
     return (
-        <div className={styles.about}>
+        <div className={styles.about} style={style}>
             <h1>About</h1>
             <div className={styles.aboutCategories}>
                 <div className={styles.aboutCategory}>
