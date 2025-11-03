@@ -1,9 +1,9 @@
 import styles from "./Overview.module.css"
 
 
-function Fundamentals() {
+function Fundamentals({style}) {
     return (
-        <div className={styles.fundamentals}>
+        <div className={styles.fundamentals} style={style}>
             <div className={styles.fundamentalTopics}>
                 <h2>Core Metrics</h2>
                 <div className={styles.fundamentalContent}>
