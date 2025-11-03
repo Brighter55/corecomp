@@ -1,54 +1,73 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from "./Overview.module.css"
 import TimeRanges from "./TimeRanges/TimeRanges.jsx"
-import {useState} from "react"
+import {useState, useEffect} from "react"
 function PricingGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
+    const [reports, setReports] = useState(props.reports);
 
-    function convertToUnix(reports) {
-        const UnixReports = reports.map((report) => {
-            const dateObject = new Date(report.date);
-            const milliseconds = dateObject.getTime();
-            const unixDate = Math.floor(milliseconds / 1000);
+    useEffect(() => {
+        setReports(filterReports);
+    }, [props.reports, timeRange]);
 
-            return {...report, date: unixDate};
+    function getStartIndex(year) {
+        /*get targetMonth and targetYear from the last element in props.reports*/
+        const lastDate = props.reports[props.reports.length - 1].date;
+        const lastDateObject = new Date(lastDate);
+        const targetMonth = lastDateObject.getMonth();
+        const targetYear = lastDateObject.getFullYear() - year;
+        // get the startIndex to filter the reports
+        const startIndex = props.reports.findIndex((report) => {
+            const currentReportDateObject = new Date(report.date);
+            const currentReportDateMonth = currentReportDateObject.getMonth();
+            const currentReportDateYear = currentReportDateObject.getFullYear();
+            return (currentReportDateMonth === targetMonth && currentReportDateYear === targetYear);
         });
-        return UnixReports;
+        return startIndex;
     }
 
-    function getDomain() {
+    function filterReports() {
+        let filteredReports;
         switch (timeRange) {
-            case "YTD": /*startDate is first month of this year, endDate is today's month */
-                const endDateUnix = reports[reports.length - 1].date;
-                const latestDate = new Date(endDateUnix * 1000);
-                const latestDateYear = latestDate.getFullYear();
-                const latestDateMonth = latestDate.getMonth();
-                const firstMonthReport = reports.find((report) => {
-                    const dateUnix = report.date;
-                    const date = new Date(dateUnix * 1000);
-                    const dateMonth = date.getMonth();
-                    const dateYear = date.getFullYear();
-                    return dateMonth == 0 && dateYear == latestDateYear;
+            case "YTD": {
+                /*get targetMonth and targetYear from the last element in props.reports*/
+                const lastDate = props.reports[props.reports.length - 1].date;
+                const lastDateObject = new Date(lastDate);
+                const targetMonth = 0;
+                const targetYear = lastDateObject.getFullYear();
+                console.log(targetMonth, targetYear);
+                // get the startIndex to filter the reports
+                const startIndex = props.reports.findIndex((report) => {
+                    const currentReportDateObject = new Date(report.date);
+                    const currentReportDateMonth = currentReportDateObject.getMonth();
+                    const currentReportDateYear = currentReportDateObject.getFullYear();
+                    return (currentReportDateMonth === targetMonth && currentReportDateYear === targetYear);
                 });
-                const startDateUnix = firstMonthReport.date;
-            /*
-            case "1Y": /*startDate is one year from today's month, endDate is the last element in the list
-                ...
-            case "5YD":
-                ...
-            case "10YD":
-                ...
-            */
-            case "all":
-                console.log("undefined");
-                return undefined;
+                filteredReports = props.reports.slice(startIndex);
+                break;
+            }
+            case "1Y": {
+                const startIndex = getStartIndex(1);
+                filteredReports = props.reports.slice(startIndex);
+                break;
+            }
+            case "5Y": {
+                const startIndex = getStartIndex(5);
+                filteredReports = props.reports.slice(startIndex);
+                break;
+            }
+            case "10Y": {
+                const startIndex = getStartIndex(10);
+                filteredReports = props.reports.slice(startIndex);
+                break;
+            }
+            default:
+                console.log("return all (default)");
+                return props.reports;
         }
-        console.log(`[${startDateUnix}, ${endDateUnix}]`);
-        return [startDateUnix, endDateUnix];
+        console.log("return", filteredReports, timeRange);
+        return filteredReports;
     }
-
-    const reports = convertToUnix(props.reports);
-
     return (
         <div className={styles.graph}>
             <div className={styles.titleAndTimeRanges}>
@@ -68,7 +87,7 @@ function PricingGraph(props) {
                 >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" stroke="#DAD7CD"
-                        tick={{fontSize: 12}} domain={getDomain} type="category"
+                        tick={{fontSize: 12}} interval="equidistantPreserveStart"
                     />
                     <YAxis stroke="#DAD7CD" />
                     <Tooltip />
