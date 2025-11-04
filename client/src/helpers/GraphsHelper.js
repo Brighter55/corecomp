@@ -23,15 +23,13 @@ export function filterReports(reports, timeRange) {
             /*get targetMonth and targetYear from the last element in reports*/
             const lastDate = reports[reports.length - 1].date;
             const lastDateObject = new Date(lastDate);
-            const targetMonth = 0;
             const targetYear = lastDateObject.getFullYear();
-            console.log(targetMonth, targetYear);
+            console.log(targetYear);
             // get the startIndex to filter the reports
             const startIndex = reports.findIndex((report) => {
                 const currentReportDateObject = new Date(report.date);
-                const currentReportDateMonth = currentReportDateObject.getMonth();
                 const currentReportDateYear = currentReportDateObject.getFullYear();
-                return (currentReportDateMonth === targetMonth && currentReportDateYear === targetYear);
+                return (currentReportDateYear === targetYear); // will get the index of the first element that has the year matches targetYear
             });
             filteredReports = reports.slice(startIndex);
             break;
