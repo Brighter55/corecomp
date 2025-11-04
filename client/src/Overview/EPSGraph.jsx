@@ -1,8 +1,17 @@
-import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from "./Overview.module.css"
+import TimeRanges from "./TimeRanges/TimeRanges.jsx"
+import {useState, useEffect} from "react"
+import {filterReports} from "../helpers/GraphsHelper.js"
 
 function EPSGraph(props) {
+    const [timeRange, setTimeRange] = useState("all");
+    const [reports, setReports] = useState(props.reports);
+
+    useEffect(() => {
+        setReports(filterReports(props.reports, timeRange));
+    }, [props.reports, timeRange]);
+
     /*CustomTooltip*/
     function CustomTooltip(props) {
         const report = {
@@ -43,10 +52,13 @@ function EPSGraph(props) {
     return (
         props.period === "quarterly" ? (
             <div className={styles.graph}>
-                <h2>Earning per Share</h2>
+                <div className={styles.titleAndTimeRanges}>
+                    <h2 className={styles.title}>Earning per Share</h2>
+                    <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}/>
+                </div>
                 <ResponsiveContainer width="100%" height={400}>
                     <LineChart
-                    data={props.reports}
+                    data={reports}
                     margin={{
                         top: 5,
                         right: 30,
@@ -56,7 +68,7 @@ function EPSGraph(props) {
                     >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" stroke="#DAD7CD" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                    <YAxis stroke="#DAD7CD"/>
+                    <YAxis tickFormatter={(value) => value.toFixed(2)} stroke="#DAD7CD" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
                     <Tooltip content={<CustomTooltip></CustomTooltip>} />
                     <Legend />
                     <Line type="monotone" dataKey="estimatedEPS" stroke="#DAD7CD" strokeWidth={0} dot={{ fill: "#DAD7CD", fillOpacity: 0.3, r: 5}} activeDot={{ r: 8, strokeWidth: 1}} legendType="circle"/>
@@ -66,10 +78,13 @@ function EPSGraph(props) {
             </div>)
         : (
             <div className={styles.graph}>
-                <h2>Earning per Share</h2>
+                <div className={styles.titleAndTimeRanges}>
+                    <h2 className={styles.title}>Earning per Share</h2>
+                    <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}/>
+                </div>
                 <ResponsiveContainer width="100%" height={400}>
                     <LineChart
-                    data={props.reports}
+                    data={reports}
                     margin={{
                         top: 5,
                         right: 30,
@@ -79,7 +94,7 @@ function EPSGraph(props) {
                     >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" stroke="#DAD7CD" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                    <YAxis stroke="#DAD7CD"/>
+                    <YAxis tickFormatter={(value) => value.toFixed(2)} stroke="#DAD7CD" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
                     <Tooltip />
                     <Legend />
                     <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
