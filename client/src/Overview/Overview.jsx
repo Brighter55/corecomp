@@ -99,24 +99,24 @@ function Overview() {
                 <div className={styles.graphs} style={searched ? {} : {visibility: "hidden", height: 0, overflow: "hidden"}}>
                     <div className={styles.row}>
                         <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
-                        <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
+                        <SharesOutstandingGraph reports={searched ? reports.SHARES_OUTSTANDING : []}></SharesOutstandingGraph>
                         <PricingGraph reports={searched ? reports.PRICING : []}></PricingGraph>
                     </div>
                 </div>
                 <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
                 <div className={styles.graphs} style={searched ? {} : {visibility: "hidden", height: 0, overflow: "hidden"}}>
                     <div className={styles.row}>
-                        <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
-                        <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
-                        <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
+                        <TotalRevenueGraph reports={searched ? reports.INCOME_STATEMENT : []}></TotalRevenueGraph>
+                        <NetIncomeGraph reports={searched ? reports.INCOME_STATEMENT : []}></NetIncomeGraph>
+                        <OperatingCashflowGraph reports={searched ? reports.CASH_FLOW : []}></OperatingCashflowGraph>
                     </div>
                     <div className={styles.row}>
-                        <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
-                        <FreeCashflowGraph reports={reports.CASH_FLOW}></FreeCashflowGraph>
-                        <CashVsDebtGraph reports={reports.BALANCE_SHEET}></CashVsDebtGraph>
+                        <CapitalExpendituresGraph reports={searched ? reports.CASH_FLOW : []}></CapitalExpendituresGraph>
+                        <FreeCashflowGraph reports={searched ? reports.CASH_FLOW : []}></FreeCashflowGraph>
+                        <CashVsDebtGraph reports={searched ? reports.BALANCE_SHEET : []}></CashVsDebtGraph>
                     </div>
                     <div className={styles.row}>
-                        <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
+                        <EPSGraph reports={searched ? reports.EARNINGS : []} period={period}></EPSGraph>
                     </div>
                 </div>
             </div>
