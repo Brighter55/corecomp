@@ -1,16 +1,13 @@
-import React from 'react';
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from "./Overview.module.css"
 import TimeRanges from "./TimeRanges/TimeRanges.jsx"
-import {filterReports} from "../helpers/GraphsHelper.js"
+import {useState, useEffect} from "react"
+import {filterReports, getPercentChange} from "../helpers/GraphsHelper.js"
 
 function SharesOutstandingGraph(props) {
-    const [timeRange, setTimeRange] = React.useState("all");
-    const [reports, setReports] = React.useState(props.reports);
-
-    React.useEffect(() => {
-        setReports(filterReports(props.reports, timeRange));
-    }, [props.reports, timeRange]);
+    const [timeRange, setTimeRange] = useState("all");
+    const reports = filterReports(props.reports, timeRange);
+    const percentChange = getPercentChange(reports, "shares_outstanding_basic");
 
     function countDigits(value) {
         if (value === 0) {
@@ -23,6 +20,7 @@ function SharesOutstandingGraph(props) {
         <div className={styles.graph}>
             <div className={styles.titleAndTimeRanges}>
                 <h2 className={styles.title}>SharesOutstanding</h2>
+                <h3 style={{color: percentChange >= 0 ? "#A3B18A" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
                 <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}/>
             </div>
             <ResponsiveContainer width="100%" height={400}>

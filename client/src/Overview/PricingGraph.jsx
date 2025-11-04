@@ -2,22 +2,19 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import styles from "./Overview.module.css"
 import TimeRanges from "./TimeRanges/TimeRanges.jsx"
 import {useState, useEffect} from "react"
-import {filterReports} from "../helpers/GraphsHelper.js"
+import {filterReports, getPercentChange} from "../helpers/GraphsHelper.js"
 
 
 function PricingGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
-    const [reports, setReports] = useState(props.reports);
-
-    useEffect(() => {
-        setReports(filterReports(props.reports, timeRange));
-    }, [props.reports, timeRange]);
-
+    const reports = filterReports(props.reports, timeRange);
+    const percentChange = getPercentChange(reports, "adjusted close");
 
     return (
         <div className={styles.graph}>
             <div className={styles.titleAndTimeRanges}>
                 <h2 className={styles.title}>Adjusted Monthly Pricing</h2>
+                <h3 style={{color: percentChange >= 0 ? "#A3B18A" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
                 <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}/>
             </div>
 

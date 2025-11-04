@@ -56,3 +56,16 @@ export function filterReports(reports, timeRange) {
     console.log("return", filteredReports, timeRange);
     return filteredReports;
 }
+
+export function getPercentChange(reports, value) {
+    // ((today’s price - years ago price) / years ago price) * 100
+    if (reports.length === 0) {
+        return 0;
+    }
+    console.log("percentChangeReports:", reports);
+    const lastValue = reports[reports.length - 1][value];
+    const firstValue = reports[0][value];
+    const percentChange = ((lastValue - firstValue) / firstValue) * 100;
+    console.log(`percentChange is ${percentChange} and lastValue is ${lastValue} and firstValue is ${firstValue}`);
+    return percentChange.toFixed(2);
+}
