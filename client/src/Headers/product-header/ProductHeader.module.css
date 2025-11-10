@@ -1,0 +1,46 @@
+.header {
+    height: 10%;
+}
+
+.nav {
+    width: 85%; /*position: fixed overrides typical layout => needs to assign width manually*/
+    min-height: 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid black;
+    border-radius: 20px;
+    padding: 0 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+
+    position: fixed;
+    top: 0;
+    z-index: 3;
+}
+
+.brand {
+    display: flex;
+    width: 16%;
+    gap: 5px;
+}
+
+.logo {
+    height: 40px;
+    width: 40px;
+    border-radius: 10px;
+}
+
+.brandText {
+    font-size: 30px;
+    text-decoration: none;
+    font-family: "Segoe Ui", Arial, sans-serif;
+    font-weight: bold;
+    color: #DAD7CD;
+}
+
+
+.rightNav {
+    display: flex;
+    align-items: center;
+}

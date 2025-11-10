@@ -1,7 +1,7 @@
 import {useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useEffect} from "react"
-import AppHeader from "../AppHeader/AppHeader.jsx"
+import ProductHeader from "../Headers/product-header/ProductHeader.jsx"
 import styles from "./Overview.module.css"
 import PeriodSwitch from "./PeriodSwitch.jsx"
 import About from "./About.jsx"
@@ -16,6 +16,7 @@ import CashVsDebtGraph from "./CashVsDebtGraph.jsx"
 import SharesOutstandingGraph from "./SharesOutstandingGraph.jsx"
 import EPSGraph from "./EPSGraph.jsx"
 import PricingGraph from "./PricingGraph.jsx"
+
 // pictures
 import logo from "../assets/logoPlaceholder.png"
 // helpers
@@ -82,7 +83,7 @@ function Overview() {
 
     return (
         <>
-            <AppHeader></AppHeader>
+            <ProductHeader></ProductHeader>
             <div className={styles.overviewContent}>
                 <form className={styles.form} onSubmit={handleSearchSubmit}>
                     <input value={symbol} onChange={(event) => {setSymbol(event.target.value)}} className={styles.searchBar} type="search" />

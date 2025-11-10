@@ -13,7 +13,7 @@ function About({style}) {
                         Technology Service
                     </h2>
                 </div>
-                <hr />
+                <hr/>
                 <div className={styles.aboutCategory}>
                     <h3>
                         Industry
