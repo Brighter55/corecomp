@@ -3,8 +3,10 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { useNavigate } from 'react-router-dom';
 
 export default function Features() {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -12,6 +14,7 @@ export default function Features() {
   };
   const handleClose = () => {
     setAnchorEl(null);
+    navigate("/overview");
   };
 
   return (
@@ -24,10 +27,10 @@ export default function Features() {
         onClick={handleClick}
         endIcon={<KeyboardArrowDownIcon />}
         sx={{
-          color: "#47546b",
+          color: "grey",
           fontFamily: "'Segoe Ui', Arial, sans-serif",
           borderRadius: "10px",
-          "&:hover": {backgroundColor: "#dce0e8"},
+          "&:hover": {backgroundColor: "hsl(0, 0%, 100%, 0.125)"},
         }}
       >
         Features

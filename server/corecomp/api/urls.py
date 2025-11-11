@@ -9,6 +9,7 @@ urlpatterns = [
     path("verify-email", views.verify_email),
     path("sign-in", views.CustomTokenObtainPairView.as_view()),
     path("google-authentication", views.google_authentication),
+    path("sign-out", views.sign_out),
     # Authorization
     path("check-permission", views.check_permission),
     # handle access token expires | refresh endpoint
