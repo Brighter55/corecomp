@@ -4,7 +4,7 @@ import Features from "./Features/Features.jsx"
 import Button from '@mui/material/Button';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from "React"
+import { useEffect, useState, useRef } from "react";
 import { getNewTokens } from "../../helpers/helper.js"
 
 function ProductHeader() {
