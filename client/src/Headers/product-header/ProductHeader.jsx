@@ -3,11 +3,35 @@ import logo from "../../assets/logoDarkMode.png"
 import Features from "./Features/Features.jsx"
 import Button from '@mui/material/Button';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { useEffect, useState, useRef } from "React"
 
 function ProductHeader() {
+    const [showNavBar, setShowNavBar] = useState(true);
+    const lastScrollY = useRef(0);
+    // listen to scroll position if it is less than previous then hide the NavBar if not then show
+
+    function controlNavBar() {
+        /*window.scrollY increases as user scrolls down*/
+        if (window.scrollY > lastScrollY.current) {
+            setShowNavBar(false);
+        } else {
+            setShowNavBar(true);
+        }
+        console.log("rerender by setLastScrollY");
+        lastScrollY.current = window.scrollY
+    }
+
+    useEffect(() => {
+        window.addEventListener("scroll", controlNavBar);
+        console.log("render by useEffect");
+
+        return () => {
+            window.removeEventListener("scroll", controlNavBar);
+        };
+    }, []);
 
     return (
-        <header className={styles.header}>
+        <header className={showNavBar ? styles.header : styles.hideHeader}>
             <nav className={styles.nav}>
                 <div className={styles.brand}>
                     <img src={logo} alt="logo" className={styles.logo} />

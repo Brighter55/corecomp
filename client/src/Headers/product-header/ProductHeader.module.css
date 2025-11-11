@@ -2,6 +2,11 @@
     height: 10%;
 }
 
+.hideHeader {
+    height: 10%;
+    visibility: hidden;
+}
+
 .nav {
     width: 85%; /*position: fixed overrides typical layout => needs to assign width manually*/
     min-height: 7%;
