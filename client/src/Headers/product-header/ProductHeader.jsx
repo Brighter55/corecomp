@@ -88,8 +88,8 @@ function ProductHeader() {
                             color: "black",
                             fontFamily: "'Segoe Ui', Arial, sans-serif",
                             borderRadius: "10px",
-                            "&:hover": {backgroundColor: "#cbcfd6"},
-                            backgroundColor: "#dce0e8",
+                            "&:hover": {backgroundColor: "lightgrey"},
+                            backgroundColor: "#DAD7CD",
                         }}>Sign Out</Button>
                 </div>
             </nav>

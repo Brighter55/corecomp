@@ -3,14 +3,13 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    height: 100%;
     gap: 10px;
     font-family: sans-serif, system-ui;
 }
 
-.form {
-    height: 7%;
-    width: 70%;
+.afterSearchedForm {
+    height: 50px;
+    width: 30%;
 }
 
 .searchBar {
@@ -18,6 +17,26 @@
     height: 100%;
     font-size: 20px;
 }
+
+/*Before searched*/
+.overviewContentBeforeSearched {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 85%; /*height is the 100% - height of header*/
+    gap: 20px;
+}
+
+.caption {
+    font-size: 4rem;
+}
+
+.beforeSearchedForm {
+    height: 10%;
+    width: 70%;
+}
+/**/
 
 .introduction {
     width: 100%;

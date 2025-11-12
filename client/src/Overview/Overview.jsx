@@ -16,11 +16,13 @@ import CashVsDebtGraph from "./CashVsDebtGraph.jsx"
 import SharesOutstandingGraph from "./SharesOutstandingGraph.jsx"
 import EPSGraph from "./EPSGraph.jsx"
 import PricingGraph from "./PricingGraph.jsx"
-
+import TextField from '@mui/material/TextField';
 // pictures
 import logo from "../assets/logoPlaceholder.png"
 // helpers
 import {checkPermission, getNewTokens} from "../helpers/helper.js"
+// styles
+import { overviewBeforeSearchedInput } from "../styles/product.js"
 
 function Overview() {
     // when opens up the page check if user is authorized
@@ -86,8 +88,13 @@ function Overview() {
             <>
                 <ProductHeader></ProductHeader>
                 <div className={styles.overviewContent}>
-                    <form className={styles.form} onSubmit={handleSearchSubmit}>
-                        <input value={symbol} onChange={(event) => {setSymbol(event.target.value)}} className={styles.searchBar} type="search" />
+                    <form className={styles.afterSearchedForm} onSubmit={handleSearchSubmit}>
+                        <TextField sx={overviewBeforeSearchedInput}
+                                variant="filled"
+                                label="stock symbol"
+                                value={symbol}
+                                onChange={(event) => {setSymbol(event.target.value)}}
+                        />
                     </form>
                     <div className={styles.introduction}>
                         <img src={logo} className={styles.logo}></img>
@@ -129,10 +136,17 @@ function Overview() {
     return (
         <>
             <ProductHeader></ProductHeader>
-            <h1>Enter stock symbol and get started now!</h1>
-            <form className={styles.form} onSubmit={handleSearchSubmit}>
-                <input value={symbol} onChange={(event) => {setSymbol(event.target.value)}} className={styles.searchBar} type="search" />
-            </form>
+            <div className={styles.overviewContentBeforeSearched}>
+                <span className={styles.caption}>Enter stock symbol and get started now!</span>
+                <form className={styles.beforeSearchedForm} onSubmit={handleSearchSubmit}>
+                    <TextField sx={overviewBeforeSearchedInput}
+                                variant="filled"
+                                label="stock symbol"
+                                value={symbol}
+                                onChange={(event) => {setSymbol(event.target.value)}}
+                    />
+                </form>
+            </div>
         </>
     )
 }
