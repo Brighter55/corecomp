@@ -6,6 +6,8 @@ import {
 } from '@stripe/react-stripe-js';
 import {useNavigate} from "react-router-dom"
 import {checkPermission, getNewTokens} from "./helpers/helper.js"
+import ProductHeader from "./headers/product-header/ProductHeader.jsx"
+import Button from '@mui/material/Button';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY, {
 });
@@ -119,12 +121,26 @@ function UserAccount() {
     }
     return (
         <>
-
+            <ProductHeader />
             <h1>Subscription</h1>
             {
-                isCustomer ? <button onClick={handleManageClicked}>Manage your billing</button>
+                isCustomer ? <Button onClick={handleManageClicked} variant="contained"
+                                     sx={{
+                                            color: "black",
+                                            fontFamily: "'Segoe Ui', Arial, sans-serif",
+                                            borderRadius: "10px",
+                                            "&:hover": {backgroundColor: "lightgrey"},
+                                            backgroundColor: "#DAD7CD",
+                                        }}>Manage your billing</Button>
                 :
-                <button onClick={handleSubscribeClicked}>Subscribe</button>
+                <Button onClick={handleSubscribeClicked} variant="contained"
+                        sx={{
+                                color: "black",
+                                fontFamily: "'Segoe Ui', Arial, sans-serif",
+                                borderRadius: "10px",
+                                "&:hover": {backgroundColor: "lightgrey"},
+                                backgroundColor: "#DAD7CD",
+                        }}>Subscribe</Button>
             }
         </>
     )

@@ -1,7 +1,7 @@
 import {useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useEffect} from "react"
-import ProductHeader from "../Headers/product-header/ProductHeader.jsx"
+import ProductHeader from "../headers/product-header/ProductHeader.jsx"
 import styles from "./Overview.module.css"
 import PeriodSwitch from "./PeriodSwitch.jsx"
 import About from "./About.jsx"
@@ -22,7 +22,7 @@ import logo from "../assets/logoPlaceholder.png"
 // helpers
 import {checkPermission, getNewTokens} from "../helpers/helper.js"
 // styles
-import { overviewBeforeSearchedInput } from "../styles/product.js"
+import { overviewSearchStyle } from "../styles/product.js"
 
 function Overview() {
     // when opens up the page check if user is authorized
@@ -41,6 +41,7 @@ function Overview() {
     const [period, setPeriod] = useState("annually");
     const [reports, setReports] = useState([]);
     const [searched, setSearched] = useState(false);
+
 
     async function getReports() {
         const payload = {symbol: symbol, period: period};
@@ -89,7 +90,7 @@ function Overview() {
                 <ProductHeader></ProductHeader>
                 <div className={styles.overviewContent}>
                     <form className={styles.afterSearchedForm} onSubmit={handleSearchSubmit}>
-                        <TextField sx={overviewBeforeSearchedInput}
+                        <TextField sx={overviewSearchStyle}
                                 variant="filled"
                                 label="stock symbol"
                                 value={symbol}
@@ -121,8 +122,8 @@ function Overview() {
                         </div>
                         <div className={styles.row}>
                             <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
-                            <FreeCashflowGraph reports={reports.CASH_FLOW}></FreeCashflowGraph>
-                            <CashVsDebtGraph reports={reports.BALANCE_SHEET}></CashVsDebtGraph>
+                            <FreeCashflowGraph reports={reports.CASH_FLOW} ></FreeCashflowGraph>
+                            <CashVsDebtGraph reports={reports.BALANCE_SHEET} ></CashVsDebtGraph>
                         </div>
                         <div className={styles.row}>
                             <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
@@ -139,7 +140,7 @@ function Overview() {
             <div className={styles.overviewContentBeforeSearched}>
                 <span className={styles.caption}>Enter stock symbol and get started now!</span>
                 <form className={styles.beforeSearchedForm} onSubmit={handleSearchSubmit}>
-                    <TextField sx={overviewBeforeSearchedInput}
+                    <TextField sx={overviewSearchStyle}
                                 variant="filled"
                                 label="stock symbol"
                                 value={symbol}

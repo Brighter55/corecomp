@@ -1,9 +1,10 @@
-import React from 'react';
+import { useState } from "react"
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from "./Overview.module.css"
 
 
 function DividendsPayoutGraph(props) {
+    const [graphClicked, setGraphClicked] = useState(false);
 
     function formatXAxis() {
         return props.reports ? props.reports.map((report, index) => {
@@ -15,9 +16,9 @@ function DividendsPayoutGraph(props) {
     }
 
     return (
-        <div className={styles.graph}>
+        <div className={graphClicked ? styles.graphClicked : styles.graph} onClick={() => {setGraphClicked(true);}}>
             <h2>Dividends Payout per Share</h2>
-            <ResponsiveContainer width="100%" height={400}>
+            <ResponsiveContainer>
                 <BarChart
                     data={formatXAxis()}
                     margin={{
@@ -27,11 +28,11 @@ function DividendsPayoutGraph(props) {
                     bottom: 5,
                     }}
                 >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="payment_date" interval="equidistantPreserveStart" stroke="#DAD7CD" tick={{fontSize: 12}}/>
-                    <YAxis stroke="#DAD7CD"/>
+                    <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A" />
+                    <XAxis dataKey="payment_date" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}}/>
+                    <YAxis stroke="#344E41"/>
                     <Tooltip />
-                    <Bar dataKey="amount" fill="#A3B18A" activeBar={<Rectangle fill="#588157" stroke="#DAD7CD"/>}/>
+                    <Bar dataKey="amount" fill="#588157" activeBar={<Rectangle fill="#A3B18A"/>}/>
                 </BarChart>
             </ResponsiveContainer>
         </div>

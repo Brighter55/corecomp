@@ -1,4 +1,4 @@
-export const overviewBeforeSearchedInput = {
+export const overviewSearchStyle = {
     width: "100%",
     height: "100%",
     fontSize: "20px",

@@ -2,7 +2,7 @@ import styles from "./ProductHeader.module.css"
 import logo from "../../assets/logoDarkMode.png"
 import Features from "./Features/Features.jsx"
 import Button from '@mui/material/Button';
-import SettingsIcon from '@mui/icons-material/Settings';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from "react";
 import { getNewTokens } from "../../helpers/helper.js"
@@ -81,7 +81,7 @@ function ProductHeader() {
                 </div>
                 <Features></Features>
                 <div className={styles.rightNav}>
-                    <Button onClick={handleSettingClicked} sx={{ "&:hover": {backgroundColor: "hsl(0, 0%, 100%, 0.125)"}, borderRadius: "10px" }} ><SettingsIcon sx={{ color: "grey" }} /></Button>
+                    <Button onClick={handleSettingClicked} sx={{ "&:hover": {backgroundColor: "hsl(0, 0%, 100%, 0.125)"}, borderRadius: "10px" }} ><AccountCircleIcon sx={{ color: "grey" }} /></Button>
                     <Button
                         onClick={handleSignoutClicked}
                         sx={{
