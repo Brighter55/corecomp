@@ -20,7 +20,7 @@ function TimeRanges({ className, timeRange, setTimeRange }) {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [dropdownRef]);
+    }, []);
 
     function handleOptionClicked(event) {
         setTimeRange(event.currentTarget.value);
