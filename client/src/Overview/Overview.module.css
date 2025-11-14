@@ -145,25 +145,13 @@
 }
 
 .titleAndTimeRanges {
-  display: flex; /* Make the container a flex container */
-  justify-content: space-between; /* Distribute space between and around items */
-  align-items: center; /* Vertically center items (optional, depending on your needs) */
-  width: 100%; /* Ensure the container takes full width */
-  /* Add any other styling for your container */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .title {
-  flex-grow: 1; /* Allow the centered element to take available space */
-  text-align: center; /* Horizontally center the content within the element */
-}
-
-.timeRanges {
-  margin-right: 30px;
-  position: relative;
-}
-
-.hidden {
-    height: 0;
-    overflow: hidden;
-    visibility: hidden;
+  flex-grow: 1;
+  text-align: center;
 }

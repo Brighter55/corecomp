@@ -3,7 +3,7 @@ import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 import styles from "./Overview.module.css"
 import CustomBar from "./CustomBar.jsx"
 import CustomActiveBar from "./CustomActiveBar.jsx"
-import TimeRanges from "./TimeRanges/TimeRanges.jsx"
+import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../helpers/GraphsHelper.js"
 

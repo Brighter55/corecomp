@@ -1,6 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from "./Overview.module.css"
-import TimeRanges from "./TimeRanges/TimeRanges.jsx"
+import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../helpers/GraphsHelper.js"
 
@@ -31,7 +31,7 @@ function PricingGraph(props) {
             <div className={styles.titleAndTimeRanges}>
                 <h2 className={styles.title}>Adjusted Monthly Pricing</h2>
                 <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
-                <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}/>
+                <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange}/>
             </div>
             <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
                 <ResponsiveContainer>
