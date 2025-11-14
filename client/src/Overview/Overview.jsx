@@ -1,7 +1,7 @@
 import {useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useEffect} from "react"
-import ProductHeader from "../Headers/product-header/ProductHeader.jsx"
+import ProductHeader from "../headers/product-header/ProductHeader.jsx"
 import styles from "./Overview.module.css"
 import PeriodSwitch from "./PeriodSwitch.jsx"
 import About from "./About.jsx"
@@ -16,11 +16,13 @@ import CashVsDebtGraph from "./CashVsDebtGraph.jsx"
 import SharesOutstandingGraph from "./SharesOutstandingGraph.jsx"
 import EPSGraph from "./EPSGraph.jsx"
 import PricingGraph from "./PricingGraph.jsx"
-
+import TextField from '@mui/material/TextField';
 // pictures
 import logo from "../assets/logoPlaceholder.png"
 // helpers
 import {checkPermission, getNewTokens} from "../helpers/helper.js"
+// styles
+import { overviewSearchStyle } from "../styles/product.js"
 
 function Overview() {
     // when opens up the page check if user is authorized
@@ -39,6 +41,7 @@ function Overview() {
     const [period, setPeriod] = useState("annually");
     const [reports, setReports] = useState([]);
     const [searched, setSearched] = useState(false);
+
 
     async function getReports() {
         const payload = {symbol: symbol, period: period};
@@ -81,45 +84,69 @@ function Overview() {
         }
     }
 
+    if (searched) {
+        return (
+            <>
+                <ProductHeader></ProductHeader>
+                <div className={styles.overviewContent}>
+                    <form className={styles.afterSearchedForm} onSubmit={handleSearchSubmit}>
+                        <TextField sx={overviewSearchStyle}
+                                variant="filled"
+                                label="stock symbol"
+                                value={symbol}
+                                onChange={(event) => {setSymbol(event.target.value)}}
+                        />
+                    </form>
+                    <div className={styles.introduction}>
+                        <img src={logo} className={styles.logo}></img>
+                        <div className={styles.introductionText}>
+                            <h2 style={{margin: "20px 0"}}>Microsoft | MSFT</h2>
+                            <h2 style={{margin: "20px 0"}}>500 <span style={{fontSize: "25px"}}>USD</span></h2>
+                        </div>
+                    </div>
+                    <About></About>
+                    <Fundamentals></Fundamentals>
+                    <div className={styles.graphs}>
+                        <div className={styles.row}>
+                            <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
+                            <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
+                            <PricingGraph reports={reports.PRICING}></PricingGraph>
+                        </div>
+                    </div>
+                    <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
+                    <div className={styles.graphs}>
+                        <div className={styles.row}>
+                            <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
+                            <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
+                            <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
+                        </div>
+                        <div className={styles.row}>
+                            <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
+                            <FreeCashflowGraph reports={reports.CASH_FLOW} ></FreeCashflowGraph>
+                            <CashVsDebtGraph reports={reports.BALANCE_SHEET} ></CashVsDebtGraph>
+                        </div>
+                        <div className={styles.row}>
+                            <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
+                        </div>
+                    </div>
+                </div>
+            </>
+        )
+    }
+
     return (
         <>
             <ProductHeader></ProductHeader>
-            <div className={styles.overviewContent}>
-                <form className={styles.form} onSubmit={handleSearchSubmit}>
-                    <input value={symbol} onChange={(event) => {setSymbol(event.target.value)}} className={styles.searchBar} type="search" />
+            <div className={styles.overviewContentBeforeSearched}>
+                <span className={styles.caption}>Enter stock symbol and get started now!</span>
+                <form className={styles.beforeSearchedForm} onSubmit={handleSearchSubmit}>
+                    <TextField sx={overviewSearchStyle}
+                                variant="filled"
+                                label="stock symbol"
+                                value={symbol}
+                                onChange={(event) => {setSymbol(event.target.value)}}
+                    />
                 </form>
-                <div className={styles.introduction} style={searched ? {} : {visibility: "hidden", height: 0, overflow: "hidden"}}>
-                    <img src={logo} className={styles.logo}></img>
-                    <div className={styles.introductionText}>
-                        <h2 style={{margin: "20px 0"}}>Microsoft | MSFT</h2>
-                        <h2 style={{margin: "20px 0"}}>500 <span style={{fontSize: "25px"}}>USD</span></h2>
-                    </div>
-                </div>
-                <About style={searched ? {} : {visibility: "hidden", height: 0, overflow: "hidden"}}></About>
-                <Fundamentals style={searched ? {} : {visibility: "hidden", height: 0, overflow: "hidden"}}></Fundamentals>
-                <div className={styles.graphs} style={searched ? {} : {visibility: "hidden", height: 0, overflow: "hidden"}}>
-                    <div className={styles.row}>
-                        <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
-                        <SharesOutstandingGraph reports={searched ? reports.SHARES_OUTSTANDING : []}></SharesOutstandingGraph>
-                        <PricingGraph reports={searched ? reports.PRICING : []}></PricingGraph>
-                    </div>
-                </div>
-                <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
-                <div className={styles.graphs} style={searched ? {} : {visibility: "hidden", height: 0, overflow: "hidden"}}>
-                    <div className={styles.row}>
-                        <TotalRevenueGraph reports={searched ? reports.INCOME_STATEMENT : []}></TotalRevenueGraph>
-                        <NetIncomeGraph reports={searched ? reports.INCOME_STATEMENT : []}></NetIncomeGraph>
-                        <OperatingCashflowGraph reports={searched ? reports.CASH_FLOW : []}></OperatingCashflowGraph>
-                    </div>
-                    <div className={styles.row}>
-                        <CapitalExpendituresGraph reports={searched ? reports.CASH_FLOW : []}></CapitalExpendituresGraph>
-                        <FreeCashflowGraph reports={searched ? reports.CASH_FLOW : []}></FreeCashflowGraph>
-                        <CashVsDebtGraph reports={searched ? reports.BALANCE_SHEET : []}></CashVsDebtGraph>
-                    </div>
-                    <div className={styles.row}>
-                        <EPSGraph reports={searched ? reports.EARNINGS : []} period={period}></EPSGraph>
-                    </div>
-                </div>
             </div>
         </>
     )

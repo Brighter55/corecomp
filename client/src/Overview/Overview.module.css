@@ -3,14 +3,13 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    height: 100%;
     gap: 10px;
     font-family: sans-serif, system-ui;
 }
 
-.form {
-    height: 7%;
-    width: 70%;
+.afterSearchedForm {
+    height: 50px;
+    width: 30%;
 }
 
 .searchBar {
@@ -18,6 +17,26 @@
     height: 100%;
     font-size: 20px;
 }
+
+/*Before searched*/
+.overviewContentBeforeSearched {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 85%; /*height is the 100% - height of header*/
+    gap: 20px;
+}
+
+.caption {
+    font-size: 4rem;
+}
+
+.beforeSearchedForm {
+    height: 10%;
+    width: 70%;
+}
+/**/
 
 .introduction {
     width: 100%;
@@ -83,12 +102,15 @@
 .graphs {
     display: flex;
     width: calc(100vw - 3vw);
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .row {
     display: flex;
+    gap: 20px;
     width: 100%;
+    height: 400px;
 }
 
 .graph {
@@ -97,32 +119,39 @@
     align-items: center;
     width: 33%;
     transition: width 0.3s ease-in-out;
+    color: #344E41;
+    border-radius: 10px;
+    background: #DAD7CD;
 }
 
 .graph:hover {
     width: 50%;
 }
 
+.graphClicked {
+    /* use viewport units and a valid color value (no quotes) */
+    background: #DAD7CD;
+    width: 90%;
+    height: 80%;
+    top: 10%;
+    left: 5%;
+    z-index: 3;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #344E41;
+    border-radius: 10px;
+}
+
 .titleAndTimeRanges {
-  display: flex; /* Make the container a flex container */
-  justify-content: space-between; /* Distribute space between and around items */
-  align-items: center; /* Vertically center items (optional, depending on your needs) */
-  width: 100%; /* Ensure the container takes full width */
-  /* Add any other styling for your container */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .title {
-  flex-grow: 1; /* Allow the centered element to take available space */
-  text-align: center; /* Horizontally center the content within the element */
-}
-
-.timeRanges {
-  margin-right: 30px;
-  position: relative;
-}
-
-.hidden {
-    height: 0;
-    overflow: hidden;
-    visibility: hidden;
+  flex-grow: 1;
+  text-align: center;
 }
