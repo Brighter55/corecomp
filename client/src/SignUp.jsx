@@ -1,6 +1,7 @@
 import {useState} from "react"
 import {GoogleLogin} from "@react-oauth/google"
 import {useNavigate} from "react-router-dom"
+import LandingHeader from "./headers/landing-header/LandingHeader.jsx"
 
 function SignUp() {
     const navigate = useNavigate();
@@ -63,6 +64,7 @@ function SignUp() {
 
     return (
         <div>
+            <LandingHeader/>
             <h1>Sign Up</h1>
             <form onSubmit={handleSubmit}>
                 <label>
