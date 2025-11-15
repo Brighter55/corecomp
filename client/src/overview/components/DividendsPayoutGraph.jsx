@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect} from "react"
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import styles from "./Overview.module.css"
+import styles from "./graph.module.css"
 
 
 function DividendsPayoutGraph(props) {

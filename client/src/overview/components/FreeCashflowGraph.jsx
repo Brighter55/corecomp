@@ -1,10 +1,10 @@
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import styles from "./Overview.module.css"
+import styles from "./graph.module.css"
 import CustomBar from "./CustomBar.jsx"
 import CustomActiveBar from "./CustomActiveBar.jsx"
 import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
-import {filterReports, getPercentChange} from "../helpers/GraphsHelper.js"
+import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 
 
 function FreeCashflowGraph(props) {

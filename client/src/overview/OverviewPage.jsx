@@ -2,21 +2,14 @@ import {useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useEffect} from "react"
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
-import styles from "./Overview.module.css"
-import PeriodSwitch from "./PeriodSwitch.jsx"
-import About from "./About.jsx"
-import Fundamentals from "./Fundamentals.jsx"
-import TotalRevenueGraph from "./TotalRevenueGraph.jsx"
-import NetIncomeGraph from "./NetIncomeGraph.jsx"
-import OperatingCashflowGraph from "./OperatingCashflowGraph.jsx"
-import CapitalExpendituresGraph from "./CapitalExpendituresGraph.jsx"
-import FreeCashflowGraph from "./FreeCashflowGraph.jsx"
-import DividendsPayoutGraph from "./DividendsPayoutGraph.jsx"
-import CashVsDebtGraph from "./CashVsDebtGraph.jsx"
-import SharesOutstandingGraph from "./SharesOutstandingGraph.jsx"
-import EPSGraph from "./EPSGraph.jsx"
-import PricingGraph from "./PricingGraph.jsx"
+import styles from "./OverviewPage.module.css"
+import PeriodSwitch from "./components/period-switch/PeriodSwitch.jsx"
 import TextField from '@mui/material/TextField';
+// components
+import { About, Fundamentals, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
+    CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
+    SharesOutstandingGraph, EPSGraph, PricingGraph
+} from "./index.js"
 // pictures
 import logo from "../assets/logoPlaceholder.png"
 // helpers
@@ -24,7 +17,7 @@ import {checkPermission, getNewTokens} from "../helpers/helper.js"
 // styles
 import { overviewSearchStyle } from "../styles/product.js"
 
-function Overview() {
+function OverviewPage() {
     // when opens up the page check if user is authorized
     // TODO: implement "refresh lock" in prod. to prevent multiple components hitting refreshing the tokens
     const navigate = useNavigate();
@@ -152,4 +145,4 @@ function Overview() {
     )
 }
 
-export default Overview
+export default OverviewPage

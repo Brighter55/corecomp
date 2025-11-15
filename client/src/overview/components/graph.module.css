@@ -1,0 +1,42 @@
+.graph {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 33%;
+    transition: width 0.3s ease-in-out;
+    color: #344E41;
+    border-radius: 10px;
+    background: #DAD7CD;
+}
+
+.graph:hover {
+    width: 50%;
+}
+
+.graphClicked {
+    /* use viewport units and a valid color value (no quotes) */
+    background: #DAD7CD;
+    width: 90%;
+    height: 80%;
+    top: 10%;
+    left: 5%;
+    z-index: 3;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #344E41;
+    border-radius: 10px;
+}
+
+.titleAndTimeRanges {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.title {
+  flex-grow: 1;
+  text-align: center;
+}

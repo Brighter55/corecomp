@@ -1,8 +1,8 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import styles from "./Overview.module.css"
+import styles from "./graph.module.css"
 import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
-import {filterReports, getPercentChange} from "../helpers/GraphsHelper.js"
+import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 
 function CashVsDebtGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
@@ -39,7 +39,7 @@ function CashVsDebtGraph(props) {
                 <h2 className={styles.title}>Cash v Debt</h2>
                 <h3 style={{color: cashPercentChange >= 0 ? "#3A5A40" : "#bc4749"}}>Cash: {cashPercentChange >= 0 ? `+${cashPercentChange}%` : `-${cashPercentChange}%`}</h3>
                 <h3 style={{color: debtPercentChange >= 0 ? "#3A5A40" : "#bc4749"}}>Debt: {debtPercentChange >= 0 ? `+${debtPercentChange}%` : `-${debtPercentChange}%`}</h3>
-                <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}/>
+                <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange}/>
             </div>
             <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
                 <ResponsiveContainer>
