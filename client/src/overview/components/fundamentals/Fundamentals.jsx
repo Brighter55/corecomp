@@ -1,4 +1,4 @@
-import styles from "./Overview.module.css"
+import styles from "./Fundamentals.module.css"
 
 
 function Fundamentals({style}) {

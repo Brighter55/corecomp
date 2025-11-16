@@ -1,4 +1,4 @@
-import styles from "./Overview.module.css"
+import styles from "./About.module.css"
 
 function About({style}) {
     return (
