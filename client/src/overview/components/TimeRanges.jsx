@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import FormHelperText from '@mui/material/FormHelperText';
 import MenuItem from '@mui/material/MenuItem';
 
-function TimeRanges({ className, timeRange, setTimeRange }) {
+function TimeRanges({ className, timeRange, setTimeRange, ref }) {
 
     function handleOptionClicked(event) {
         setTimeRange(event.target.value);
@@ -16,7 +15,7 @@ function TimeRanges({ className, timeRange, setTimeRange }) {
     }
 
     return (
-        <FormControl sx={{ m: 1, width: 80 }}>
+        <FormControl sx={{ m: 1, width: 80 }} ref={ref}>
             <Select
             value={timeRange}
             onChange={handleOptionClicked}
