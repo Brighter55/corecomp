@@ -3,7 +3,7 @@ import Select from '@mui/material/Select';
 import FormHelperText from '@mui/material/FormHelperText';
 import MenuItem from '@mui/material/MenuItem';
 
-function TimeRanges({ className, timeRange, setTimeRange, ref }) {
+function TimeRanges({ className, timeRange, setTimeRange, menuContainer }) {
 
     function handleOptionClicked(event) {
         setTimeRange(event.target.value);
@@ -15,18 +15,21 @@ function TimeRanges({ className, timeRange, setTimeRange, ref }) {
     }
 
     return (
-        <FormControl sx={{ m: 1, width: 80 }} ref={ref}>
+        <FormControl sx={{ m: 1, width: 80 }} >
             <Select
-            value={timeRange}
-            onChange={handleOptionClicked}
-            displayEmpty
-            inputProps={{ 'aria-label': 'Without label' }}
-            sx={{ color: "#344E41",
-                fontFamily: "'Segoe Ui', Arial, sans-serif",
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: "#A3B18A",
-                },
-             }}
+                value={timeRange}
+                onChange={handleOptionClicked}
+                displayEmpty
+                inputProps={{ 'aria-label': 'Without label' }}
+                MenuProps={{
+                    container: menuContainer,
+                }}
+                sx={{ color: "#344E41",
+                    fontFamily: "'Segoe Ui', Arial, sans-serif",
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: "#A3B18A",
+                    },
+                }}
             >
                 <MenuItem value="YTD" sx={menuItemStyle}>YTD</MenuItem>
                 <MenuItem value="1Y" sx={menuItemStyle}>1Y</MenuItem>
@@ -34,7 +37,7 @@ function TimeRanges({ className, timeRange, setTimeRange, ref }) {
                 <MenuItem value="10Y" sx={menuItemStyle}>10Y</MenuItem>
                 <MenuItem value="all" sx={menuItemStyle}>all</MenuItem>
             </Select>
-      </FormControl>
+        </FormControl>
     );
 }
 

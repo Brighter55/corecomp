@@ -14,14 +14,10 @@ function CapitalExpendituresGraph(props) {
     const [graphClicked, setGraphClicked] = useState(false);
 
     const graphRef = useRef(null);
-    const optionsRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (
-                graphRef.current && !graphRef.current.contains(event.target) &&
-                optionsRef.current && !optionsRef.current.contains(event.target)
-            ) {
+            if (graphRef.current && !graphRef.current.contains(event.target)) {
                 console.log("click outside");
                 setGraphClicked(false);
             }
@@ -45,7 +41,8 @@ function CapitalExpendituresGraph(props) {
             <div className={styles.titleAndTimeRanges}>
                 <h2 className={styles.title}>Capital Expenditures</h2>
                 <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
-                <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} ref={optionsRef} />
+
+                <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current} />
             </div>
             <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
                 <ResponsiveContainer>

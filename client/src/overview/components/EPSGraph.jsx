@@ -68,7 +68,7 @@ function EPSGraph(props) {
                 <div className={styles.titleAndTimeRanges}>
                     <h2 className={styles.title}>Earning per Share</h2>
                     <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
-                    <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}/>
+                    <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}  menuContainer={graphRef.current}/>
                 </div>
                 <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
                     <ResponsiveContainer>
@@ -97,7 +97,7 @@ function EPSGraph(props) {
                 <div className={styles.titleAndTimeRanges}>
                     <h2 className={styles.title}>Earning per Share</h2>
                     <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
-                    <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}/>
+                    <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current}/>
                 </div>
                 <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
                     <ResponsiveContainer>
