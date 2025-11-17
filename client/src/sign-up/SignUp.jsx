@@ -5,6 +5,11 @@ import LandingHeader from "../headers/landing-header/LandingHeader.jsx"
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
 // style
 import styles from "./SignUp.module.css"
 
@@ -20,6 +25,15 @@ function SignUp() {
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
+    // hide password
+    const [showPassword, setShowPassword] = useState(false);
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+    const handleMouseUpPassword = (event) => {
+        event.preventDefault();
+    };
 
 
     async function handleSubmit(event) {
@@ -68,16 +82,31 @@ function SignUp() {
     }
 
     const textFieldStyle = {
-        "& .MuiInputBase-input": {
-            backgroundColor: "lightgrey",
-        },
+        backgroundColor: "lightgrey",
         "& .MuiInputLabel-root.Mui-focused": {
             color: "#3A5A40",
         },
         "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
             borderColor: "#3A5A40",
-        }
+        },
+        "& .MuiFormHelperText-root": {backgroundColor: "#DAD7CD", margin: "0"},
     };
+
+    const hidePasswordAdornment = {
+        endAdornment: (
+        <InputAdornment position="end">
+            <IconButton
+                aria-label="toggle password visibility"
+                onClick={handleClickShowPassword}
+                onMouseDown={handleMouseDownPassword}
+                onMouseUp={handleMouseUpPassword}
+                edge="end"
+            >
+            {showPassword ? <Visibility /> : <VisibilityOff />}
+            </IconButton>
+        </InputAdornment>
+        ),
+    }
 
     return (
         <>
@@ -113,6 +142,8 @@ function SignUp() {
                                 sx={textFieldStyle}
                                 error={passwordError ? true : false}
                                 helperText={passwordError ? passwordError : " "}
+                                type={showPassword ? 'text' : 'password'}
+                                InputProps={hidePasswordAdornment}
                             />
                             <TextField
                                 value={confirmPassword}
@@ -122,6 +153,8 @@ function SignUp() {
                                 sx={textFieldStyle}
                                 error={confirmPasswordError ? true : false}
                                 helperText={confirmPasswordError ? confirmPasswordError : " "}
+                                type={showPassword ? 'text' : 'password'}
+                                InputProps={hidePasswordAdornment}
                             />
                             <Button
                                 type="submit"
