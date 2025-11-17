@@ -1,7 +1,7 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom"
 import Homepage from "./Homepage.jsx"
 import SignIn from "./SignIn.jsx"
-import SignUp from "./SignUp.jsx"
+import SignUp from "./sign-up/SignUp.jsx"
 import OverviewPage from "./overview/OverviewPage.jsx"
 import AccountVerification from "./AccountVerification.jsx"
 import UserAccount from "./UserAccount.jsx"
