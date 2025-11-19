@@ -9,6 +9,9 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import HelpIcon from '@mui/icons-material/Help';
+// pictures
+import logo from "../assets/logoLightMode.png"
 
 // style
 import styles from "./SignUp.module.css"
@@ -162,10 +165,11 @@ function SignUp() {
                                 sx={{ backgroundColor: "#588157" }}
                             >Sign Up</Button>
                         </form>
-                        <Divider>or</Divider>
+                        <Divider sx={{ width: "100%" }}>or</Divider>
                         <GoogleLogin
                             onSuccess={credentialResponse => {
                                 const payload = {JWTToken: credentialResponse.credential};
+                                console.log(credentialResponse);
                                 async function sendJWTToken() {
                                     const response = await fetch("http://127.0.0.1:8000/api/google-authentication", {
                                         method: "POST",
@@ -184,11 +188,30 @@ function SignUp() {
                             }}
                             onError={() => console.log("Log in failed")}
                             useOneTap
+                            text="continue_with"
+                            shape="pill"
+                            size="large"
                         />
                     </div>
                 </div>
                 <div className={styles.featuresContent}>
-                    Hello 2
+                    <span className={styles.signUpText}>All Features</span>
+                    <div className={styles.features}>
+                        <div className={styles.feature}>
+                            <span style={{ fontSize: "70px" }}>20+</span>
+                            <span>years of financial data</span>
+                        </div>
+                        <div className={styles.feature}>
+                            <img style={{ width: "90px", height: "90px", borderRadius: "10px" }} src={logo} alt="logo"/>
+                            <span>easy looking graphs</span>
+                        </div>
+                        <div className={styles.feature}>
+                            <HelpIcon sx={{ width: "70px", height: "70px" }} />
+                            <span>chart explainations</span>
+                        </div>
+                    </div>
+                    <Divider sx={{ width: "80%", bgcolor: "#DAD7CD" }}></Divider>
+                    <span>and more features coming soon!</span>
                 </div>
             </div>
         </>
