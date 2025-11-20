@@ -119,6 +119,12 @@ def sign_out(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def reset_password(request):
+    user_email = json.loads(request.body)
+    return Response({"success": True}, status=status.HTTP_200_OK)
+
 # stripe
 stripe.api_key = os.getenv("STRIPE_API_KEY")
 endpoint_secret = os.getenv("STRIPE_ENDPOINT_SECRET")

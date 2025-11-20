@@ -127,7 +127,7 @@ function SignIn() {
                                 sx={{ backgroundColor: "#588157", color: "#DAD7CD" }}
                             >Sign in</Button>
                         </form>
-                        <span>forgot your password?</span>
+                        <span onClick={() => {navigate("/reset-password");}} className={styles.forgot} >forgot your password?</span>
                         <Divider sx={{ width: "100%", '&::before, &::after': { borderColor: "#DAD7CD" } }}>or</Divider>
                         <GoogleLogin
                             onSuccess={credentialResponse => {

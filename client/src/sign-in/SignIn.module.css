@@ -36,6 +36,14 @@
     gap: 10px;
 }
 
+.forgot {
+    cursor: pointer;
+}
+
+.forgot:hover {
+    text-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+}
+
 .quoteContent {
     background-color: #DAD7CD; /*c6c3ba 746355*/
     border-radius: 0 10px 10px 0;
