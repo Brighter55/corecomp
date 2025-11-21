@@ -57,7 +57,7 @@ def sign_up(request):
         password = serializer.validated_data["password"]
         username = serializer.validated_data["username"]
 
-        User.objects.create_user(username=username, email=email, password=password, is_active=False)
+        User.objects.create_user(username=username, email=email, password=password, is_active=False, account_type="manual")
         # send email verification
         user = User.objects.get(username=username)
         token = default_token_generator.make_token(user)
@@ -98,7 +98,7 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
     try:
         user_info = id_token.verify_oauth2_token(JWTtoken, google_requests.Request(), os.getenv("GOOGLE_CLIENT_ID"))
         email = user_info["email"]
-        user, created = User.objects.get_or_create(email=email, defaults={"username": email, "email": email, "is_active": True, "date_active": now()})
+        user, created = User.objects.get_or_create(email=email, defaults={"username": email, "email": email, "is_active": True, "date_active": now(), "account_type": "google"})
         if created:
             user.set_unusable_password()
             user.save()
