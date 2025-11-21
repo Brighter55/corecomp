@@ -25,7 +25,7 @@ function ResetPassword() {
             console.log(data);
 
             if (!response.ok) {
-                if (field == "email") {
+                if (data.email) { // if email provided fails the test
                     setEmailError(data.email);
                 }
                 return;

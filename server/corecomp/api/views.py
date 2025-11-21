@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import default_token_generator
-from .serializers import SignUp, CustomTokenObtainPairSerializer
+from .serializers import SignUp, CustomTokenObtainPairSerializer, ResetPassword
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
 import json
@@ -122,8 +122,12 @@ def sign_out(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def reset_password(request):
-    user_email = json.loads(request.body)
-    return Response({"success": True}, status=status.HTTP_200_OK)
+    data = json.loads(request.body)
+    serializer = ResetPassword(data=data)
+    if serializer.is_valid():
+        email = serializer.validated_data["email"]
+        return Response({"success": f"valid email is {email}"}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # stripe
 stripe.api_key = os.getenv("STRIPE_API_KEY")
