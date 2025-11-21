@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import default_token_generator
-from .serializers import SignUp, CustomTokenObtainPairSerializer
+from .serializers import SignUp, CustomTokenObtainPairSerializer, ResetPassword
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
 import json
@@ -57,7 +57,7 @@ def sign_up(request):
         password = serializer.validated_data["password"]
         username = serializer.validated_data["username"]
 
-        User.objects.create_user(username=username, email=email, password=password, is_active=False)
+        User.objects.create_user(username=username, email=email, password=password, is_active=False, account_type="manual")
         # send email verification
         user = User.objects.get(username=username)
         token = default_token_generator.make_token(user)
@@ -98,7 +98,7 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
     try:
         user_info = id_token.verify_oauth2_token(JWTtoken, google_requests.Request(), os.getenv("GOOGLE_CLIENT_ID"))
         email = user_info["email"]
-        user, created = User.objects.get_or_create(email=email, defaults={"username": email, "email": email, "is_active": True, "date_active": now()})
+        user, created = User.objects.get_or_create(email=email, defaults={"username": email, "email": email, "is_active": True, "date_active": now(), "account_type": "google"})
         if created:
             user.set_unusable_password()
             user.save()
@@ -118,6 +118,16 @@ def sign_out(request):
         return Response({"success": "Refresh token has been blacklisted successfully"}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def reset_password(request):
+    data = json.loads(request.body)
+    serializer = ResetPassword(data=data)
+    if serializer.is_valid():
+        email = serializer.validated_data["email"]
+        return Response({"success": f"valid email is {email}"}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # stripe
 stripe.api_key = os.getenv("STRIPE_API_KEY")

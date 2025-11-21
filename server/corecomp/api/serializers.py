@@ -82,6 +82,25 @@ class SignUp(serializers.ModelSerializer):
         model = User
         fields = ["email", "password", "username", "confirmPassword"]
 
+class ResetPassword(serializers.Serializer):
+    email = serializers.EmailField(
+        required=True,
+        allow_blank=False,
+        trim_whitespace=True,
+        allow_null=False,
+        error_messages={
+            "required": "Email is required",
+            "blank": "Email is required",
+            "null": "Email is required",
+            "invalid": "Email is invalid",
+        }
+    )
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value, account_type="manual").exists():
+            raise serializers.ValidationError("Email provided doesn't exist")
+        return value
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, data):
         data = super().validate(data) # returns only {"access": ..., "refresh": ..} but self.user is now avialable

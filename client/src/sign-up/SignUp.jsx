@@ -85,7 +85,9 @@ function SignUp() {
     }
 
     const textFieldStyle = {
-        backgroundColor: "lightgrey",
+        "& .MuiInputBase-root": {
+            backgroundColor: "lightgrey",
+        },
         "& .MuiInputLabel-root.Mui-focused": {
             color: "#3A5A40",
         },

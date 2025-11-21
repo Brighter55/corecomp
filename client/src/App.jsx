@@ -1,11 +1,12 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom"
 import Homepage from "./Homepage.jsx"
-import SignIn from "./SignIn.jsx"
+import SignIn from "./sign-in/SignIn.jsx"
 import SignUp from "./sign-up/SignUp.jsx"
 import OverviewPage from "./overview/OverviewPage.jsx"
 import AccountVerification from "./AccountVerification.jsx"
 import UserAccount from "./UserAccount.jsx"
 import Return from "./Return.jsx"
+import ResetPassword from "./reset-password/ResetPassword.jsx"
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/account-verification/:token/:user_id" element={<AccountVerification></AccountVerification>} />
         <Route path="/user-account" element={<UserAccount></UserAccount>} />
         <Route path="/return/:checkout_session_id" element={<Return></Return>} />
+        <Route path="/reset-password" element={<ResetPassword></ResetPassword>} />
       </Routes>
     </BrowserRouter>
   )
