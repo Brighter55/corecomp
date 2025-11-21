@@ -97,7 +97,7 @@ class ResetPassword(serializers.Serializer):
     )
 
     def validate_email(self, value):
-        if not User.objects.filter(email=value).exists():
+        if not User.objects.filter(email=value, account_type="manual").exists():
             raise serializers.ValidationError("Email provided doesn't exist")
         return value
 
