@@ -7,6 +7,7 @@ import AccountVerification from "./AccountVerification.jsx"
 import UserAccount from "./UserAccount.jsx"
 import Return from "./Return.jsx"
 import ResetPassword from "./reset-password/ResetPassword.jsx"
+import ConfirmResetPassword from "./confirm-reset-password/ConfirmResetPassword.jsx"
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/user-account" element={<UserAccount></UserAccount>} />
         <Route path="/return/:checkout_session_id" element={<Return></Return>} />
         <Route path="/reset-password" element={<ResetPassword></ResetPassword>} />
+        <Route path="/reset-password/:token/:user_id" element={<ConfirmResetPassword />} />
       </Routes>
     </BrowserRouter>
   )
