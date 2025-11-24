@@ -28,6 +28,7 @@ function ResetPassword() {
                 if (data.email) { // if email provided fails the test
                     setEmailError(data.email);
                 }
+
                 return;
             }
         } catch (error) {
@@ -43,9 +44,9 @@ function ResetPassword() {
         <>
             <LandingHeader></LandingHeader>
             <div className={styles.content}>
-                <div className={styles.resetContainer}>
+                <div className={styles.container}>
                     <span className={styles.text}>Reset your password</span>
-                    <p className={styles.description}>Enter your email and we will send you a recovery email</p>
+                    <p>Enter your email and we will send you a recovery email</p>
                     <form onSubmit={handleSubmit} className={styles.form}>
                         <TextField
                             value={email}

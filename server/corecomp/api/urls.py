@@ -11,6 +11,7 @@ urlpatterns = [
     path("google-authentication", views.google_authentication),
     path("sign-out", views.sign_out),
     path("reset-password", views.reset_password),
+    path("confirm-reset-password", views.confirm_reset_password),
     # Authorization
     path("check-permission", views.check_permission),
     # handle access token expires | refresh endpoint

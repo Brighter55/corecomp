@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.tokens import default_token_generator, PasswordResetTokenGenerator
-from .serializers import SignUp, CustomTokenObtainPairSerializer, ResetPassword
+from .serializers import SignUp, CustomTokenObtainPairSerializer, ResetPassword, ConfirmResetPassword
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
 import json
@@ -144,6 +144,26 @@ def reset_password(request):
             }
         )
         return Response({"success": f"valid email is {email} and email has been sent"}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def confirm_reset_password(request):
+    data = json.loads(request.body)
+    serializer = ConfirmResetPassword(data=data)
+    if serializer.is_valid():
+        user_id = serializer.validated_data["id"]
+        new_password = serializer.validated_data["password"]
+        user = User.objects.get(id=user_id)
+        token = serializer.validated_data["token"]
+
+        token_generator = PasswordResetTokenGenerator()
+        if token_generator.check_token(user, token):  # if the token belongs to user
+            user.set_password(new_password)
+            user.save()
+            return Response({"success": f"Your password has been reset!, your token is {token} and user_id is {user_id}"}, status=status.HTTP_200_OK)
+
+        return Response({"token": "token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # stripe
