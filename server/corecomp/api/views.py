@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.tokens import default_token_generator
-from .serializers import SignUp, CustomTokenObtainPairSerializer, ResetPassword
+from django.contrib.auth.tokens import default_token_generator, PasswordResetTokenGenerator
+from .serializers import SignUp, CustomTokenObtainPairSerializer, ResetPassword, ConfirmResetPassword
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model
 import json
@@ -15,6 +15,8 @@ from django.core.cache import cache
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.utils.timezone import now
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from datetime import timedelta
 import stripe
 
@@ -126,7 +128,42 @@ def reset_password(request):
     serializer = ResetPassword(data=data)
     if serializer.is_valid():
         email = serializer.validated_data["email"]
-        return Response({"success": f"valid email is {email}"}, status=status.HTTP_200_OK)
+        user = User.objects.get(email=email)
+        token_generator = PasswordResetTokenGenerator()
+        user_id = urlsafe_base64_encode(force_bytes(user.id))
+        token = token_generator.make_token(user)
+        reset_password_url = f"http://localhost:5173/reset-password/{token}/{user_id}"
+        response = requests.post(
+            "https://api.mailgun.net/v3/sandboxcb8d9093dd704fa990c67dc9fb3b0e78.mailgun.org/messages",
+            auth=("api", os.getenv("MAILGUN_API_KEY")),
+            data={"from": "Corecomp <reset-password@corecomp.cc>",
+                "to": "Peter <sriphrakhunpiyawit@gmail.com>", # change to email in prod.
+                "subject": "Reset Password",
+             #   "html": get_html_message(link),
+                "text": f"Click the link below to reset your password {reset_password_url}"
+            }
+        )
+        return Response({"success": f"valid email is {email} and email has been sent"}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def confirm_reset_password(request):
+    data = json.loads(request.body)
+    serializer = ConfirmResetPassword(data=data)
+    if serializer.is_valid():
+        user_id = serializer.validated_data["id"]
+        new_password = serializer.validated_data["password"]
+        user = User.objects.get(id=user_id)
+        token = serializer.validated_data["token"]
+
+        token_generator = PasswordResetTokenGenerator()
+        if token_generator.check_token(user, token):  # if the token belongs to user
+            user.set_password(new_password)
+            user.save()
+            return Response({"success": f"Your password has been reset!, your token is {token} and user_id is {user_id}"}, status=status.HTTP_200_OK)
+
+        return Response({"token": "token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # stripe

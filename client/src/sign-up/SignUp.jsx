@@ -61,17 +61,13 @@ function SignUp() {
                 for (const field in data) {
                     if (field == "username") {
                         setUsernameError(data.username);
-                    }
-                    if (field == "email") {
+                    } else if (field == "email") {
                         setEmailError(data.email);
-                    }
-                    if (field == "password") {
+                    } else if (field == "password") {
                         setPasswordError(data.password)
-                    }
-                    if (field == "confirmPassword") {
+                    } else if (field == "confirmPassword") {
                         setConfirmPasswordError(data.confirmPassword);
-                    }
-                    if (field == "non_field_errors") {
+                    } else if (field == "non_field_errors") {
                         setPasswordError(data.non_field_errors);
                         setConfirmPasswordError(data.non_field_errors);
                     }
