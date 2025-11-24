@@ -46,7 +46,7 @@ function ResetPassword() {
             <div className={styles.content}>
                 <div className={styles.container}>
                     <span className={styles.text}>Reset your password</span>
-                    <p>Enter your email and we will send you a recovery email</p>
+                    {success ? <p>Recovery email has been sent!</p> : <p>Enter your email and we will send you a recovery email</p>}
                     <form onSubmit={handleSubmit} className={styles.form}>
                         <TextField
                             value={email}
