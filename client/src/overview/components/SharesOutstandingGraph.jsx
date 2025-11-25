@@ -3,6 +3,9 @@ import styles from "./graph.module.css"
 import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
+import Explanation from "./Explanation.jsx"
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 function SharesOutstandingGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
@@ -31,11 +34,31 @@ function SharesOutstandingGraph(props) {
         return Math.floor(Math.log10(Math.abs(value))) + 1;
     }
 
+    const explanation = (
+        <>
+            <h1>What is it?</h1>
+            <p className={styles.explanationText}>
+                Basic shares outstanding are the total shares issued and available for trading in the stock market. This includes shares held by both institutions and individual investors. However, this doesn't include Treasury shares (shares repurchased by the company and held in its treasury).
+            </p>
+            <h1>Calculation</h1>
+            <p className={styles.explanationFormular}>Outstanding Shares = Issued shares - Treasury shares</p>
+            <h1>Interpretation</h1>
+            <ul>
+                <li className={styles.explanationText}><TrendingUpIcon sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}} /> Shares Outstanding increases when a company is issuing and selling new shares to raise their capital</li>
+                <li className={styles.explanationText}><TrendingDownIcon sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}/> Shares Outstanding decreases when a company repurchases its own shares and holds them as treasury stock. The process is called "Share Buybacks"</li>
+                <li className={styles.explanationText}>Shares Outstanding stays stable when a company isn’t raising new capital or aggressively buying back shares.</li>
+            </ul>
+        </>
+    )
+
     return (
         <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
             <div className={styles.titleAndTimeRanges}>
-                <h2 className={styles.title}>SharesOutstanding</h2>
-                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
+                <div className={styles.titleContainer}>
+                    <h2>SharesOutstanding</h2>
+                    <Explanation explanation={explanation} />
+                </div>
+                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
                 <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current}/>
             </div>
             <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>

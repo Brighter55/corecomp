@@ -5,6 +5,9 @@ import CustomActiveBar from "./CustomActiveBar.jsx"
 import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
+import Explanation from "./Explanation.jsx"
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 
 function NetIncomeGraph(props) {
@@ -35,11 +38,30 @@ function NetIncomeGraph(props) {
         return Math.floor(Math.log10(Math.abs(value))) + 1;
     }
 
+    const explanation = (
+        <>
+            <h1>What is it?</h1>
+            <p className={styles.explanationText}>
+                Net income is a company's profit after all expenses and taxes have been deducted from its total revenue.
+            </p>
+            <h1>Calculation</h1>
+            <p className={styles.explanationFormular}>Net Income = Total Revenue – Total Expenses</p>
+            <h1>Interpretation</h1>
+            <ul>
+                <li className={styles.explanationText}><TrendingUpIcon sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}} /> A positive trend shows the company is improving its financial performance.</li>
+                <li className={styles.explanationText}><TrendingDownIcon sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}/> A negative trend can be a warning sign, even if it remains positive. It suggests the company may be facing challenges in its operations or market.</li>
+            </ul>
+        </>
+    )
+
     return (
         <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
             <div className={styles.titleAndTimeRanges}>
-                <h2 className={styles.title}>Net Income</h2>
-                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
+                <div className={styles.titleContainer}>
+                    <h2>Net Income</h2>
+                    <Explanation explanation={explanation} />
+                </div>
+                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
                 <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current}/>
             </div>
             <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>

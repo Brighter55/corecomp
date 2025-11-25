@@ -3,6 +3,10 @@ import styles from "./graph.module.css"
 import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
+import Explanation from "./Explanation.jsx"
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+
 
 function EPSGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
@@ -62,12 +66,31 @@ function EPSGraph(props) {
         return <circle cx={cx} cy={cy} stroke={stroke} payload={payload} value={value} fill={color} r={8} strokeWidth={1}></circle>
     }
 
+    const explanation = (
+        <>
+            <h1>What is it?</h1>
+            <p className={styles.explanationText}>
+                A measure of a company's profitability, showing how much profit is generated for each share of stock
+            </p>
+            <h1>Calculation</h1>
+            <p className={styles.explanationFormular}>EPS = Net Income / # of outstanding shares</p>
+            <h1>Interpretation</h1>
+            <ul>
+                <li className={styles.explanationText}><TrendingUpIcon sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}} /> Upward trend in EPS generally signifies growing profitability, which can lead to a higher stock price and increased investor confidence</li>
+                <li className={styles.explanationText}><TrendingDownIcon sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}/> Downward trend in EPS signals declining profits, which often leads to a lower stock price and may indicate financial challenges. </li>
+            </ul>
+        </>
+    )
+
     return (
         props.period === "quarterly" ? (
             <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
                 <div className={styles.titleAndTimeRanges}>
-                    <h2 className={styles.title}>Earning per Share</h2>
-                    <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
+                    <div className={styles.titleContainer}>
+                        <h2>Earning per Share</h2>
+                        <Explanation explanation={explanation} />
+                    </div>
+                    <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
                     <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange}  menuContainer={graphRef.current}/>
                 </div>
                 <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
@@ -95,8 +118,11 @@ function EPSGraph(props) {
         : (
             <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
                 <div className={styles.titleAndTimeRanges}>
-                    <h2 className={styles.title}>Earning per Share</h2>
-                    <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
+                    <div className={styles.titleContainer}>
+                        <h2>Earning per Share</h2>
+                        <Explanation explanation={explanation} />
+                    </div>
+                    <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
                     <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current}/>
                 </div>
                 <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
