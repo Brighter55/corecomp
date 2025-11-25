@@ -5,7 +5,9 @@ import CustomActiveBar from "./CustomActiveBar.jsx"
 import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
-
+import Explanation from "./Explanation.jsx"
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 function CapitalExpendituresGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
@@ -36,12 +38,30 @@ function CapitalExpendituresGraph(props) {
         return Math.floor(Math.log10(Math.abs(value))) + 1;
     }
 
+    const explanation = (
+        <>
+            <h1>What is it?</h1>
+            <p className={styles.explanationText}>
+                Capital expenditure (CapEx) is the money a company spends on long-term physical assets like property, buildings, and machinery.
+            </p>
+            <h1>Calculation</h1>
+            <p className={styles.explanationFormular}>CapEx = (Ending PP&E - Beginning PP&E) + Depreciation Expense</p>
+            <h1>Interpretation</h1>
+            <ul>
+                <li className={styles.explanationText}><TrendingUpIcon sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}} /> Upward trend often signifies expansion, investment in new technology, or replacement of aging equipment, suggesting the company is growing or trying to increase efficiency</li>
+                <li className={styles.explanationText}><TrendingDownIcon sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}/> Downward trend can mean reduced investment in assets, which could signal market uncertainty, reduced growth prospects, or that the company is in a mature phase.</li>
+            </ul>
+        </>
+    )
+
     return (
         <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
             <div className={styles.titleAndTimeRanges}>
-                <h2 className={styles.title}>Capital Expenditures</h2>
-                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
-
+                <div className={styles.titleContainer}>
+                    <h2>Capital Expenditures</h2>
+                    <Explanation explanation={explanation} />
+                </div>
+                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
                 <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current} />
             </div>
             <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>

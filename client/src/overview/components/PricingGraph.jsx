@@ -3,7 +3,9 @@ import styles from "./graph.module.css"
 import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
-
+import Explanation from "./Explanation.jsx"
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 function PricingGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
@@ -26,11 +28,31 @@ function PricingGraph(props) {
         };
     }, []);
 
+    const explanation = (
+        <>
+            <h1>What is it?</h1>
+            <p className={styles.explanationText}>
+                Adjusted monthly pricing represents a company's stock price after accounting for corporate actions like stock splits and dividends, making historical prices comparable to current prices.
+            </p>
+            <h1>Examples</h1>
+            <p className={styles.explanationText}>Dividends: When a company pays a cash dividend, the stock price typically drops by the dividend amount on the ex-dividend date. The adjusted price accounts for this by subtracting the dividend amount from the closing prices on and before the ex-dividend date, making the pre-dividend prices comparable to the post-dividend prices.</p>
+            <p className={styles.explanationText}>Stock Splits: If a company has a 2-for-1 stock split, the share price immediately halves. To prevent a misleading vertical drop on the chart, all historical prices before the split date are divided by two when calculating the adjusted price.</p>
+            <h1>Interpretation</h1>
+            <ul>
+                <li className={styles.explanationText}><TrendingUpIcon sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}} /> An upward trend in the adjusted price means the stock's value has genuinely increased.</li>
+                <li className={styles.explanationText}><TrendingDownIcon sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}/> A downward trend in the adjusted price suggests the stock's value has decreased.</li>
+            </ul>
+        </>
+    )
+
     return (
         <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
             <div className={styles.titleAndTimeRanges}>
-                <h2 className={styles.title}>Adjusted Monthly Pricing</h2>
-                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
+                <div className={styles.titleContainer}>
+                    <h2>Adjusted Monthly Pricing</h2>
+                    <Explanation explanation={explanation} />
+                </div>
+                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
                 <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current}/>
             </div>
             <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>

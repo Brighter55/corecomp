@@ -36,7 +36,32 @@
   width: 100%;
 }
 
+/*to be deleted*/
 .title {
   flex-grow: 1;
   text-align: center;
 }
+
+.titleContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.percentChangeContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+/*Tooltip*/
+.explanationText {
+  font-size: 16px;
+}
+
+.explanationFormular {
+  font-size: 16px;
+  font-family: "Times New Roman", Times, "Segoe Ui", Arial, sans-serif;
+}
+/*----*/

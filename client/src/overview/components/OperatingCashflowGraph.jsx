@@ -6,6 +6,9 @@ import CustomActiveBar from "./CustomActiveBar.jsx"
 import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
+import Explanation from "./Explanation.jsx"
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 function OperatingCashflowGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
@@ -35,11 +38,32 @@ function OperatingCashflowGraph(props) {
         return Math.floor(Math.log10(Math.abs(value))) + 1;
     }
 
+    const explanation = (
+        <>
+            <h1>What is it?</h1>
+            <p className={styles.explanationText}>
+                Operating cash flow is the actual cash a company recieves or spends from its normal, day-to-day business activities—selling products, providing services, paying suppliers, covering wages, etc.
+            </p>
+            <h1>Calculation</h1>
+            <p className={styles.explanationFormular}>Operating Cash Flow = Net Income + Depreciation + Changes in Working capital</p>
+            <h1>Interpretation</h1>
+            <ul>
+                <li className={styles.explanationText}><TrendingUpIcon sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}} /> Upward Trend means the company is consistently bringing in more cash from its regular business than it is spending, indicating a healthy, efficient, and potentially growing business.</li>
+                <li className={styles.explanationText}><TrendingDownIcon sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}/> Downward Trend means the company is consistently bringing in less cash from operations or spending more, which could signal underlying operational issues or a need for external funding to stay afloat.</li>
+                <li className={styles.explanationText}>Positive Cash Flow means cash coming in is higher than cash going out over a period, allowing the business to pay bills, invest in growth, and handle expenses.</li>
+                <li className={styles.explanationText}>Negative Cash Flow means cash going out is higher than cash coming in, which, if it continues for a long time, can be a warning sign of financial trouble. </li>
+            </ul>
+        </>
+    )
+
     return (
         <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
             <div className={styles.titleAndTimeRanges}>
-                <h2 className={styles.title}>Operating Cash Flow</h2>
-                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
+                <div className={styles.titleContainer}>
+                    <h2>Operating Cash Flow</h2>
+                    <Explanation explanation={explanation} />
+                </div>
+                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
                 <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current}/>
             </div>
             <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>

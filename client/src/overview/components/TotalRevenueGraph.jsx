@@ -5,7 +5,9 @@ import CustomActiveBar from "./CustomActiveBar.jsx"
 import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
-
+import Explanation from "./Explanation.jsx"
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 function TotalRevenueGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
@@ -36,11 +38,30 @@ function TotalRevenueGraph(props) {
         return Math.floor(Math.log10(Math.abs(value))) + 1;
     }
 
+    const explanation = (
+        <>
+            <h1>What is it?</h1>
+            <p className={styles.explanationText}>
+                Total revenue is the total income a company generates from all sources before any expenses are deducted
+            </p>
+            <h1>Calculation</h1>
+            <p className={styles.explanationFormular}>Total Revenue = Price per Unit * Quantity Sold</p>
+            <h1>Interpretation</h1>
+            <ul>
+                <li className={styles.explanationText}><TrendingUpIcon sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}} /> An increase in total revenue over time can indicate successful sales and marketing strategies, good market demand, or effective pricing.</li>
+                <li className={styles.explanationText}><TrendingDownIcon sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}/> A decrease in total revenue could signal problems such as declining demand, increased competition, or ineffective pricing strategies.</li>
+            </ul>
+        </>
+    )
+
     return (
         <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
             <div className={styles.titleAndTimeRanges}>
-                <h2 className={styles.title}>Total Revenue</h2>
-                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `-${percentChange}%`}</h3>
+                <div className={styles.titleContainer}>
+                    <h2>Total Revenue</h2>
+                    <Explanation explanation={explanation} />
+                </div>
+                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
                 <TimeRanges className={styles.timeRanges} timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current}/>
             </div>
             <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
