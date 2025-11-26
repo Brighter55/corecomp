@@ -36,12 +36,6 @@
   width: 100%;
 }
 
-/*to be deleted*/
-.title {
-  flex-grow: 1;
-  text-align: center;
-}
-
 .titleContainer {
   display: flex;
   justify-content: center;

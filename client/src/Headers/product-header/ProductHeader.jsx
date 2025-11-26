@@ -8,9 +8,10 @@ import { useEffect, useState, useRef } from "react";
 import { getNewTokens } from "../../helpers/helper.js"
 
 function ProductHeader() {
+    const navigate = useNavigate();
     const [showNavBar, setShowNavBar] = useState(true);
     const lastScrollY = useRef(0);
-    const navigate = useNavigate();
+
 
     useEffect(() => {
         window.addEventListener("scroll", controlNavBar);
