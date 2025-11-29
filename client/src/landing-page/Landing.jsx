@@ -8,16 +8,17 @@ import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import Grow from '@mui/material/Grow';
 import placeholderImage from "../assets/placeholderImage.png"
+import SampleIncomeGraph from "./components/sample-income-graph/SampleIncomeGraph.jsx"
 import styles from "./Landing.module.css"
 
 function Landing() {
     const navigate = useNavigate();
 
 
-    const [cards, setCards] = useState([
-        { id: 0, text: "Over 20 years of comprehensive financial data that provides a broad view of any company.", image: placeholderImage },
-        { id: 1, text: "10+  fundamentals to help you truly understand a company’s performance", image: placeholderImage },
-        { id: 2, text: "Beginners? Professionals? CoreComp explains everything in simple terms!", image: placeholderImage },
+    const [features, setFeatures] = useState([
+        { id: 0, text: "Over 20 years of comprehensive financial data that provides a broad view of any company.", content: <SampleIncomeGraph /> },
+        { id: 1, text: "10+  fundamentals to help you truly understand a company’s performance", content: <img src={placeholderImage} style={{width: "80%", height: "100%",}} /> },
+        { id: 2, text: "Beginners? Professionals? CoreComp explains everything in simple terms!", content: <img src={placeholderImage} style={{width: "80%", height: "100%",}} /> },
     ]);
     const [currentPage, setCurrentPage] = useState(0);
     const [slideDirection, setSlideDirection] = useState("left");
@@ -53,26 +54,18 @@ function Landing() {
                 <div className={styles.featureContainer}>
                     <IconButton
                         onClick={handlePrevPage}
-                        sx={{ margin: 5 }}
+                        sx={{ margin: 5, color: "#DAD7CD" }}
                         disabled={currentPage === 0}
                     >
                         <NavigateBeforeIcon />
                     </IconButton>
-                    {cards.map((card, index) => (
-                            <div className={styles.feature} style={{ display: currentPage === index ? "flex" : "none" }}>
-                                <h1 style={{ textAlign: "left", width: "100%" }}>{card.text}</h1>
-                                <Grow
-                                in={currentPage === index}
-                                timeout={500}
-                                >
-                                    <img
-                                        key={index}
-                                        src={card.image}
-                                        style={{
-                                            width: "80%",
-                                            height: "80%",
-                                        }}
-                                    />
+                    {features.map((feature, index) => (
+                            <div key={index} className={styles.feature} style={{ display: currentPage === index ? "flex" : "none" }}>
+                                <h1 style={{ textAlign: "left", width: "100%" }}>{feature.text}</h1>
+                                <Grow in={currentPage === index}>
+                                    <div className={styles.featureContent}>
+                                        {feature.content}
+                                    </div>
                                 </Grow>
                             </div>
 
@@ -81,9 +74,10 @@ function Landing() {
                         onClick={handleNextPage}
                         sx={{
                         margin: 5,
+                        color: "#DAD7CD",
                         }}
                         disabled={
-                        currentPage >= Math.ceil(cards.length || 0) - 1
+                        currentPage >= Math.ceil(features.length || 0) - 1
                         }
                     >
                         <NavigateNextIcon />

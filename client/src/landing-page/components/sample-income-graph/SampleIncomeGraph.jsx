@@ -1,35 +1,27 @@
+import sampleReports from "../../sample-data/sampleData.json"
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import styles from "./graph.module.css"
-import CustomBar from "./CustomBar.jsx"
-import CustomActiveBar from "./CustomActiveBar.jsx"
-import TimeRanges from "./TimeRanges.jsx"
-import {useState, useEffect, useRef} from "react"
-import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
-import Explanation from "./Explanation.jsx"
+import { useState } from "react"
+import {filterReports, getPercentChange} from "../../../helpers/GraphsHelper.js"
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TimeRanges from "../../../overview/components/TimeRanges.jsx"
+import Explanation from "../../../overview/components/Explanation.jsx"
+import styles from "./sampleGraph.module.css"
 
-
-function NetIncomeGraph(props) {
+function SampleIncomeGraph({ key }) {
     const [timeRange, setTimeRange] = useState("all");
-    const reports = filterReports(props.reports, timeRange);
+    const reports = filterReports(sampleReports.INCOME_STATEMENT, timeRange);
     const percentChange = getPercentChange(reports, "netIncome");
-    const [graphClicked, setGraphClicked] = useState(false);
 
-    const graphRef = useRef(null);
+    function CustomBar(props) {
+        const barColor = (props.value >= 0 ? "#588157" : "#bc4749");
+        return <Rectangle {...props} fill={barColor}/>
+    }
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (graphRef.current && !graphRef.current.contains(event.target)) {
-                setGraphClicked(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
+    function CustomActiveBar(props) {
+        const activeBarColor = (props.value >= 0 ? "#A3B18A" : "#B35C5E");
+        return <Rectangle {...props} fill={activeBarColor} stroke="#DAD7CD"></Rectangle>
+    }
 
     function countDigits(value) {
         if (value === 0) {
@@ -55,16 +47,16 @@ function NetIncomeGraph(props) {
     )
 
     return (
-        <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
+        <div key={key} className={styles.graph}>
             <div className={styles.titleAndTimeRanges}>
                 <div className={styles.titleContainer}>
                     <h2>Net Income</h2>
                     <Explanation explanation={explanation} />
                 </div>
                 <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
-                <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current}/>
+                <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange}/>
             </div>
-            <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
+            <div style={{ width: "100%", height: "100%" }}>
                 <ResponsiveContainer>
                     <BarChart
                         data={reports}
@@ -95,5 +87,4 @@ function NetIncomeGraph(props) {
     )
 }
 
-
-export default NetIncomeGraph
+export default SampleIncomeGraph

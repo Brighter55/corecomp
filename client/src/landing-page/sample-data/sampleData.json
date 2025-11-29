@@ -1,0 +1,24 @@
+{
+    "INCOME_STATEMENT": [
+    { "date": "2005", "netIncome": "7934000000" },
+    { "date": "2006", "netIncome": "9492000000" },
+    { "date": "2007", "netIncome": "10418000000" },
+    { "date": "2008", "netIncome": "12334000000" },
+    { "date": "2009", "netIncome": "13425000000" },
+    { "date": "2010", "netIncome": "14833000000" },
+    { "date": "2011", "netIncome": "15855000000" },
+    { "date": "2012", "netIncome": "16604000000" },
+    { "date": "2013", "netIncome": "16483000000" },
+    { "date": "2014", "netIncome": "12022000000" },
+    { "date": "2015", "netIncome": "13190000000" },
+    { "date": "2016", "netIncome": "11872000000" },
+    { "date": "2017", "netIncome": "5753000000" },
+    { "date": "2018", "netIncome": "8728000000" },
+    { "date": "2019", "netIncome": "9431000000" },
+    { "date": "2020", "netIncome": "5590000000" },
+    { "date": "2021", "netIncome": "5742000000" },
+    { "date": "2022", "netIncome": "1640000000" },
+    { "date": "2023", "netIncome": "7502000000" },
+    { "date": "2024", "netIncome": "6023000000" }
+]
+}

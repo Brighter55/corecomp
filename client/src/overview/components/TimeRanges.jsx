@@ -3,7 +3,7 @@ import Select from '@mui/material/Select';
 import FormHelperText from '@mui/material/FormHelperText';
 import MenuItem from '@mui/material/MenuItem';
 
-function TimeRanges({ className, timeRange, setTimeRange, menuContainer }) {
+function TimeRanges({ timeRange, setTimeRange, menuContainer }) {
 
     function handleOptionClicked(event) {
         setTimeRange(event.target.value);
