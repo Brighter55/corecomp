@@ -2,21 +2,44 @@ import styles from "./LandingHeader.module.css"
 import logo from "../../assets/logoDarkMode.png"
 import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useRef } from "react";
+
 
 function LandingHeader() {
     const navigate = useNavigate();
+    const [showNavBar, setShowNavBar] = useState(true);
+    const lastScrollY = useRef(0);
+
+    useEffect(() => {
+        window.addEventListener("scroll", controlNavBar);
+        console.log("render by useEffect");
+
+        return () => {
+            window.removeEventListener("scroll", controlNavBar);
+        };
+    }, []);
+
+    function controlNavBar() {
+        /*window.scrollY increases as user scrolls down*/
+        if (window.scrollY > lastScrollY.current) {
+            setShowNavBar(false);
+        } else {
+            setShowNavBar(true);
+        }
+        console.log("rerender by setLastScrollY");
+        lastScrollY.current = window.scrollY
+    }
 
     return (
-        <header className={styles.header}>
+        <header className={showNavBar ? styles.header : styles.hideHeader}>
             <nav className={styles.nav}>
                 <div className={styles.brand}>
                     <img src={logo} alt="logo" className={styles.logo} />
                     <a href="/" className={styles.brandText}>CoreComp</a>
                 </div>
                     <div className={styles.about}>
-                    <Button sx={{ "&:hover": {backgroundColor: "hsl(0, 0%, 100%, 0.125)"}, borderRadius: "10px", color: "grey"}} ><a href="#features" className={styles.sectionAnchor}>features</a></Button>
-                    <Button sx={{ "&:hover": {backgroundColor: "hsl(0, 0%, 100%, 0.125)"}, borderRadius: "10px", color: "grey"}} ><a href="#products" className={styles.sectionAnchor}>products</a></Button>
-                    <Button sx={{ "&:hover": {backgroundColor: "hsl(0, 0%, 100%, 0.125)"}, borderRadius: "10px", color: "grey"}} ><a href="#pricing" className={styles.sectionAnchor}>pricing</a></Button>
+                    <Button sx={{ "&:hover": {backgroundColor: "hsl(0, 0%, 100%, 0.125)"}, borderRadius: "10px", color: "grey"}} ><a href="/#features" className={styles.sectionAnchor}>features</a></Button>
+                    <Button sx={{ "&:hover": {backgroundColor: "hsl(0, 0%, 100%, 0.125)"}, borderRadius: "10px", color: "grey"}} ><a href="/#pricing" className={styles.sectionAnchor}>pricing</a></Button>
                 </div>
                 <div className={styles.rightNav}>
                     <Button
