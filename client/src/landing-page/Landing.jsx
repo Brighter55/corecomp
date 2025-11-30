@@ -9,7 +9,9 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import Grow from '@mui/material/Grow';
 import placeholderImage from "../assets/placeholderImage.png"
 import SampleIncomeGraph from "./components/sample-income-graph/SampleIncomeGraph.jsx"
+import GraphsCarousel from "./components/graphs-carousel/GraphsCarousel"
 import styles from "./Landing.module.css"
+
 
 function Landing() {
     const navigate = useNavigate();
@@ -17,7 +19,7 @@ function Landing() {
 
     const [features, setFeatures] = useState([
         { id: 0, text: "Over 20 years of comprehensive financial data that provides a broad view of any company.", content: <SampleIncomeGraph /> },
-        { id: 1, text: "10+  fundamentals to help you truly understand a company’s performance", content: <img src={placeholderImage} style={{width: "80%", height: "100%",}} /> },
+        { id: 1, text: "10+  fundamentals to help you truly understand a company’s performance", content: <GraphsCarousel/> },
         { id: 2, text: "Beginners? Professionals? CoreComp explains everything in simple terms!", content: <img src={placeholderImage} style={{width: "80%", height: "100%",}} /> },
     ]);
     const [currentPage, setCurrentPage] = useState(0);
