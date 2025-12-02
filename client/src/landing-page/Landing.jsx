@@ -10,8 +10,12 @@ import Grow from '@mui/material/Grow';
 import explanationImage from "../assets/explanation.png"
 import SampleIncomeGraph from "./components/sample-income-graph/SampleIncomeGraph.jsx"
 import GraphsCarousel from "./components/graphs-carousel/GraphsCarousel"
+import Divider from '@mui/material/Divider';
+import DoneIcon from '@mui/icons-material/Done';
+import { styled } from '@mui/material/styles';
 import Steps from "./components/steps/Steps.jsx"
 import styles from "./Landing.module.css"
+
 
 
 function Landing() {
@@ -41,6 +45,23 @@ function Landing() {
         event.preventDefault();
         navigate("/sign-up");
     }
+
+    const StyledDoneIcon = styled(DoneIcon)({
+        color: "#588157",
+    });
+
+    const StyledFab = styled(Fab)({
+        backgroundColor: "#2f3037",
+        color: "white",
+        width: "100%",
+        height: "10%",
+        textTransform: 'none',
+        fontSize: "17px",
+        borderRadius: "5px",
+        "&:hover": {
+            backgroundColor: "#588157"
+        },
+    });
 
     return (
         <>
@@ -90,11 +111,33 @@ function Landing() {
             <section id="steps" className={styles.steps}>
                 <Steps></Steps>
             </section>
-            <section id="pricing">
-                <h2>TO DO pricing</h2>
+            <section id="pricing" className={styles.pricing}>
+                <h1 style={{ fontSize: "60px", textAlign: "center", fontFamily: "Tahoma", marginBottom: "10px" }}>Only $3 a Month</h1>
+                <p style={{ fontSize: "1.2rem", textAlign: "center", width: "40%", marginLeft: "auto", marginRight: "auto" }}>Your money should go to your investments, not tools; the most affordable stock analysis app.</p>
+                <div className={styles.pricingContent}>
+                    <div className={styles.pricingCard}>
+                        <h2>Monthly</h2>
+                        <p><span style={{ fontSize: "60px" }}>$3</span> / month</p>
+                        <StyledFab
+                        href="/sign-in"
+                        variant="extended"
+                        >
+                            Subscribe
+                        </StyledFab>
+                        <p style={{ color: "grey" }}>All features</p>
+                        <Divider></Divider>
+                        <div className={styles.pricingFeatureContainer} style={{ marginTop: "25px" }}>
+                            <StyledDoneIcon />
+                            <p className={styles.pricingFeatureText}>Unlimited stock search</p>
+                        </div>
+                        <div className={styles.pricingFeatureContainer}>
+                            <StyledDoneIcon />
+                            <p className={styles.pricingFeaturesText}>and many more in the futures</p>
+                        </div>
+                    </div>
+                </div>
             </section>
             <footer>
-                <h2>TO DO footer</h2>
             </footer>
         </>
     )
