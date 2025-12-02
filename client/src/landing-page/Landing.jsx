@@ -10,6 +10,7 @@ import Grow from '@mui/material/Grow';
 import explanationImage from "../assets/explanation.png"
 import SampleIncomeGraph from "./components/sample-income-graph/SampleIncomeGraph.jsx"
 import GraphsCarousel from "./components/graphs-carousel/GraphsCarousel"
+import Steps from "./components/steps/Steps.jsx"
 import styles from "./Landing.module.css"
 
 
@@ -86,8 +87,11 @@ function Landing() {
                     </IconButton>
                 </div>
             </section>
+            <section id="steps" className={styles.steps}>
+                <Steps></Steps>
+            </section>
             <section id="pricing">
-                <h2>TO DO demo</h2>
+                <h2>TO DO pricing</h2>
             </section>
             <footer>
                 <h2>TO DO footer</h2>

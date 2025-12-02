@@ -1,0 +1,27 @@
+.steps {
+    width: 100%;
+}
+
+.stepsContent {
+    margin-top: 50px;
+    width: 100%;
+}
+
+.stepsContainer {
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stepsImage {
+    height: 500px;
+    width: 80%;
+    border-radius: 30px;
+}
+
+.stepsDescription {
+    margin: 0;
+    color: #8e8e8dff;
+    font-size: 16px;
+}

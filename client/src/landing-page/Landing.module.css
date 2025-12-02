@@ -12,7 +12,7 @@
 }
 
 .features {
-    margin-top: 75px;
+    margin-top: 150px;
     height: 90%;
     background-color: #746355;
     border-radius: 20px;
@@ -57,4 +57,9 @@
 .featureImage:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.steps {
+    margin-top: 150px;
+    width: 100%;
 }
