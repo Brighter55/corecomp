@@ -15,12 +15,13 @@
 }
 
 .stepsImage {
-    height: 450px;
-    width: 60%;
-    border-radius: 10px;
+    height: 500px;
+    width: 80%;
+    border-radius: 30px;
 }
 
 .stepsDescription {
     margin: 0;
-    color: "#8e8e8dff";
+    color: #8e8e8dff;
+    font-size: 16px;
 }
