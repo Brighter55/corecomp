@@ -1,3 +1,11 @@
+:root {
+  --main-dust-grey: #DAD7CD;
+  --main-dry-sage: #A3B18A;
+  --main-fern: #588157;
+  --main-hunter-green: #3A5A40;
+  --main-pine-teal: #344E41;
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;

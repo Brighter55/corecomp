@@ -10,6 +10,7 @@ import Grow from '@mui/material/Grow';
 import explanationImage from "../assets/explanation.png"
 import SampleIncomeGraph from "./components/sample-income-graph/SampleIncomeGraph.jsx"
 import GraphsCarousel from "./components/graphs-carousel/GraphsCarousel"
+import FAQ from "./components/FAQ.jsx"
 import Divider from '@mui/material/Divider';
 import DoneIcon from '@mui/icons-material/Done';
 import { styled } from '@mui/material/styles';
@@ -128,14 +129,18 @@ function Landing() {
                         <Divider></Divider>
                         <div className={styles.pricingFeatureContainer} style={{ marginTop: "25px" }}>
                             <StyledDoneIcon />
-                            <p className={styles.pricingFeatureText}>Unlimited stock search</p>
+                            <p>Unlimited stock search</p>
                         </div>
                         <div className={styles.pricingFeatureContainer}>
                             <StyledDoneIcon />
-                            <p className={styles.pricingFeaturesText}>and many more in the futures</p>
+                            <p>and many more in the futures</p>
                         </div>
                     </div>
                 </div>
+            </section>
+            <section id="FAQ" className={styles.FAQ} >
+                <h1 style={{ marginBottom: "50px" }}>Frequently asked questions</h1>
+                <FAQ />
             </section>
             <footer>
             </footer>
