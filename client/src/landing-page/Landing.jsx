@@ -10,6 +10,7 @@ import Grow from '@mui/material/Grow';
 import explanationImage from "../assets/explanation.png"
 import SampleIncomeGraph from "./components/sample-income-graph/SampleIncomeGraph.jsx"
 import GraphsCarousel from "./components/graphs-carousel/GraphsCarousel"
+import Brand from "../headers/landing-header/components/brand/Brand.jsx"
 import FAQ from "./components/FAQ.jsx"
 import Divider from '@mui/material/Divider';
 import DoneIcon from '@mui/icons-material/Done';
@@ -142,7 +143,33 @@ function Landing() {
                 <h1 style={{ marginBottom: "50px" }}>Frequently asked questions</h1>
                 <FAQ />
             </section>
-            <footer>
+            <footer className={styles.footer}>
+                <Divider sx={{ borderColor: "rgba(218, 215, 205, 0.5)" }}></Divider>
+                <div className={styles.footerContent}>
+                    <Brand />
+                    <div className={styles.footerRight}>
+                        <div className={styles.footerNav}>
+                            <h3>Support</h3>
+                            <div className={styles.footerNavHyperlinks}>
+                                <p>
+                                    <a href="mailto: support@corecomp.com" className={styles.footerNavHyperlinksText}>Contact Us</a>
+                                </p>
+                            </div>
+                        </div>
+                        <div className={styles.footerNav}>
+                            <h3>Legal</h3>
+                            <div className={styles.footerNavHyperlinks}>
+                                <p>
+                                    <a href="/privacy" className={styles.footerNavHyperlinksText}>Privacy Policy</a>
+                                </p>
+                                <p>
+                                    <a href="/terms" className={styles.footerNavHyperlinksText}>Terms of Service</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <Divider sx={{ borderColor: "rgba(218, 215, 205, 0.5)" }}></Divider>
             </footer>
         </>
     )
