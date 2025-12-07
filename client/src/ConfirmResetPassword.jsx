@@ -1,15 +1,56 @@
 import { useState } from "react"
-import { useParams } from "react-router-dom"
-import LandingHeader from "../headers/landing-header/LandingHeader.jsx"
+import { useParams, useNavigate } from "react-router-dom"
+import LandingHeader from "./headers/landing-header/LandingHeader.jsx"
+// mui components
+import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import {useNavigate} from "react-router-dom"
-// styles
-import styles from "./ConfirmResetPassword.module.css"
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
+
+
+const StyledStack = styled(Stack)(({ theme }) => ({
+    height: "30rem",
+    backgroundColor: "var(--main-dust-grey)",
+    color: "var(--main-pine-teal)",
+    borderRadius: "20px",
+    padding: "20px",
+    [theme.breakpoints.up("xs")]: {
+        width: "70%"
+    },
+    [theme.breakpoints.up("md")]: {
+        width: "50%"
+    },
+    [theme.breakpoints.up("lg")]: {
+        width: "40%"
+    },
+}));
+
+const textFieldStyle = {
+    "& .MuiInputBase-root": {
+        backgroundColor: "lightgrey",
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+        color: "#3A5A40",
+    },
+    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#3A5A40",
+    },
+    "& .MuiFormHelperText-root": {backgroundColor: "#DAD7CD", margin: "0"},
+    width: "100%",
+};
+
+const formStyle = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+    alignItems: "end",
+}
 
 function ConfirmResetPassword() {
     const navigate = useNavigate();
@@ -75,20 +116,6 @@ function ConfirmResetPassword() {
         navigate("/sign-in");
     }
 
-    const textFieldStyle = {
-        "& .MuiInputBase-root": {
-            backgroundColor: "lightgrey",
-        },
-        "& .MuiInputLabel-root.Mui-focused": {
-            color: "#3A5A40",
-        },
-        "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#3A5A40",
-        },
-        "& .MuiFormHelperText-root": {backgroundColor: "#DAD7CD", margin: "0"},
-        width: "100%",
-    };
-
     const hidePasswordAdornment = {
         endAdornment: (
         <InputAdornment position="end">
@@ -106,15 +133,15 @@ function ConfirmResetPassword() {
     }
 
     return (
-        <>
+        <Container maxWidth="lg" disableGutters>
             <LandingHeader />
-            <div className={styles.content}>
-                <div className={styles.container}>
-                    <span className={styles.text}>Reset your Password</span>
-                    <p>Enter your new password and we will reset the password for you</p>
+            <Stack direction="row" sx={{ justifyContent: "center" }}>
+                <StyledStack spacing={4}>
+                    <Typography variant="h3" sx={{ fontWeight: "bold" }} >Reset your Password</Typography>
+                    <Typography variant="body1">Enter your new password and we will reset the password for you</Typography>
                     <span>{idError ? idError : ""}</span>
                     <span>{tokenError ? tokenError : ""}</span>
-                    <form onSubmit={handleSubmit} className={styles.form}>
+                    <form onSubmit={handleSubmit} style={formStyle}>
                         <TextField
                             value={password}
                             onChange={(event) => {setPassword(event.target.value)}}
@@ -139,9 +166,9 @@ function ConfirmResetPassword() {
                         />
                         <Button sx={{ width: "20%", backgroundColor: "#588157", color: "#DAD7CD"}} type="submit">send</Button>
                     </form>
-                </div>
-            </div>
-        </>
+                </StyledStack>
+            </Stack>
+        </Container>
     )
 }
 

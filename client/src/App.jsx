@@ -7,7 +7,7 @@ import AccountVerification from "./AccountVerification.jsx"
 import UserAccount from "./UserAccount.jsx"
 import Return from "./Return.jsx"
 import ResetPassword from "./ResetPassword.jsx"
-import ConfirmResetPassword from "./confirm-reset-password/ConfirmResetPassword.jsx"
+import ConfirmResetPassword from "./ConfirmResetPassword.jsx"
 
 function App() {
   return (
