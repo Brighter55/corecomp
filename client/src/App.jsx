@@ -6,7 +6,7 @@ import OverviewPage from "./overview/OverviewPage.jsx"
 import AccountVerification from "./AccountVerification.jsx"
 import UserAccount from "./UserAccount.jsx"
 import Return from "./Return.jsx"
-import ResetPassword from "./reset-password/ResetPassword.jsx"
+import ResetPassword from "./ResetPassword.jsx"
 import ConfirmResetPassword from "./confirm-reset-password/ConfirmResetPassword.jsx"
 
 function App() {

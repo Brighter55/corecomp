@@ -1,8 +1,39 @@
-import LandingHeader from "../headers/landing-header/LandingHeader.jsx"
-import styles from "./ResetPassword.module.css"
+import { useState } from "react"
+import LandingHeader from "./headers/landing-header/LandingHeader.jsx"
+// mui components
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import { useState } from "react"
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+
+
+const StyledStack = styled(Stack)(({ theme }) => ({
+    height: "30rem",
+    backgroundColor: "var(--main-dust-grey)",
+    color: "var(--main-pine-teal)",
+    borderRadius: "20px",
+    padding: "20px",
+    [theme.breakpoints.up("xs")]: {
+        width: "70%"
+    },
+    [theme.breakpoints.up("md")]: {
+        width: "50%"
+    },
+    [theme.breakpoints.up("lg")]: {
+        width: "40%"
+    },
+}));
+
+const formStyle = {
+    height: "40%",
+    display: "flex",
+    flexDirection: "column",
+    gap: "4rem",
+    alignItems: "end",
+}
 
 function ResetPassword() {
     const [email, setEmail] = useState("");
@@ -41,13 +72,17 @@ function ResetPassword() {
     }
 
     return (
-        <>
+        <Container maxWidth="lg" disableGutters>
             <LandingHeader></LandingHeader>
-            <div className={styles.content}>
-                <div className={styles.container}>
-                    <span className={styles.text}>Reset your password</span>
-                    {success ? <p>Recovery email has been sent!</p> : <p>Enter your email and we will send you a recovery email</p>}
-                    <form onSubmit={handleSubmit} className={styles.form}>
+            <Box sx={{ display: "flex", justifyContent: "center", height: "85%" }}>
+                <StyledStack spacing={4}>
+                    <Typography variant="h3" sx={{ fontWeight: "bold" }}>Reset your password</Typography>
+                    {success ? (
+                        <Typography variant="body1">Recovery email has been sent!</Typography>
+                    ) : (
+                        <Typography variant="body1">Enter your email and we will send you a recovery email</Typography>
+                    )}
+                    <form onSubmit={handleSubmit} style={formStyle}>
                         <TextField
                             value={email}
                             onChange={(event) => {setEmail(event.target.value)}}
@@ -71,9 +106,9 @@ function ResetPassword() {
                         />
                         <Button sx={{ width: "20%", backgroundColor: "#588157", color: "#DAD7CD"}} type="submit">send</Button>
                     </form>
-                </div>
-            </div>
-        </>
+                </StyledStack>
+            </Box>
+        </Container>
     )
 }
 

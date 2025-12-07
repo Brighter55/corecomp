@@ -7,18 +7,16 @@
 }
 
 html, body, #root {
-  height: 100%;
   margin: 0;
   font-family: "Segoe Ui", Arial, sans-serif;
 }
 
 body {
-  display: flex;
-  justify-content: center;
   background-color: #344E41;
   color: #DAD7CD;
 }
 
 #root {
-  width: 85%;
+  margin-left: auto;
+  margin-right: auto;
 }
