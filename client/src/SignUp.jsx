@@ -1,7 +1,7 @@
 import {useState} from "react"
 import {GoogleLogin} from "@react-oauth/google"
 import {useNavigate} from "react-router-dom"
-import LandingHeader from "../headers/landing-header/LandingHeader.jsx"
+import LandingHeader from "./headers/landing-header/LandingHeader.jsx"
 // mui components
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -17,10 +17,7 @@ import { styled } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // pictures
-import logo from "../assets/logoLightMode.png"
-
-// style
-import styles from "./SignUp.module.css"
+import logo from "./assets/logoLightMode.png"
 
 
 const StyledSignUpGrid = styled(Grid)(({theme}) => ({
@@ -31,6 +28,9 @@ const StyledSignUpGrid = styled(Grid)(({theme}) => ({
     justifyContent: "center",
     alignItems: "center",
     padding: "2rem",
+    [theme.breakpoints.down("md")] : {
+        borderRadius: "10px 10px 0 0",
+    },
 }));
 
 const StyledFeaturesGrid = styled(Grid)(({theme}) => ({
@@ -42,6 +42,9 @@ const StyledFeaturesGrid = styled(Grid)(({theme}) => ({
     alignItems: "center",
     gap: "2rem",
     padding: "2rem",
+    [theme.breakpoints.down("md")] : {
+        borderRadius: "0 0 10px 10px",
+    },
 }));
 
 const StyledTextField = styled(TextField)(({theme}) => ({
@@ -149,8 +152,8 @@ function SignUp() {
     return (
         <Container maxWidth="lg">
             <LandingHeader/>
-            <Grid container>
-                <StyledSignUpGrid size={6}>
+            <Grid container sx={{ marginBottom: "3rem" }}>
+                <StyledSignUpGrid size={{ xs: 12, md: 6 }}>
                     <Stack sx={{ width: "60%", alignItems: "center"}} spacing={2}>
                         <Typography variant="h3">Sign Up</Typography>
                         <form onSubmit={handleSubmit} style={formStyle}>
@@ -193,7 +196,7 @@ function SignUp() {
                             <Button
                                 type="submit"
                                 variant="contained"
-                                sx={{ backgroundColor: "#588157" }}
+                                sx={{ backgroundColor: "var(--main-fern)" }}
                             >Sign Up</Button>
                         </form>
                         <Divider sx={{ width: "100%" }}>or</Divider>
@@ -225,24 +228,32 @@ function SignUp() {
                         />
                     </Stack>
                 </StyledSignUpGrid>
-                <StyledFeaturesGrid size={6}>
+                <StyledFeaturesGrid size={{ xs: 12, md: 6 }}>
                     <Typography variant="h3">All features</Typography>
-                    <div className={styles.features}>
-                        <div className={styles.feature}>
-                            <span style={{ fontSize: "70px" }}>20+</span>
-                            <span>years of financial data</span>
-                        </div>
-                        <div className={styles.feature}>
-                            <img style={{ width: "90px", height: "90px", borderRadius: "10px" }} src={logo} alt="logo"/>
-                            <span>easy looking graphs</span>
-                        </div>
-                        <div className={styles.feature}>
+                    <Stack direction="row"
+                        sx={{ gap: "2rem", width: "80%", flexWrap: "wrap", justifyContent: "space-around" }}
+                    >
+                        <Stack spacing={1}
+                            sx={{ justifyContent: "center", alignItems: "center" }}
+                        >
+                            <Typography variant="h2">20+</Typography>
+                            <Typography variant="body1">years of financial data</Typography>
+                        </Stack>
+                        <Stack spacing={1}
+                            sx={{ justifyContent: "center", alignItems: "center" }}
+                        >
+                            <img style={{ width: "70px", height: "70px", borderRadius: "10px" }} src={logo} alt="logo"/>
+                            <Typography variant="body1">easy looking graphs</Typography>
+                        </Stack>
+                        <Stack spacing={1}
+                            sx={{ justifyContent: "center", alignItems: "center" }}
+                        >
                             <HelpIcon sx={{ width: "70px", height: "70px" }} />
-                            <span>chart explainations</span>
-                        </div>
-                    </div>
+                            <Typography variant="body1">chart explanations</Typography>
+                        </Stack>
+                    </Stack>
                     <Divider sx={{ width: "80%", bgcolor: "#DAD7CD" }}></Divider>
-                    <span>and more features coming soon!</span>
+                    <Typography variant="body1">and more features coming soon!</Typography>
                 </StyledFeaturesGrid>
             </Grid>
         </Container>

@@ -1,7 +1,7 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom"
 import Landing from "./landing-page/Landing.jsx"
 import SignIn from "./sign-in/SignIn.jsx"
-import SignUp from "./sign-up/SignUp.jsx"
+import SignUp from "./SignUp.jsx"
 import OverviewPage from "./overview/OverviewPage.jsx"
 import AccountVerification from "./AccountVerification.jsx"
 import UserAccount from "./UserAccount.jsx"
