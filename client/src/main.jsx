@@ -8,6 +8,9 @@ import App from './App.jsx'
 let theme = createTheme({
   typography: {
     fontFamily: "'Segoe Ui', Arial, sans-serif",
+    h3: {
+      fontWeight: "bold",
+    },
   },
 });
 theme = responsiveFontSizes(theme);

@@ -2,6 +2,7 @@ import {useState} from "react"
 import {GoogleLogin} from "@react-oauth/google"
 import {useNavigate} from "react-router-dom"
 import LandingHeader from "../headers/landing-header/LandingHeader.jsx"
+// mui components
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -10,11 +11,60 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import HelpIcon from '@mui/icons-material/Help';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 // pictures
 import logo from "../assets/logoLightMode.png"
 
 // style
 import styles from "./SignUp.module.css"
+
+
+const StyledSignUpGrid = styled(Grid)(({theme}) => ({
+    display: "flex",
+    backgroundColor: "var(--main-dust-grey)",
+    borderRadius: "10px 0 0 10px",
+    color: "var(--main-pine-teal)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "2rem",
+}));
+
+const StyledFeaturesGrid = styled(Grid)(({theme}) => ({
+    display: "flex",
+    flexDirection: "column",
+    backgroundColor: "var(--main-brown)",
+    borderRadius: "0 10px 10px 0",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "2rem",
+    padding: "2rem",
+}));
+
+const StyledTextField = styled(TextField)(({theme}) => ({
+    "& .MuiInputBase-root": {
+        backgroundColor: "lightgrey",
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+        color: "#3A5A40",
+    },
+    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#3A5A40",
+    },
+    "& .MuiFormHelperText-root": {backgroundColor: "#DAD7CD", margin: "0"},
+}));
+
+const formStyle = {
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+};
+
 
 function SignUp() {
     const navigate = useNavigate();
@@ -80,19 +130,6 @@ function SignUp() {
         }
     }
 
-    const textFieldStyle = {
-        "& .MuiInputBase-root": {
-            backgroundColor: "lightgrey",
-        },
-        "& .MuiInputLabel-root.Mui-focused": {
-            color: "#3A5A40",
-        },
-        "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#3A5A40",
-        },
-        "& .MuiFormHelperText-root": {backgroundColor: "#DAD7CD", margin: "0"},
-    };
-
     const hidePasswordAdornment = {
         endAdornment: (
         <InputAdornment position="end">
@@ -110,48 +147,44 @@ function SignUp() {
     }
 
     return (
-        <>
+        <Container maxWidth="lg">
             <LandingHeader/>
-            <div className={styles.contents}>
-                <div className={styles.signUpContent}>
-                    <div className={styles.signUpContainer}>
-                        <span className={styles.signUpText}>Sign Up</span>
-                        <form onSubmit={handleSubmit} className={styles.form}>
-                            <TextField
+            <Grid container>
+                <StyledSignUpGrid size={6}>
+                    <Stack sx={{ width: "60%", alignItems: "center"}} spacing={2}>
+                        <Typography variant="h3">Sign Up</Typography>
+                        <form onSubmit={handleSubmit} style={formStyle}>
+                            <StyledTextField
                                 value={username}
                                 onChange={(event) => {setUsername(event.target.value)}}
                                 label="username"
                                 variant="outlined"
-                                sx={textFieldStyle}
                                 error={usernameError ? true : false}
                                 helperText={usernameError ? usernameError : " "}
                             />
-                            <TextField
+                            <StyledTextField
                                 value={email}
                                 onChange={(event) => {setEmail(event.target.value)}}
                                 label="email"
                                 variant="outlined"
-                                sx={textFieldStyle}
                                 error={emailError ? true : false}
                                 helperText={emailError ? emailError : " "}
                             />
-                            <TextField
+                            <StyledTextField
                                 value={password}
                                 onChange={(event) => {setPassword(event.target.value)}}
                                 label="password"
                                 variant="outlined"
-                                sx={textFieldStyle}
                                 error={passwordError ? true : false}
                                 helperText={passwordError ? passwordError : " "}
                                 type={showPassword ? 'text' : 'password'}
                                 InputProps={hidePasswordAdornment}
                             />
-                            <TextField
+                            <StyledTextField
                                 value={confirmPassword}
                                 onChange={(event) => {setConfirmPassword(event.target.value)}}
                                 label="confirm password"
                                 variant="outlined"
-                                sx={textFieldStyle}
                                 error={confirmPasswordError ? true : false}
                                 helperText={confirmPasswordError ? confirmPasswordError : " "}
                                 type={showPassword ? 'text' : 'password'}
@@ -190,10 +223,10 @@ function SignUp() {
                             shape="pill"
                             size="large"
                         />
-                    </div>
-                </div>
-                <div className={styles.featuresContent}>
-                    <span className={styles.signUpText}>All Features</span>
+                    </Stack>
+                </StyledSignUpGrid>
+                <StyledFeaturesGrid size={6}>
+                    <Typography variant="h3">All features</Typography>
                     <div className={styles.features}>
                         <div className={styles.feature}>
                             <span style={{ fontSize: "70px" }}>20+</span>
@@ -210,9 +243,9 @@ function SignUp() {
                     </div>
                     <Divider sx={{ width: "80%", bgcolor: "#DAD7CD" }}></Divider>
                     <span>and more features coming soon!</span>
-                </div>
-            </div>
-        </>
+                </StyledFeaturesGrid>
+            </Grid>
+        </Container>
     )
 }
 
