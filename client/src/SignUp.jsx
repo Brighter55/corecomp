@@ -2,8 +2,9 @@ import {useState} from "react"
 import {GoogleLogin} from "@react-oauth/google"
 import {useNavigate} from "react-router-dom"
 import LandingHeader from "./headers/landing-header/LandingHeader.jsx"
+// styled components
+import StyledTextField from "./shared/StyledTextField.jsx";
 // mui components
-import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
@@ -47,22 +48,8 @@ const StyledFeaturesGrid = styled(Grid)(({theme}) => ({
     },
 }));
 
-const StyledTextField = styled(TextField)(({theme}) => ({
-    "& .MuiInputBase-root": {
-        backgroundColor: "lightgrey",
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-        color: "#3A5A40",
-    },
-    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#3A5A40",
-    },
-    "& .MuiFormHelperText-root": {backgroundColor: "#DAD7CD", margin: "0"},
-}));
-
 const formStyle = {
     width: "100%",
-    height: "100%",
     display: "flex",
     flexDirection: "column",
     gap: "1rem",
