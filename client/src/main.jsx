@@ -12,6 +12,13 @@ let theme = createTheme({
       fontWeight: "bold",
     },
   },
+  components: {
+    MuiLink: {
+      defaultProps: {
+        underline: "none",
+      },
+    },
+  },
 });
 theme = responsiveFontSizes(theme);
 

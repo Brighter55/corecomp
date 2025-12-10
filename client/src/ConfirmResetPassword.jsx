@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import LandingHeader from "./headers/landing-header/LandingHeader.jsx"
+import LandingHeader from "./headers/LandingHeader.jsx"
 // mui components
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';

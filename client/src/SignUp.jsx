@@ -1,7 +1,7 @@
 import {useState} from "react"
 import {GoogleLogin} from "@react-oauth/google"
 import {useNavigate} from "react-router-dom"
-import LandingHeader from "./headers/landing-header/LandingHeader.jsx"
+import LandingHeader from "./headers/LandingHeader.jsx"
 // styled components
 import StyledTextField from "./shared/StyledTextField.jsx";
 // mui components

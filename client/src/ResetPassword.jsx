@@ -1,5 +1,5 @@
 import { useState } from "react"
-import LandingHeader from "./headers/landing-header/LandingHeader.jsx"
+import LandingHeader from "./headers/LandingHeader.jsx"
 // mui components
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';

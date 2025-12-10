@@ -2,6 +2,7 @@ import styles from "./ProductHeader.module.css"
 import logo from "../../assets/logoDarkMode.png"
 import Features from "./Features/Features.jsx"
 import Button from '@mui/material/Button';
+import Brand from "../../shared/Brand.jsx";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from "react";
@@ -76,10 +77,7 @@ function ProductHeader() {
     return (
         <header className={showNavBar ? styles.header : styles.hideHeader}>
             <nav className={styles.nav}>
-                <div className={styles.brand}>
-                    <img src={logo} alt="logo" className={styles.logo} />
-                    <a href="/overview" className={styles.brandText}>CoreComp</a>
-                </div>
+                <Brand variant="product" />
                 <Features></Features>
                 <div className={styles.rightNav}>
                     <Button onClick={handleSettingClicked} sx={{ "&:hover": {backgroundColor: "hsl(0, 0%, 100%, 0.125)"}, borderRadius: "10px" }} ><AccountCircleIcon sx={{ color: "grey" }} /></Button>

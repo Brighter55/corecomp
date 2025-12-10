@@ -1,4 +1,4 @@
-import LandingHeader from "../headers/landing-header/LandingHeader.jsx"
+import LandingHeader from "../headers/LandingHeader.jsx"
 import {useNavigate} from "react-router-dom"
 import { useState } from "react"
 import Button from '@mui/material/Button';
@@ -10,7 +10,7 @@ import Grow from '@mui/material/Grow';
 import explanationImage from "../assets/explanation.png"
 import SampleIncomeGraph from "./components/sample-income-graph/SampleIncomeGraph.jsx"
 import GraphsCarousel from "./components/graphs-carousel/GraphsCarousel"
-import Brand from "../headers/landing-header/components/brand/Brand.jsx"
+import Brand from "../shared/Brand.jsx"
 import FAQ from "./components/FAQ.jsx"
 import Divider from '@mui/material/Divider';
 import DoneIcon from '@mui/icons-material/Done';
@@ -146,7 +146,7 @@ function Landing() {
             <footer className={styles.footer}>
                 <Divider sx={{ borderColor: "rgba(218, 215, 205, 0.5)" }}></Divider>
                 <div className={styles.footerContent}>
-                    <Brand />
+                    <Brand variant="landing" />
                     <div className={styles.footerRight}>
                         <div className={styles.footerNav}>
                             <h3>Support</h3>
