@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useRef, useState, useEffect } from "react"
 import {loadStripe} from '@stripe/stripe-js';
 import {
   EmbeddedCheckoutProvider,
@@ -14,8 +14,8 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY, {
 
 function UserAccount() {
     const navigate = useNavigate();
-    const ran = React.useRef(false);
-    const [isCustomer, setIsCustomer] = React.useState(false);
+    const ran = useRef(false);
+    const [isCustomer, setIsCustomer] = useState(false);
 
     async function checkIsCustomer() {
         const response = await fetch("http://127.0.0.1:8000/api/is-customer", {
@@ -28,7 +28,7 @@ function UserAccount() {
         setIsCustomer(data.is_customer);
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (ran.current) {return;}
         ran.current = true;
         checkPermission(navigate);
@@ -36,7 +36,7 @@ function UserAccount() {
     }, []);
 
 
-    const [clientSecret, setClientSecret] = React.useState(null);
+    const [clientSecret, setClientSecret] = useState(null);
 
     async function handleSubscribeClicked(event) {
         event.preventDefault();
