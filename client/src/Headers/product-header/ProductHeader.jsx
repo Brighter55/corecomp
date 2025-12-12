@@ -1,43 +1,38 @@
-import styles from "./ProductHeader.module.css"
-import logo from "../../assets/logoDarkMode.png"
-import Features from "./Features/Features.jsx"
-import Button from '@mui/material/Button';
-import Brand from "../../shared/Brand.jsx";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from "react";
 import { getNewTokens } from "../../helpers/helper.js"
+import { useState } from "react"
+// components
+import Features from "./components/Features.jsx"
+import Brand from "../../shared/Brand.jsx";
+import HideOnScroll from "../components/HideOnScroll.jsx"
+// mui components
+import Button from '@mui/material/Button';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Container from '@mui/material/Container';
+import Stack from '@mui/material/Stack';
+import Menu from '@mui/material/Menu';
+import MenuIcon from '@mui/icons-material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Link from '@mui/material/Link';
+import Box from '@mui/material/Box';
+// images
+import logo from "../../assets/logoDarkMode.png"
 
 function ProductHeader() {
     const navigate = useNavigate();
-    const [showNavBar, setShowNavBar] = useState(true);
-    const lastScrollY = useRef(0);
 
 
-    useEffect(() => {
-        window.addEventListener("scroll", controlNavBar);
-        console.log("render by useEffect");
+    const [anchorElNav, setAnchorElNav] = useState(null);
+    const handleOpenNavMenu = (event) => {
+        setAnchorElNav(event.currentTarget);
+    };
+    const handleCloseNavMenu = () => {
+        setAnchorElNav(null);
+    };
 
-        return () => {
-            window.removeEventListener("scroll", controlNavBar);
-        };
-    }, []);
-
-    // listen to scroll position if it is less than previous then hide the NavBar if not then show
-    function controlNavBar() {
-        /*window.scrollY increases as user scrolls down*/
-        if (window.scrollY > lastScrollY.current) {
-            setShowNavBar(false);
-        } else {
-            setShowNavBar(true);
-        }
-        console.log("rerender by setLastScrollY");
-        lastScrollY.current = window.scrollY
-    }
-
-    function handleSettingClicked() {
-        navigate("/user-account");
-    }
 
     async function handleSignoutClicked() {
         // send a request to Django with refresh token to revoke the token
@@ -75,24 +70,95 @@ function ProductHeader() {
     }
 
     return (
-        <header className={showNavBar ? styles.header : styles.hideHeader}>
-            <nav className={styles.nav}>
-                <Brand variant="product" />
-                <Features></Features>
-                <div className={styles.rightNav}>
-                    <Button onClick={handleSettingClicked} sx={{ "&:hover": {backgroundColor: "hsl(0, 0%, 100%, 0.125)"}, borderRadius: "10px" }} ><AccountCircleIcon sx={{ color: "grey" }} /></Button>
-                    <Button
-                        onClick={handleSignoutClicked}
-                        sx={{
-                            color: "black",
-                            fontFamily: "'Segoe Ui', Arial, sans-serif",
-                            borderRadius: "10px",
-                            "&:hover": {backgroundColor: "lightgrey"},
-                            backgroundColor: "#DAD7CD",
-                        }}>Sign Out</Button>
-                </div>
-            </nav>
-        </header>
+        <>
+            <HideOnScroll>
+                <AppBar
+                    position="sticky"
+                    sx={{
+                        backgroundColor: "hsl(0, 0%, 100%, 0.027)",
+                        backdropFilter: "blur(15px)",
+                        borderRadius: "20px",
+                        marginBottom: "4rem",
+                        top: "1rem",
+                    }}
+                >
+                    <Container maxWidth="lg">
+                        <Toolbar disabledGutters>
+                            <Brand variant="product" />
+                            <Features />
+                            <Stack direction="row" sx={{ display: { xs: "none", md: "flex" } }}>
+                                <Button
+                                    href="/user-account"
+                                    sx={{
+                                        color: "grey",
+                                        borderRadius: "10px",
+                                        "&:hover": {background: "none", color: "var(--main-dust-grey)"},
+                                    }}
+                                >
+                                    <AccountCircleIcon />
+                                </Button>
+                                <Button
+                                    onClick={handleSignoutClicked}
+                                    sx={{
+                                        color: "black",
+                                        borderRadius: "10px",
+                                        "&:hover": {backgroundColor: "var(--main-brick)"},
+                                        backgroundColor: "var(--main-dust-grey)",
+                                    }}
+                                >
+                                    Sign Out
+                                </Button>
+                            </Stack>
+                            <Box sx={{ display: {xs: "block", md: "none"} }}>
+                                <IconButton
+                                    size="large"
+                                    onClick={handleOpenNavMenu}
+                                    color="inherit"
+                                >
+                                    <MenuIcon />
+                                </IconButton>
+                                <Menu
+                                    anchorEl={anchorElNav}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'left',
+                                    }}
+                                    keepMounted
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'left',
+                                    }}
+                                    open={Boolean(anchorElNav)}
+                                    onClose={handleCloseNavMenu}
+                                    sx={{
+                                        display: { xs: 'block', md: 'none' },
+                                        ".MuiMenu-paper": {
+                                            backgroundColor: "hsl(0, 0%, 100%, 0.027)",
+                                            backdropFilter: "blur(15px)",
+                                            borderRadius: "20px"
+                                        },
+                                        ".MuiMenuItem-root": {color: "white"},
+                                    }}
+                                >
+                                    <MenuItem>
+                                        <Link
+                                            href="/user-account"
+                                            color="inherit"
+                                            sx={{ margin: "auto" }}
+                                        >
+                                            <AccountCircleIcon />
+                                        </Link>
+                                    </MenuItem>
+                                    <MenuItem onClick={handleSignoutClicked} sx={{ "&:hover": {backgroundColor: "var(--main-brick)"} }}>
+                                        Sign Out
+                                    </MenuItem>
+                                </Menu>
+                            </Box>
+                        </Toolbar>
+                    </Container>
+                </AppBar>
+            </HideOnScroll>
+        </>
     );
 }
 
