@@ -7,8 +7,15 @@ import App from './App.jsx'
 
 let theme = createTheme({
   typography: {
-    fontFamily: "'Segoe Ui', Arial, sans-serif",
+    fontFamily: [
+      "'Segoe Ui'",
+      "Arial",
+      "sans-serif",
+    ].join(","),
     h3: {
+      fontWeight: "bold",
+    },
+    h5: {
       fontWeight: "bold",
     },
   },
@@ -16,6 +23,13 @@ let theme = createTheme({
     MuiLink: {
       defaultProps: {
         underline: "none",
+      },
+    },
+    MuiFab: {
+      styleOverrides: {
+        root: {
+          zIndex: 0,
+        }
       },
     },
   },
