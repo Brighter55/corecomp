@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom"
 import { useState } from "react"
 import explanationImage from "../assets/explanation.png"
 import SampleIncomeGraph from "./components/SampleIncomeGraph.jsx"
-import GraphsCarousel from "./components/graphs-carousel/GraphsCarousel"
+import GraphsCarousel from "./components/GraphsCarousel.jsx"
 import Brand from "../shared/Brand.jsx"
 import FAQ from "./components/FAQ.jsx"
 import Steps from "./components/steps/Steps.jsx"
@@ -97,29 +97,27 @@ function Landing() {
                         <NavigateBeforeIcon />
                     </IconButton>
                     {features.map((feature, index) => (
-                            <Stack
-                                useFlexGap
-                                spacing={4}
+                    <Stack
+                        useFlexGap
+                        spacing={4}
+                        sx={{
+                            display: currentPage === index ? "flex" : "none",
+                            flex: 1,
+                            overflow: "hidden",
+                        }}
+                    >
+                        <Typography variant="h5" sx={{ fontWeight: "bold" }}>{feature.text}</Typography>
+                        <Grow in={currentPage === index}>
+                            <Box
                                 sx={{
-                                    display: currentPage === index ? "flex" : "none",
-                                    flex: 1,
-                                }}
-                            >
-                                <Typography variant="h5" sx={{ fontWeight: "bold" }}>{feature.text}</Typography>
-                                <Grow in={currentPage === index}>
-                                    <Box
-                                        sx={{
-                                            height: {xs: "20rem", md: "30rem"},
-                                            width: "100%",
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            overflow: "hidden",
-                                        }}>
-                                        {feature.content}
-                                    </Box>
-                                </Grow>
-                            </Stack>
-
+                                    height: {xs: "20rem", md: "30rem"},
+                                    display: "flex",
+                                    justifyContent: "center",
+                                }}>
+                                {feature.content}
+                            </Box>
+                        </Grow>
+                    </Stack>
                     ))}
                     <IconButton
                         onClick={handleNextPage}
