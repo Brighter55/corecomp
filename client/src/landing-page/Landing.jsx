@@ -85,10 +85,10 @@ function Landing() {
             <LandingHeader />
             <Stack spacing={18}>
                 <section id="hero" style={{ display: "flex", justifyContent: "center" }}>
-                    <Stack sx={{ width: "60%", alignItems: "center" }} spacing={3}>
-                        <Typography variant="h2" textAlign="center" sx={{ fontFamily: "Montserrat" }}>An “every Core detail of a Company” app</Typography>
+                    <Stack sx={{ alignItems: "center" }} spacing={3}>
+                        <Typography variant="h2" textAlign="center" sx={{ fontFamily: "Montserrat", width: {xs: "100%", md: "60%"} }}>An “every Core detail of a Company” app</Typography>
                         <Divider sx={{ width: "30%", bgcolor: "var(--main-dust-grey)" }}></Divider>
-                        <Typography variant="body1" textAlign="center" sx={{ fontSize: {xs: "0.8rem", md: "1.2rem"} }}>Turns complex financial data into simple, easy-looking graphs with over 20+ years of financial data and clear, beginner-friendly explanations.</Typography>
+                        <Typography variant="body1" textAlign="center" sx={{ width: {xs: "80%", md: "50%"} }}>Turns complex financial data into simple, easy-looking graphs with over 20+ years of financial data and clear, beginner-friendly explanations.</Typography>
                         <Fab variant="extended" onClick={handleTryClicked} sx={{ backgroundColor: "#DAD7CD", textTransform: 'none', "&:hover": {backgroundColor: "#588157"} }}>Get Started</Fab>
                     </Stack>
                 </section>
@@ -147,31 +147,54 @@ function Landing() {
                 <section id="steps">
                     <Steps></Steps>
                 </section>
-                <section id="pricing" className={styles.pricing}>
-                    <h1 style={{ fontSize: "60px", textAlign: "center", fontFamily: "Tahoma", marginBottom: "10px" }}>Only $3 a Month</h1>
-                    <p style={{ fontSize: "1.2rem", textAlign: "center", width: "40%", marginLeft: "auto", marginRight: "auto" }}>Your money should go to your investments, not tools; the most affordable stock analysis app.</p>
-                    <div className={styles.pricingContent}>
-                        <div className={styles.pricingCard}>
-                            <h2>Monthly</h2>
-                            <p><span style={{ fontSize: "60px" }}>$3</span> / month</p>
+                <section id="pricing">
+                    <Stack spacing={2} sx={{ alignItems: "center" }}>
+                        <Typography variant="h2">Only $3 a Month</Typography>
+                        <Typography
+                            textAlign="center"
+                            variant="body1"
+                            sx={{ width: {xs: "80%", md: "50%"} }}
+                        >
+                            Your money should go to your investments, not tools; the most affordable stock analysis app.
+                        </Typography>
+                        <Stack
+                            sx={{
+                                width: {xs: "70%", md: "30%"},
+                                height: "22rem",
+                                borderRadius: "30px",
+                                border: "5px solid white",
+                                backgroundColor: "#f7f6f2",
+                                padding: "2rem",
+                                color: "#2f3037",
+                                boxShadow: "0 0 40px 5px white",
+                                marginTop: "3rem !important"
+                            }}
+                            spacing={2}
+                        >
+                            <Typography variant="h5">Monthly</Typography>
+                            <Typography variant="body1">
+                                <Typography variant="h2" component="span" sx={{ fontWeight: "normal" }}>$3</Typography>
+                                / month
+                            </Typography>
                             <StyledFab
-                            href="/sign-in"
-                            variant="extended"
+                                href="/sign-in"
+                                variant="extended"
+                                sx={{ height: "3rem" }}
                             >
                                 Subscribe
                             </StyledFab>
-                            <p style={{ color: "grey" }}>All features</p>
+                            <Typography variant="body1">All features</Typography>
                             <Divider></Divider>
-                            <div className={styles.pricingFeatureContainer} style={{ marginTop: "25px" }}>
+                            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                                 <StyledDoneIcon />
-                                <p>Unlimited stock search</p>
-                            </div>
-                            <div className={styles.pricingFeatureContainer}>
+                                <Typography variant="body1">Unlimited stock search</Typography>
+                            </Stack>
+                            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                                 <StyledDoneIcon />
-                                <p>and many more in the futures</p>
-                            </div>
-                        </div>
-                    </div>
+                                <Typography variant="body1">and many more in the futures</Typography>
+                            </Stack>
+                        </Stack>
+                    </Stack>
                 </section>
                 <section id="FAQ" className={styles.FAQ} >
                     <h1 style={{ marginBottom: "50px" }}>Frequently asked questions</h1>
