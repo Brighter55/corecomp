@@ -1,14 +1,14 @@
 // images
-import capitalExpendituresGraph from "../../../assets/Graphs/capitalExpendituresGraph.png"
-import cashVsDebtGraph from "../../../assets/Graphs/cashVsDebtGraph.png"
-import dividendGraph from "../../../assets/Graphs/dividendGraph.png"
-import epsGraph from "../../../assets/Graphs/epsGraph.png"
-import freeCashFlowGraph from "../../../assets/Graphs/freeCashFlowGraph.png"
-import incomeGraph from "../../../assets/Graphs/capitalExpendituresGraph.png"
-import operatingCashFlowGraph from "../../../assets/Graphs/operatingCashFlowGraph.png"
-import pricingGraph from "../../../assets/Graphs/pricingGraph.png"
-import revenueGraph from "../../../assets/Graphs/revenueGraph.png"
-import sharesOutstandingGraph from "../../../assets/Graphs/sharesOutstandingGraph.png"
+import capitalExpendituresGraph from "../../assets/Graphs/capitalExpendituresGraph.png"
+import cashVsDebtGraph from "../../assets/Graphs/cashVsDebtGraph.png"
+import dividendGraph from "../../assets/Graphs/dividendGraph.png"
+import epsGraph from "../../assets/Graphs/epsGraph.png"
+import freeCashFlowGraph from "../../assets/Graphs/freeCashFlowGraph.png"
+import incomeGraph from "../../assets/Graphs/capitalExpendituresGraph.png"
+import operatingCashFlowGraph from "../../assets/Graphs/operatingCashFlowGraph.png"
+import pricingGraph from "../../assets/Graphs/pricingGraph.png"
+import revenueGraph from "../../assets/Graphs/revenueGraph.png"
+import sharesOutstandingGraph from "../../assets/Graphs/sharesOutstandingGraph.png"
 // mui components
 import { keyframes } from '@mui/system';
 import Box from '@mui/material/Box';

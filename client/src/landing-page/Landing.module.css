@@ -1,23 +1,4 @@
 
-
-.featureContainer {
-    height: 90%;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-}
-
-.featureImage {
-    max-width: 70%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 10px;
-}
-
-.steps {
-    width: 100%;
-}
-
 .pricing {
 }
 

@@ -15,6 +15,9 @@ let theme = createTheme({
     h3: {
       fontWeight: "bold",
     },
+    h4: {
+      fontWeight: "bold",
+    },
     h5: {
       fontWeight: "bold",
     },

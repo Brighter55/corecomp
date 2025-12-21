@@ -6,7 +6,7 @@ import SampleIncomeGraph from "./components/SampleIncomeGraph.jsx"
 import GraphsCarousel from "./components/GraphsCarousel.jsx"
 import Brand from "../shared/Brand.jsx"
 import FAQ from "./components/FAQ.jsx"
-import Steps from "./components/steps/Steps.jsx"
+import Steps from "./components/Steps.jsx"
 import styles from "./Landing.module.css"
 // mui components
 import Container from '@mui/material/Container';
@@ -28,9 +28,21 @@ function Landing() {
 
 
     const [features, setFeatures] = useState([
-        { id: 0, text: "Over 20 years of comprehensive financial data that provides a broad view of any company.", content: <SampleIncomeGraph /> },
-        { id: 1, text: "10+  fundamentals to help you truly understand a company’s performance", content: <GraphsCarousel/> },
-        { id: 2, text: "Beginners? Professionals? CoreComp explains everything in simple terms!", content: <img src={explanationImage} className={styles.featureImage} /> },
+        {
+            id: 0,
+            text: "Over 20 years of comprehensive financial data that provides a broad view of any company.",
+            content: <SampleIncomeGraph />
+        },
+        {
+            id: 1,
+            text: "10+  fundamentals to help you truly understand a company’s performance",
+            content: <GraphsCarousel/>
+        },
+        {
+            id: 2,
+            text: "Beginners? Professionals? CoreComp explains everything in simple terms!",
+            content: <Box component="img" src={explanationImage} sx={{ width: {xs: "100%", sm: "30rem", md: "40rem"}, height: "100%", borderRadius: "10px" }} />
+        },
     ]);
     const [currentPage, setCurrentPage] = useState(0);
     const [slideDirection, setSlideDirection] = useState("left");
@@ -132,7 +144,7 @@ function Landing() {
                         <NavigateNextIcon />
                     </IconButton>
                 </section>
-                <section id="steps" className={styles.steps}>
+                <section id="steps">
                     <Steps></Steps>
                 </section>
                 <section id="pricing" className={styles.pricing}>
