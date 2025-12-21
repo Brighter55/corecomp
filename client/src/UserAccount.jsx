@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useRef, useState, useEffect } from "react"
 import {loadStripe} from '@stripe/stripe-js';
 import {
   EmbeddedCheckoutProvider,
@@ -7,15 +7,27 @@ import {
 import {useNavigate} from "react-router-dom"
 import {checkPermission, getNewTokens} from "./helpers/helper.js"
 import ProductHeader from "./headers/product-header/ProductHeader.jsx"
+// mui components
 import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
+
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY, {
 });
 
+const StyledButton = styled(Button)({
+    color: "black",
+    borderRadius: "10px",
+    "&:hover": {backgroundColor: "lightgrey"},
+    backgroundColor: "var(--main-dust-grey)",
+});
+
 function UserAccount() {
     const navigate = useNavigate();
-    const ran = React.useRef(false);
-    const [isCustomer, setIsCustomer] = React.useState(false);
+    const ran = useRef(false);
+    const [isCustomer, setIsCustomer] = useState(false);
 
     async function checkIsCustomer() {
         const response = await fetch("http://127.0.0.1:8000/api/is-customer", {
@@ -28,7 +40,7 @@ function UserAccount() {
         setIsCustomer(data.is_customer);
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (ran.current) {return;}
         ran.current = true;
         checkPermission(navigate);
@@ -36,7 +48,7 @@ function UserAccount() {
     }, []);
 
 
-    const [clientSecret, setClientSecret] = React.useState(null);
+    const [clientSecret, setClientSecret] = useState(null);
 
     async function handleSubscribeClicked(event) {
         event.preventDefault();
@@ -120,29 +132,26 @@ function UserAccount() {
         )
     }
     return (
-        <>
+        <Container maxWidth="lg">
             <ProductHeader />
-            <h1>Subscription</h1>
+            <Typography variant="h3" sx={{ marginBottom: "1rem" }}>Subscription</Typography>
             {
-                isCustomer ? <Button onClick={handleManageClicked} variant="contained"
-                                     sx={{
-                                            color: "black",
-                                            fontFamily: "'Segoe Ui', Arial, sans-serif",
-                                            borderRadius: "10px",
-                                            "&:hover": {backgroundColor: "lightgrey"},
-                                            backgroundColor: "#DAD7CD",
-                                        }}>Manage your billing</Button>
+                isCustomer ?
+                <StyledButton
+                    onClick={handleManageClicked}
+                    variant="contained"
+                >
+                    Manage your billing
+                </StyledButton>
                 :
-                <Button onClick={handleSubscribeClicked} variant="contained"
-                        sx={{
-                                color: "black",
-                                fontFamily: "'Segoe Ui', Arial, sans-serif",
-                                borderRadius: "10px",
-                                "&:hover": {backgroundColor: "lightgrey"},
-                                backgroundColor: "#DAD7CD",
-                        }}>Subscribe</Button>
+                <StyledButton
+                    onClick={handleSubscribeClicked}
+                    variant="contained"
+                >
+                    Subscribe
+                </StyledButton>
             }
-        </>
+        </Container>
     )
 }
 

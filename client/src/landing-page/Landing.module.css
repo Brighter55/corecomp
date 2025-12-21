@@ -1,65 +1,5 @@
-.hero {
-    display: flex;
-    justify-content: center;
-}
-
-.heroContent {
-    display: flex;
-    flex-direction: column;
-    width: 60%;
-    justify-content: center;
-    align-items: center;
-}
-
-.features {
-    margin-top: 150px;
-    height: 90%;
-    background-color: #746355;
-    border-radius: 20px;
-    color: #DAD7CD;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 0 10px 2px black;
-}
-
-.featureContainer {
-    height: 90%;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.feature {
-    height: 100%;
-    width: 80%;
-    flex-direction: column;
-    align-items: center;
-}
-
-.featureContent {
-    display: flex;
-    flex: 1;
-    width: 90%;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-}
-
-.featureImage {
-    max-width: 70%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 10px;
-}
-
-.steps {
-    margin-top: 150px;
-    width: 100%;
-}
 
 .pricing {
-    margin-top: 150px;
 }
 
 .pricingContent {
@@ -89,11 +29,9 @@
 }
 
 .FAQ {
-    margin-top: 150px;
 }
 
 .footer {
-    margin-top: 150px;
 }
 
 .footerContent {
