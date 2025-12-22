@@ -1,4 +1,4 @@
-export { default as About } from "./components/about/About.jsx"
+export { default as About } from "./components/About.jsx"
 export { default as Fundamentals } from "./components/fundamentals/Fundamentals.jsx"
 export { default as  TotalRevenueGraph } from "./components/TotalRevenueGraph.jsx"
 export { default as  NetIncomeGraph } from "./components/NetIncomeGraph.jsx"

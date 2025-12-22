@@ -70,95 +70,93 @@ function ProductHeader() {
     }
 
     return (
-        <>
-            <HideOnScroll>
-                <AppBar
-                    position="sticky"
-                    sx={{
-                        backgroundColor: "hsl(0, 0%, 100%, 0.027)",
-                        backdropFilter: "blur(15px)",
-                        borderRadius: "20px",
-                        marginBottom: "4rem",
-                        top: "1rem",
-                    }}
-                >
-                    <Container maxWidth="lg">
-                        <Toolbar disabledGutters>
-                            <Brand variant="product" />
-                            <Features />
-                            <Stack direction="row" sx={{ display: { xs: "none", md: "flex" } }}>
-                                <Button
-                                    href="/user-account"
-                                    sx={{
-                                        color: "grey",
-                                        borderRadius: "10px",
-                                        "&:hover": {background: "none", color: "var(--main-dust-grey)"},
-                                    }}
-                                >
-                                    <AccountCircleIcon />
-                                </Button>
-                                <Button
-                                    onClick={handleSignoutClicked}
-                                    sx={{
-                                        color: "black",
-                                        borderRadius: "10px",
-                                        "&:hover": {backgroundColor: "var(--main-brick)"},
-                                        backgroundColor: "var(--main-dust-grey)",
-                                    }}
-                                >
+        <HideOnScroll>
+            <AppBar
+                position="sticky"
+                sx={{
+                    backgroundColor: "hsl(0, 0%, 100%, 0.027)",
+                    backdropFilter: "blur(15px)",
+                    borderRadius: "20px",
+                    marginBottom: "4rem",
+                    top: "1rem",
+                }}
+            >
+                <Container maxWidth="lg">
+                    <Toolbar disabledGutters>
+                        <Brand variant="product" />
+                        <Features />
+                        <Stack direction="row" sx={{ display: { xs: "none", md: "flex" } }}>
+                            <Button
+                                href="/user-account"
+                                sx={{
+                                    color: "grey",
+                                    borderRadius: "10px",
+                                    "&:hover": {background: "none", color: "var(--main-dust-grey)"},
+                                }}
+                            >
+                                <AccountCircleIcon />
+                            </Button>
+                            <Button
+                                onClick={handleSignoutClicked}
+                                sx={{
+                                    color: "black",
+                                    borderRadius: "10px",
+                                    "&:hover": {backgroundColor: "var(--main-brick)"},
+                                    backgroundColor: "var(--main-dust-grey)",
+                                }}
+                            >
+                                Sign Out
+                            </Button>
+                        </Stack>
+                        <Box sx={{ display: {xs: "block", md: "none"} }}>
+                            <IconButton
+                                size="large"
+                                onClick={handleOpenNavMenu}
+                                color="inherit"
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                            <Menu
+                                anchorEl={anchorElNav}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                }}
+                                keepMounted
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'left',
+                                }}
+                                open={Boolean(anchorElNav)}
+                                onClose={handleCloseNavMenu}
+                                sx={{
+                                    display: { xs: 'block', md: 'none' },
+                                    ".MuiMenu-paper": {
+                                        backgroundColor: "hsl(0, 0%, 100%, 0.027)",
+                                        backdropFilter: "blur(15px)",
+                                        borderRadius: "20px"
+                                    },
+                                    ".MuiMenuItem-root": {color: "white"},
+                                }}
+                            >
+                                <MenuItem>
+                                    <Link
+                                        href="/user-account"
+                                        color="inherit"
+                                        sx={{ margin: "auto" }}
+                                    >
+                                        <AccountCircleIcon />
+                                    </Link>
+                                </MenuItem>
+                                <MenuItem onClick={handleSignoutClicked} sx={{ "&:hover": {backgroundColor: "var(--main-brick)"} }}>
                                     Sign Out
-                                </Button>
-                            </Stack>
-                            <Box sx={{ display: {xs: "block", md: "none"} }}>
-                                <IconButton
-                                    size="large"
-                                    onClick={handleOpenNavMenu}
-                                    color="inherit"
-                                >
-                                    <MenuIcon />
-                                </IconButton>
-                                <Menu
-                                    anchorEl={anchorElNav}
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'left',
-                                    }}
-                                    keepMounted
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'left',
-                                    }}
-                                    open={Boolean(anchorElNav)}
-                                    onClose={handleCloseNavMenu}
-                                    sx={{
-                                        display: { xs: 'block', md: 'none' },
-                                        ".MuiMenu-paper": {
-                                            backgroundColor: "hsl(0, 0%, 100%, 0.027)",
-                                            backdropFilter: "blur(15px)",
-                                            borderRadius: "20px"
-                                        },
-                                        ".MuiMenuItem-root": {color: "white"},
-                                    }}
-                                >
-                                    <MenuItem>
-                                        <Link
-                                            href="/user-account"
-                                            color="inherit"
-                                            sx={{ margin: "auto" }}
-                                        >
-                                            <AccountCircleIcon />
-                                        </Link>
-                                    </MenuItem>
-                                    <MenuItem onClick={handleSignoutClicked} sx={{ "&:hover": {backgroundColor: "var(--main-brick)"} }}>
-                                        Sign Out
-                                    </MenuItem>
-                                </Menu>
-                            </Box>
-                        </Toolbar>
-                    </Container>
-                </AppBar>
-            </HideOnScroll>
-        </>
+                                </MenuItem>
+                            </Menu>
+                        </Box>
+                    </Toolbar>
+                </Container>
+            </AppBar>
+        </HideOnScroll>
     );
 }
 
