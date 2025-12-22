@@ -1,13 +1,11 @@
 import LandingHeader from "../headers/LandingHeader.jsx"
-import {useNavigate} from "react-router-dom"
 import { useState } from "react"
 import explanationImage from "../assets/explanation.png"
 import SampleIncomeGraph from "./components/SampleIncomeGraph.jsx"
 import GraphsCarousel from "./components/GraphsCarousel.jsx"
-import Brand from "../shared/Brand.jsx"
 import FAQ from "./components/FAQ.jsx"
 import Steps from "./components/Steps.jsx"
-import styles from "./Landing.module.css"
+import Footer from "../shared/Footer.jsx"
 // mui components
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
@@ -24,7 +22,6 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 function Landing() {
-    const navigate = useNavigate();
 
 
     const [features, setFeatures] = useState([
@@ -196,38 +193,13 @@ function Landing() {
                         </Stack>
                     </Stack>
                 </section>
-                <section id="FAQ" className={styles.FAQ} >
-                    <h1 style={{ marginBottom: "50px" }}>Frequently asked questions</h1>
-                    <FAQ />
+                <section id="FAQ">
+                    <Stack spacing={3}>
+                        <Typography variant="h4">Frequently Asked Questions</Typography>
+                        <FAQ />
+                    </Stack>
                 </section>
-                <footer className={styles.footer}>
-                    <Divider sx={{ borderColor: "rgba(218, 215, 205, 0.5)" }}></Divider>
-                    <div className={styles.footerContent}>
-                        <Brand variant="landing" />
-                        <div className={styles.footerRight}>
-                            <div className={styles.footerNav}>
-                                <h3>Support</h3>
-                                <div className={styles.footerNavHyperlinks}>
-                                    <p>
-                                        <a href="mailto: support@corecomp.com" className={styles.footerNavHyperlinksText}>Contact Us</a>
-                                    </p>
-                                </div>
-                            </div>
-                            <div className={styles.footerNav}>
-                                <h3>Legal</h3>
-                                <div className={styles.footerNavHyperlinks}>
-                                    <p>
-                                        <a href="/privacy" className={styles.footerNavHyperlinksText}>Privacy Policy</a>
-                                    </p>
-                                    <p>
-                                        <a href="/terms" className={styles.footerNavHyperlinksText}>Terms of Service</a>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <Divider sx={{ borderColor: "rgba(218, 215, 205, 0.5)" }}></Divider>
-                </footer>
+                <Footer />
             </Stack>
         </Container>
     )

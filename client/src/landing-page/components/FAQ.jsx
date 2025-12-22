@@ -5,6 +5,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
+import Box from '@mui/material/Box';
 
 
 const StyledAccordion = styled(Accordion)({
@@ -33,7 +34,7 @@ export default function ControlledAccordions() {
   }
 
   return (
-    <>
+    <Box>
       <StyledAccordion expanded={expanded === 'panel1'}
         onChange={(event, isExpanded) => {handleChange("panel1", isExpanded)}}
         disableGutters
@@ -45,11 +46,14 @@ export default function ControlledAccordions() {
           id="panel1bh-header"
           sx={{ padding: "0" }}
         >
-          <h2>How many companies can CoreComp research?</h2>
+          <Typography variant="h6">How many companies can CoreComp research?</Typography>
         </AccordionSummary>
         <StyledAccordionDetails>
-          <Typography>
-            Our financial data are from U.S. Securities and Exchange Commission (SEC) filings, so if the company you are looking for files with the SEC, you are able to search it with CoreComp. This means comprehensive coverage for US-listed companies.
+          <Typography variant="body1">
+            Our financial data are from U.S. Securities and
+            Exchange Commission (SEC) filings, so if the company you are
+            looking for files with the SEC, you are able to search it with
+            CoreComp. This means comprehensive coverage for US-listed companies.
           </Typography>
         </StyledAccordionDetails>
       </StyledAccordion>
@@ -64,10 +68,10 @@ export default function ControlledAccordions() {
           id="panel1bh-header"
           sx={{ padding: "0" }}
         >
-          <h2>Who is CoreComp for?</h2>
+          <Typography variant="h6">Who is CoreComp for?</Typography>
         </AccordionSummary>
         <StyledAccordionDetails>
-          <Typography>
+          <Typography variant="body1">
             CoreComp's is built to be beginner-friendly enough so that even people with no background in finance could understand and make sense of it, but everyone who wants to understand companies' fundamentals could use it.
           </Typography>
         </StyledAccordionDetails>
@@ -83,10 +87,10 @@ export default function ControlledAccordions() {
           id="panel1bh-header"
           sx={{ padding: "0" }}
         >
-          <h2>Help?</h2>
+          <Typography variant="h6">Help?</Typography>
         </AccordionSummary>
         <StyledAccordionDetails>
-          <Typography>
+          <Typography variant="body1">
             If you encounter any problems, contact our support at support@corecomp.com
           </Typography>
         </StyledAccordionDetails>
@@ -103,14 +107,14 @@ export default function ControlledAccordions() {
           id="panel1bh-header"
           sx={{ padding: "0" }}
         >
-          <h2>Will CoreComp have new features?</h2>
+          <Typography variant="h6">Will CoreComp have new features?</Typography>
         </AccordionSummary>
         <StyledAccordionDetails>
-          <Typography>
+          <Typography variant="body1">
             Of course! CoreComp is always evolving. We are always looking for new analysis tools that would be beneficial to investors.
           </Typography>
         </StyledAccordionDetails>
       </StyledAccordion>
-    </>
+    </Box>
   );
 }
