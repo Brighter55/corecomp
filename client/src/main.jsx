@@ -12,6 +12,9 @@ let theme = createTheme({
       "Arial",
       "sans-serif",
     ].join(","),
+    h2: {
+      fontWeight: "bold",
+    },
     h3: {
       fontWeight: "bold",
     },
