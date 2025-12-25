@@ -23,6 +23,27 @@ import {checkPermission, getNewTokens} from "../helpers/helper.js"
 
 
 function OverviewPage() {
+    /*
+
+    <div className={styles.graphs}>
+        <div className={styles.row}>
+            <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
+            <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
+            <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
+        </div>
+        <div className={styles.row}>
+            <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
+            <FreeCashflowGraph reports={reports.CASH_FLOW} ></FreeCashflowGraph>
+            <CashVsDebtGraph reports={reports.BALANCE_SHEET} ></CashVsDebtGraph>
+        </div>
+        <div className={styles.row}>
+            <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
+        </div>
+    </div>
+
+    */
+
+
     // when opens up the page check if user is authorized
     // TODO: implement "refresh lock" in prod. to prevent multiple components hitting refreshing the tokens
     const navigate = useNavigate();
@@ -34,6 +55,7 @@ function OverviewPage() {
         ran.current = true;
         checkPermission(navigate);
     }, []);
+
 
     const [symbol, setSymbol] = useState("");
     const [period, setPeriod] = useState("annually");
@@ -116,29 +138,20 @@ function OverviewPage() {
                     </Stack>
                     <About></About>
                     <Fundamentals></Fundamentals>
-                    <div className={styles.graphs}>
-                        <div className={styles.row}>
+                    <Stack
+                        direction={{ xs: "column", md: "row" }}
+                        sx={{
+                            width: "95vw",
+                            maxWidth: "1300px",
+                            flexWrap: "wrap",
+                            gap: "1rem",
+                        }}>
                             <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
                             <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
                             <PricingGraph reports={reports.PRICING}></PricingGraph>
-                        </div>
-                    </div>
+                    </Stack>
                     <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
-                    <div className={styles.graphs}>
-                        <div className={styles.row}>
-                            <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
-                            <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
-                            <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
-                        </div>
-                        <div className={styles.row}>
-                            <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
-                            <FreeCashflowGraph reports={reports.CASH_FLOW} ></FreeCashflowGraph>
-                            <CashVsDebtGraph reports={reports.BALANCE_SHEET} ></CashVsDebtGraph>
-                        </div>
-                        <div className={styles.row}>
-                            <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
-                        </div>
-                    </div>
+                    {/* --- */}
                 </Stack>
             </Container>
         )

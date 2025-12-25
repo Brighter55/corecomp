@@ -12,6 +12,33 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
+const explanation = (
+    <Stack spacing={1}>
+        <Typography variant="h5">What is it?</Typography>
+        <Typography variant="body1">
+            Net income is a company's profit after all expenses and taxes have been deducted from its total revenue.
+        </Typography>
+        <Typography variant="h5">Calculation</Typography>
+        <Typography variant="body1" sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}>Net Income = Total Revenue – Total Expenses</Typography>
+        <Typography variant="h5">Interpretation</Typography>
+        <Stack direction="row" spacing={1}>
+            <TrendingUpIcon
+                sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
+            />
+            <Typography variant="body1">
+                A positive trend shows the company is improving its financial performance.
+            </Typography>
+        </Stack>
+        <Stack direction="row" spacing={1}>
+            <TrendingDownIcon
+                sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
+            />
+            <Typography variant="body1">
+                A negative trend can be a warning sign, even if it remains positive. It suggests the company may be facing challenges in its operations or market.
+            </Typography>
+        </Stack>
+    </Stack>
+)
 
 function SampleIncomeGraph({ key }) {
     const [timeRange, setTimeRange] = useState("all");
@@ -51,33 +78,6 @@ function SampleIncomeGraph({ key }) {
         return Math.floor(Math.log10(Math.abs(value))) + 1;
     }
 
-    const explanation = (
-        <Stack spacing={1}>
-            <Typography variant="h5">What is it?</Typography>
-            <Typography variant="body1">
-                Net income is a company's profit after all expenses and taxes have been deducted from its total revenue.
-            </Typography>
-            <Typography variant="h5">Calculation</Typography>
-            <Typography variant="body1" sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}>Net Income = Total Revenue – Total Expenses</Typography>
-            <Typography variant="h5">Interpretation</Typography>
-            <Stack direction="row" spacing={1}>
-                <TrendingUpIcon
-                    sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-                />
-                <Typography variant="body1">
-                    A positive trend shows the company is improving its financial performance.
-                </Typography>
-            </Stack>
-            <Stack direction="row" spacing={1}>
-                <TrendingDownIcon
-                    sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-                />
-                <Typography variant="body1">
-                    A negative trend can be a warning sign, even if it remains positive. It suggests the company may be facing challenges in its operations or market.
-                </Typography>
-            </Stack>
-        </Stack>
-    )
 
     return (
         <Stack
@@ -121,7 +121,7 @@ function SampleIncomeGraph({ key }) {
                 <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current} />
             </Stack>
             <Box
-                style={{ width: "100%", height: "100%" }}
+                sx={{ width: "100%", height: "100%" }}
                 onClick={() => {setGraphClicked(true);}}
             >
                 <ResponsiveContainer>

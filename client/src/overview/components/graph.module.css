@@ -2,15 +2,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 33%;
-    transition: width 0.3s ease-in-out;
     color: #344E41;
     border-radius: 10px;
     background: #DAD7CD;
-}
-
-.graph:hover {
-    width: 50%;
+    width: 100%;
+    min-width: 25rem;
+    height: 25rem;
 }
 
 .graphClicked {

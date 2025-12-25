@@ -24,6 +24,21 @@ let theme = createTheme({
     h5: {
       fontWeight: "bold",
     },
+    explanationTopic: {
+      fontWeight: "bold",
+      fontSize: "1rem",
+
+      [createTheme().breakpoints.up("lg")]: {
+        fontSize: "1.5rem",
+      },
+    },
+    explanationText: { // here
+      fontSize: ".8rem",
+      lineHeight: "1.5rem",
+      [createTheme().breakpoints.up("lg")]: {
+        fontSize: "1rem",
+      },
+    },
   },
   components: {
     MuiLink: {
