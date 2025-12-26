@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 
 const explanation = (
-    <Stack spacing={1}>
+    <Stack spacing={2}>
         <Typography variant="explanationTopic">What is it?</Typography>
         <Typography variant="explanationText">
             Basic shares outstanding are the total shares issued and available for trading in the stock market. This includes shares held by both institutions and individual investors. However, this doesn't include Treasury shares (shares repurchased by the company and held in its treasury).

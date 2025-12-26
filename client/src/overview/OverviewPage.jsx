@@ -2,7 +2,6 @@ import {useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useEffect} from "react"
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
-import styles from "./OverviewPage.module.css"
 import PeriodSwitch from "./components/period-switch/PeriodSwitch.jsx"
 // mui components
 import Container from '@mui/material/Container';
@@ -10,6 +9,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import { styled } from '@mui/material/styles'; // here
 // components
 import { About, Fundamentals, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
@@ -21,6 +21,13 @@ import logo from "../assets/logoPlaceholder.png"
 // helpers
 import {checkPermission, getNewTokens} from "../helpers/helper.js"
 
+
+const GraphsContainer = styled(Stack)({
+    width: "95vw",
+    maxWidth: "1300px",
+    flexWrap: "wrap",
+    gap: "1rem",
+});
 
 function OverviewPage() {
     /*
@@ -138,20 +145,9 @@ function OverviewPage() {
                     </Stack>
                     <About></About>
                     <Fundamentals></Fundamentals>
-                    <Stack
-                        direction={{ xs: "column", md: "row" }}
-                        sx={{
-                            width: "95vw",
-                            maxWidth: "1300px",
-                            flexWrap: "wrap",
-                            gap: "1rem",
-                        }}>
-                            <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
-                            <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
-                            <PricingGraph reports={reports.PRICING}></PricingGraph>
-                    </Stack>
-                    <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
-                    {/* --- */}
+                    <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                        <PricingGraph reports={reports.PRICING}></PricingGraph>
+                    </GraphsContainer>
                 </Stack>
             </Container>
         )

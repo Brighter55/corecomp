@@ -1,12 +1,14 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import styles from "./graph.module.css"
-import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
-import Explanation from "./Explanation.jsx"
+import GraphTitle from "./GraphTitle.jsx"
+import GraphCard from "./GraphCard.jsx"
+// mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 
 function EPSGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
@@ -67,85 +69,108 @@ function EPSGraph(props) {
     }
 
     const explanation = (
-        <>
-            <h1>What is it?</h1>
-            <p className={styles.explanationText}>
+        <Stack spacing={2}>
+            <Typography variant="explanationTopic">What is it?</Typography>
+            <Typography variant="explanationText">
                 A measure of a company's profitability, showing how much profit is generated for each share of stock
-            </p>
-            <h1>Calculation</h1>
-            <p className={styles.explanationFormular}>EPS = Net Income / # of outstanding shares</p>
-            <h1>Interpretation</h1>
-            <ul>
-                <li className={styles.explanationText}><TrendingUpIcon sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}} /> Upward trend in EPS generally signifies growing profitability, which can lead to a higher stock price and increased investor confidence</li>
-                <li className={styles.explanationText}><TrendingDownIcon sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}/> Downward trend in EPS signals declining profits, which often leads to a lower stock price and may indicate financial challenges. </li>
-            </ul>
-        </>
+            </Typography>
+            <Typography variant="explanationTopic">Calculation</Typography>
+            <Typography
+                variant="explanationText"
+                sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
+            >
+                EPS = Net Income / # of outstanding shares
+            </Typography>
+            <Typography variant="explanationTopic">Interpretation</Typography>
+            <Stack direction="row" spacing={1}>
+                <TrendingUpIcon
+                    sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
+                />
+                <Typography variant="explanationText">
+                    Upward trend in EPS generally signifies growing profitability, which can lead to a higher stock price and increased investor confidence.
+                </Typography>
+            </Stack>
+            <Stack direction="row" spacing={1}>
+                <TrendingDownIcon
+                    sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
+                />
+                <Typography variant="explanationText">
+                    Downward trend in EPS signals declining profits, which often leads to a lower stock price and may indicate financial challenges.
+                </Typography>
+            </Stack>
+        </Stack>
     )
 
     return (
         props.period === "quarterly" ? (
-            <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
-                <div className={styles.titleAndTimeRanges}>
-                    <div className={styles.titleContainer}>
-                        <h2>Earning per Share</h2>
-                        <Explanation explanation={explanation} />
-                    </div>
-                    <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
-                    <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange}  menuContainer={graphRef.current}/>
-                </div>
-                <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
-                    <ResponsiveContainer>
-                        <LineChart
-                        data={reports}
-                        margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                        }}
-                        >
-                        <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                        <XAxis dataKey="date" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                        <YAxis tickFormatter={(value) => value.toFixed(2)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
-                        <Tooltip content={<CustomTooltip></CustomTooltip>} />
-                        <Legend />
-                        <Line type="monotone" dataKey="estimatedEPS" stroke="grey" strokeWidth={0} dot={{ fill: "grey", fillOpacity: 0.3, r: 5}} activeDot={{ r: 8, strokeWidth: 1}} legendType="circle"/>
-                        <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={<CustomDot></CustomDot>} activeDot={<CustomActiveDot></CustomActiveDot>} legendType="circle" />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>)
+            <Box sx={{ flex: 1 }}>
+                <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                    <GraphTitle
+                        title="Earning per Share"
+                        explanation={explanation}
+                        percentChange={percentChange}
+                        timeRange={timeRange}
+                        setTimeRange={setTimeRange}
+                        menuContainer={graphRef.current}
+                    />
+                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                        <ResponsiveContainer>
+                            <LineChart
+                            data={reports}
+                            margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                            }}
+                            >
+                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
+                            <XAxis dataKey="date" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
+                            <YAxis tickFormatter={(value) => value.toFixed(2)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                            <Tooltip content={<CustomTooltip></CustomTooltip>} />
+                            <Legend />
+                            <Line type="monotone" dataKey="estimatedEPS" stroke="grey" strokeWidth={0} dot={{ fill: "grey", fillOpacity: 0.3, r: 5}} activeDot={{ r: 8, strokeWidth: 1}} legendType="circle"/>
+                            <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={<CustomDot></CustomDot>} activeDot={<CustomActiveDot></CustomActiveDot>} legendType="circle" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </Box>
+                </GraphCard>
+            </Box>
+            )
         : (
-            <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
-                <div className={styles.titleAndTimeRanges}>
-                    <div className={styles.titleContainer}>
-                        <h2>Earning per Share</h2>
-                        <Explanation explanation={explanation} />
-                    </div>
-                    <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
-                    <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current}/>
-                </div>
-                <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
-                    <ResponsiveContainer>
-                        <LineChart
-                        data={reports}
-                        margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                        }}
-                        >
-                        <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                        <XAxis dataKey="date" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                        <YAxis tickFormatter={(value) => value.toFixed(2)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>)
+            <Box sx={{ flex: 1 }}>
+                <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                    <GraphTitle
+                        title="Earning per Share"
+                        explanation={explanation}
+                        percentChange={percentChange}
+                        timeRange={timeRange}
+                        setTimeRange={setTimeRange}
+                        menuContainer={graphRef.current}
+                    />
+                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                        <ResponsiveContainer>
+                            <LineChart
+                            data={reports}
+                            margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                            }}
+                            >
+                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
+                            <XAxis dataKey="date" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
+                            <YAxis tickFormatter={(value) => value.toFixed(2)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                            <Tooltip />
+                            <Legend />
+                            <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </Box>
+                </GraphCard>
+            </Box>
+        )
     )
 }
 

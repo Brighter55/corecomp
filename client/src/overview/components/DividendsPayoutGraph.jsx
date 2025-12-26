@@ -11,7 +11,7 @@ import Stack from '@mui/material/Stack';
 
 
 const explanation = (
-    <Stack spacing={1}>
+    <Stack spacing={2}>
         <Typography variant="explanationTopic">What is it?</Typography>
         <Typography variant="explanationText">
             A dividend payout is the distribution of a portion of a company's earnings to its shareholders. Companies use dividends to reward investors, typically in cash, on a quarterly basis, though some pay monthly or annually. The amount received by a shareholder depends on the number of shares owned and the dividend declared per share.
@@ -77,7 +77,7 @@ function DividendsPayoutGraph(props) {
                     sx={{ alignItems: "center", flexGrow: 1, justifyContent: "center" }}
                     spacing={1}
                 >
-                    <Typography sx={{ typography: {xs: "h6", sm: "h5"} }}>Dividends Payout per Share</Typography>
+                    <Typography variant="h6" textAlign="center">Dividends Payout per Share</Typography>
                     <Explanation explanation={explanation} />
                 </Stack>
                 <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>

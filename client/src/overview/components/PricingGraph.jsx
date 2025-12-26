@@ -13,7 +13,7 @@ import Stack from '@mui/material/Stack';
 
 
 const explanation = (
-    <Stack spacing={1}>
+    <Stack spacing={2}>
         <Typography variant="explanationTopic">What is it?</Typography>
         <Typography variant="explanationText">
             Adjusted monthly pricing represents a company's stock price after accounting for corporate actions like stock splits and dividends, making historical prices comparable to current prices.

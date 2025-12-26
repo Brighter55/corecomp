@@ -3,15 +3,17 @@ import Select from '@mui/material/Select';
 import FormHelperText from '@mui/material/FormHelperText';
 import MenuItem from '@mui/material/MenuItem';
 
+
+const menuItemStyle = {
+    color: "#344E41",
+    fontFamily: "'Segoe Ui', Arial, sans-serif",
+}
+
 function TimeRanges({ timeRange, setTimeRange, menuContainer }) {
 
     function handleOptionClicked(event) {
         setTimeRange(event.target.value);
-    }
-
-    const menuItemStyle = {
-        color: "#344E41",
-        fontFamily: "'Segoe Ui', Arial, sans-serif",
+        
     }
 
     return (
@@ -19,8 +21,6 @@ function TimeRanges({ timeRange, setTimeRange, menuContainer }) {
             <Select
                 value={timeRange}
                 onChange={handleOptionClicked}
-                displayEmpty
-                inputProps={{ 'aria-label': 'Without label' }}
                 MenuProps={{
                     container: menuContainer,
                 }}
