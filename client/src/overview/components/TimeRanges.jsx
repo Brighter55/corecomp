@@ -9,11 +9,11 @@ const menuItemStyle = {
     fontFamily: "'Segoe Ui', Arial, sans-serif",
 }
 
-function TimeRanges({ timeRange, setTimeRange, menuContainer }) {
+function TimeRanges({ timeRange, setTimeRange }) {
 
     function handleOptionClicked(event) {
         setTimeRange(event.target.value);
-        
+
     }
 
     return (
@@ -22,7 +22,7 @@ function TimeRanges({ timeRange, setTimeRange, menuContainer }) {
                 value={timeRange}
                 onChange={handleOptionClicked}
                 MenuProps={{
-                    container: menuContainer,
+                    disablePortal: true,
                 }}
                 sx={{ color: "#344E41",
                     fontFamily: "'Segoe Ui', Arial, sans-serif",

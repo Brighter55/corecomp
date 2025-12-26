@@ -127,7 +127,7 @@ function CashVsDebtGraph(props) {
                     >
                         {debtPercentChange >= 0 ? `+${debtPercentChange}%` : `${debtPercentChange}%`}
                     </Typography>
-                    <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current} />
+                    <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} />
                 </Stack>
                 <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
                     <ResponsiveContainer>

@@ -111,7 +111,6 @@ function EPSGraph(props) {
                         percentChange={percentChange}
                         timeRange={timeRange}
                         setTimeRange={setTimeRange}
-                        menuContainer={graphRef.current}
                     />
                     <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
                         <ResponsiveContainer>
@@ -146,7 +145,6 @@ function EPSGraph(props) {
                         percentChange={percentChange}
                         timeRange={timeRange}
                         setTimeRange={setTimeRange}
-                        menuContainer={graphRef.current}
                     />
                     <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
                         <ResponsiveContainer>

@@ -2,14 +2,14 @@ import {useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useEffect} from "react"
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
-import PeriodSwitch from "./components/period-switch/PeriodSwitch.jsx"
+import PeriodSwitch from "./components/PeriodSwitch.jsx"
 // mui components
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import { styled } from '@mui/material/styles'; // here
+import { styled } from '@mui/material/styles';
 // components
 import { About, Fundamentals, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
@@ -30,27 +30,6 @@ const GraphsContainer = styled(Stack)({
 });
 
 function OverviewPage() {
-    /*
-
-    <div className={styles.graphs}>
-        <div className={styles.row}>
-            <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
-            <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
-            <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
-        </div>
-        <div className={styles.row}>
-            <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
-            <FreeCashflowGraph reports={reports.CASH_FLOW} ></FreeCashflowGraph>
-            <CashVsDebtGraph reports={reports.BALANCE_SHEET} ></CashVsDebtGraph>
-        </div>
-        <div className={styles.row}>
-            <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
-        </div>
-    </div>
-
-    */
-
-
     // when opens up the page check if user is authorized
     // TODO: implement "refresh lock" in prod. to prevent multiple components hitting refreshing the tokens
     const navigate = useNavigate();
@@ -146,7 +125,19 @@ function OverviewPage() {
                     <About></About>
                     <Fundamentals></Fundamentals>
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                        <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
+                        <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
                         <PricingGraph reports={reports.PRICING}></PricingGraph>
+                    </GraphsContainer>
+                    <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
+                    <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                        <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
+                        <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
+                        <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
+                        <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
+                        <FreeCashflowGraph reports={reports.CASH_FLOW} ></FreeCashflowGraph>
+                        <CashVsDebtGraph reports={reports.BALANCE_SHEET} ></CashVsDebtGraph>
+                        <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
                     </GraphsContainer>
                 </Stack>
             </Container>

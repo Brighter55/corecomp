@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 
-function GraphTitle({title, explanation, percentChange, timeRange, setTimeRange, menuContainer}) {
+function GraphTitle({ title, explanation, percentChange, timeRange, setTimeRange }) {
 
     return (
         <Stack direction="row" sx={{ alignItems: "center" }}>
@@ -26,7 +26,7 @@ function GraphTitle({title, explanation, percentChange, timeRange, setTimeRange,
             >
                 {percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}
             </Typography>
-            <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={menuContainer} />
+            <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} />
         </Stack>
     )
 }

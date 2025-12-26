@@ -14,6 +14,9 @@ const GraphCard = styled(Stack)(({ graphClicked, theme }) => {
         zIndex: 3,
         transition: "height .5s ease",
         overflow: "auto",
+        "&::-webkit-scrollbar": {
+            display: "none",
+        }
     } : {
         height: "20rem",
         width: "100%",
