@@ -1,13 +1,17 @@
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import styles from "./graph.module.css"
 import CustomBar from "./CustomBar.jsx"
 import CustomActiveBar from "./CustomActiveBar.jsx"
-import TimeRanges from "./TimeRanges.jsx"
 import {useState, useEffect, useRef} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
-import Explanation from "./Explanation.jsx"
+import GraphTitle from "./GraphTitle.jsx"
+import GraphCard from "./GraphCard.jsx"
+// mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+
 
 function CapitalExpendituresGraph(props) {
     const [timeRange, setTimeRange] = useState("all");
@@ -39,59 +43,77 @@ function CapitalExpendituresGraph(props) {
     }
 
     const explanation = (
-        <>
-            <h1>What is it?</h1>
-            <p className={styles.explanationText}>
+        <Stack spacing={2}>
+            <Typography variant="explanationTopic">What is it?</Typography>
+            <Typography variant="explanationText">
                 Capital expenditure (CapEx) is the money a company spends on long-term physical assets like property, buildings, and machinery.
-            </p>
-            <h1>Calculation</h1>
-            <p className={styles.explanationFormular}>CapEx = (Ending PP&E - Beginning PP&E) + Depreciation Expense</p>
-            <h1>Interpretation</h1>
-            <ul>
-                <li className={styles.explanationText}><TrendingUpIcon sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}} /> Upward trend often signifies expansion, investment in new technology, or replacement of aging equipment, suggesting the company is growing or trying to increase efficiency</li>
-                <li className={styles.explanationText}><TrendingDownIcon sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}/> Downward trend can mean reduced investment in assets, which could signal market uncertainty, reduced growth prospects, or that the company is in a mature phase.</li>
-            </ul>
-        </>
+            </Typography>
+            <Typography variant="explanationTopic">Calculation</Typography>
+            <Typography
+                variant="explanationText"
+                sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
+            >
+                CapEx = (Ending PP&E - Beginning PP&E) + Depreciation Expense
+            </Typography>
+            <Typography variant="explanationTopic">Interpretation</Typography>
+            <Stack direction="row" spacing={1}>
+                <TrendingUpIcon
+                    sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
+                />
+                <Typography variant="explanationText">
+                    Upward trend often signifies expansion, investment in new technology, or replacement of aging equipment, suggesting the company is growing or trying to increase efficiency
+                </Typography>
+            </Stack>
+            <Stack direction="row" spacing={1}>
+                <TrendingDownIcon
+                    sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
+                />
+                <Typography variant="explanationText">
+                    Downward trend can mean reduced investment in assets, which could signal market uncertainty, reduced growth prospects, or that the company is in a mature phase.
+                </Typography>
+            </Stack>
+        </Stack>
     )
 
     return (
-        <div className={graphClicked ? styles.graphClicked : styles.graph} ref={graphRef}>
-            <div className={styles.titleAndTimeRanges}>
-                <div className={styles.titleContainer}>
-                    <h2>Capital Expenditures</h2>
-                    <Explanation explanation={explanation} />
-                </div>
-                <h3 style={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}>{percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}</h3>
-                <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current} />
-            </div>
-            <div onClick={() => {setGraphClicked(true);}} style={{ width: "100%", height: "100%" }}>
-                <ResponsiveContainer>
-                    <BarChart
-                        data={reports}
-                        margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
-                        }}
-                    >
-                        <CartesianGrid  strokeDasharray="" vertical={false} stroke="#A3B18A" />
-                        <XAxis dataKey="date" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}} />
-                        <YAxis tickFormatter={(value) => {
-                            if (countDigits(value) >= 10) {return `${(value / 1000000000).toFixed(2)}B`}
-                            if (countDigits(value) >= 7) {return `${(value / 1000000).toFixed(2)}M`}
-                            return value
-                        }} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
-                        <Tooltip formatter={(value) => {
-                            if (countDigits(value) >= 10) {return `${value / 1000000000}B`}
-                            if (countDigits(value) >= 7) {return `${value / 1000000}M`}
-                            return value
-                        }}/>
-                        <Bar dataKey="capitalExpenditures" shape={<CustomBar></CustomBar>}  activeBar={<CustomActiveBar></CustomActiveBar>} />
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
-        </div>
+        <Box sx={{ flex: 1 }}>
+            <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                <GraphTitle
+                    title="Capital Expenditures"
+                    explanation={explanation}
+                    percentChange={percentChange}
+                    timeRange={timeRange}
+                    setTimeRange={setTimeRange}
+                />
+                <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                    <ResponsiveContainer>
+                        <BarChart
+                            data={reports}
+                            margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
+                            }}
+                        >
+                            <CartesianGrid  strokeDasharray="" vertical={false} stroke="#A3B18A" />
+                            <XAxis dataKey="date" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}} />
+                            <YAxis tickFormatter={(value) => {
+                                if (countDigits(value) >= 10) {return `${(value / 1000000000).toFixed(2)}B`}
+                                if (countDigits(value) >= 7) {return `${(value / 1000000).toFixed(2)}M`}
+                                return value
+                            }} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                            <Tooltip formatter={(value) => {
+                                if (countDigits(value) >= 10) {return `${value / 1000000000}B`}
+                                if (countDigits(value) >= 7) {return `${value / 1000000}M`}
+                                return value
+                            }}/>
+                            <Bar dataKey="capitalExpenditures" shape={<CustomBar></CustomBar>}  activeBar={<CustomActiveBar></CustomActiveBar>} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </Box>
+            </GraphCard>
+        </Box>
     )
 }
 

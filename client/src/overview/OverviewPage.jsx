@@ -2,19 +2,32 @@ import {useState, useRef} from "react"
 import {useNavigate} from "react-router-dom"
 import {useEffect} from "react"
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
-import styles from "./OverviewPage.module.css"
-import PeriodSwitch from "./components/period-switch/PeriodSwitch.jsx"
+import PeriodSwitch from "./components/PeriodSwitch.jsx"
+// mui components
+import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import { styled } from '@mui/material/styles';
 // components
 import { About, Fundamentals, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
     SharesOutstandingGraph, EPSGraph, PricingGraph
 } from "./index.js"
+import StyledTextField from "../shared/StyledTextField.jsx"
 // pictures
 import logo from "../assets/logoPlaceholder.png"
 // helpers
 import {checkPermission, getNewTokens} from "../helpers/helper.js"
 
+
+const GraphsContainer = styled(Stack)({
+    width: "95vw",
+    maxWidth: "1300px",
+    flexWrap: "wrap",
+    gap: "1rem",
+});
 
 function OverviewPage() {
     // when opens up the page check if user is authorized
@@ -28,6 +41,7 @@ function OverviewPage() {
         ran.current = true;
         checkPermission(navigate);
     }, []);
+
 
     const [symbol, setSymbol] = useState("");
     const [period, setPeriod] = useState("annually");
@@ -76,104 +90,92 @@ function OverviewPage() {
         }
     }
 
-    const overviewSearchStyle = {
-        width: "100%",
-        height: "100%",
-        fontSize: "20px",
-        "& .MuiFilledInput-root": {
-            backgroundColor: "#DAD7CD",
-            borderColor: "lightgrey",
-            borderWidth: "2px",
-            borderStyle: "solid",
-            borderRadius: "20px",
-            overflow: "hidden",
-            '& fieldset': {
-                borderRadius: "20px",
-                overflow: "hidden",
-            }
-        },
-        '& .MuiInputLabel-filled': {
-            color: '#344E41',
-            '&.Mui-focused': {
-                color: '#344E41',
-            },
-        },
-        '& .MuiFilledInput-underline': {
-            '&:before': {
-                borderBottomColor: '#3A5A40',
-            },
-            '&:after': {
-                borderBottomColor: '#3A5A40',
-            },
-        },
-        "input": {color: "#344E41", backgroundColor: "#DAD7CD"},
-    };
-
     if (searched) {
         return (
-            <>
+            <Container maxWidth="lg">
                 <ProductHeader></ProductHeader>
-                <div className={styles.overviewContent}>
-                    <form className={styles.afterSearchedForm} onSubmit={handleSearchSubmit}>
-                        <TextField sx={overviewSearchStyle}
-                                variant="filled"
-                                label="stock symbol"
-                                value={symbol}
-                                onChange={(event) => {setSymbol(event.target.value)}}
+                <Stack spacing={5} sx={{ alignItems: "center" }}>
+                    <form onSubmit={handleSearchSubmit} style={{ width: "50%" }}>
+                        <StyledTextField
+                            label="stock symbol"
+                            value={symbol}
+                            onChange={(event) => {setSymbol(event.target.value)}}
+                            sx={{ width: "100%" }}
                         />
                     </form>
-                    <div className={styles.introduction}>
-                        <img src={logo} className={styles.logo}></img>
-                        <div className={styles.introductionText}>
-                            <h2 style={{margin: "20px 0"}}>Microsoft | MSFT</h2>
-                            <h2 style={{margin: "20px 0"}}>500 <span style={{fontSize: "25px"}}>USD</span></h2>
-                        </div>
-                    </div>
+                    <Stack
+                        direction="row"
+                        sx={{ width: "100%", alignItems: "center" }}
+                        spacing={5}
+                    >
+                        <Box
+                            component="img"
+                            src={logo}
+                            sx={{
+                                width: {xs: "7rem", sm: "15rem", md: "20rem"},
+                                height: {xs: "7rem", sm: "15rem", md: "20rem"},
+                                borderRadius: "50%"
+                            }}
+                        />
+                        <Stack spacing={2}>
+                            <Typography sx={{ fontSize: { xs: "2rem", sm: "3rem", md: "4rem" }, fontWeight: "bold" }}>Microsoft | MSFT</Typography>
+                            <Typography sx={{ fontSize: { xs: "2rem", sm: "3rem", md: "4rem" }, fontWeight: "bold" }}>500 <Typography component="span" sx={{ fontSize: { xs: "1rem", sm: "2rem", md: "3rem" }, fontWeight: "bold" }}>USD</Typography></Typography>
+                        </Stack>
+                    </Stack>
                     <About></About>
                     <Fundamentals></Fundamentals>
-                    <div className={styles.graphs}>
-                        <div className={styles.row}>
-                            <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
-                            <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
-                            <PricingGraph reports={reports.PRICING}></PricingGraph>
-                        </div>
-                    </div>
+                    <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                        <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
+                        <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
+                        <PricingGraph reports={reports.PRICING}></PricingGraph>
+                    </GraphsContainer>
                     <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
-                    <div className={styles.graphs}>
-                        <div className={styles.row}>
-                            <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
-                            <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
-                            <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
-                        </div>
-                        <div className={styles.row}>
-                            <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
-                            <FreeCashflowGraph reports={reports.CASH_FLOW} ></FreeCashflowGraph>
-                            <CashVsDebtGraph reports={reports.BALANCE_SHEET} ></CashVsDebtGraph>
-                        </div>
-                        <div className={styles.row}>
-                            <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
-                        </div>
-                    </div>
-                </div>
-            </>
+                    <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                        <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
+                        <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
+                        <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
+                        <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
+                        <FreeCashflowGraph reports={reports.CASH_FLOW} ></FreeCashflowGraph>
+                        <CashVsDebtGraph reports={reports.BALANCE_SHEET} ></CashVsDebtGraph>
+                        <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
+                    </GraphsContainer>
+                </Stack>
+            </Container>
         )
     }
 
     return (
-        <>
+        <Container maxWidth="lg">
             <ProductHeader></ProductHeader>
-            <div className={styles.overviewContentBeforeSearched}>
-                <span className={styles.caption}>Enter stock symbol and get started now!</span>
-                <form className={styles.beforeSearchedForm} onSubmit={handleSearchSubmit}>
-                    <TextField sx={overviewSearchStyle}
-                                variant="filled"
-                                label="stock symbol"
-                                value={symbol}
-                                onChange={(event) => {setSymbol(event.target.value)}}
+            <Stack
+                spacing={2}
+                sx={{
+                    height: "30rem",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "70%",
+                    justifySelf: "center",
+                }}
+            >
+                <Typography
+                    variant="h2"
+                    sx={{
+                        fontWeight: "normal",
+                        textAlign: "center",
+                    }}
+                >
+                    Enter stock symbol and get started now!
+                </Typography>
+                <form onSubmit={handleSearchSubmit} style={{ width: "100%" }}>
+                    <StyledTextField
+                        label="stock symbol"
+                        value={symbol}
+                        onChange={(event) => {setSymbol(event.target.value)}}
+                        sx={{ width: "100%" }}
                     />
                 </form>
-            </div>
-        </>
+            </Stack>
+        </Container>
     )
 }
 

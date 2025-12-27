@@ -12,6 +12,7 @@ const StyledTextField = styled(TextField)(({theme}) => ({
         borderColor: "#3A5A40",
     },
     "& .MuiFormHelperText-root": {backgroundColor: "#DAD7CD", margin: "0"},
+    "& .MuiInputLabel-shrink": {top: "4px"},
 }));
 
 

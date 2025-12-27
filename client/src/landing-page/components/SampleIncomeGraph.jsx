@@ -3,13 +3,10 @@ import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 import { useState, useRef, useEffect } from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 // borrows from overview page
-import TimeRanges from "../../overview/components/TimeRanges.jsx"
-import Explanation from "../../overview/components/Explanation.jsx"
+import GraphTitle from "../../overview/components/GraphTitle.jsx"
+import { explanation } from "../../overview/components/NetIncomeGraph.jsx"
 // mui components
 import Stack from '@mui/material/Stack';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 
@@ -51,33 +48,6 @@ function SampleIncomeGraph({ key }) {
         return Math.floor(Math.log10(Math.abs(value))) + 1;
     }
 
-    const explanation = (
-        <Stack spacing={1}>
-            <Typography variant="h5">What is it?</Typography>
-            <Typography variant="body1">
-                Net income is a company's profit after all expenses and taxes have been deducted from its total revenue.
-            </Typography>
-            <Typography variant="h5">Calculation</Typography>
-            <Typography variant="body1" sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}>Net Income = Total Revenue – Total Expenses</Typography>
-            <Typography variant="h5">Interpretation</Typography>
-            <Stack direction="row" spacing={1}>
-                <TrendingUpIcon
-                    sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-                />
-                <Typography variant="body1">
-                    A positive trend shows the company is improving its financial performance.
-                </Typography>
-            </Stack>
-            <Stack direction="row" spacing={1}>
-                <TrendingDownIcon
-                    sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-                />
-                <Typography variant="body1">
-                    A negative trend can be a warning sign, even if it remains positive. It suggests the company may be facing challenges in its operations or market.
-                </Typography>
-            </Stack>
-        </Stack>
-    )
 
     return (
         <Stack
@@ -95,7 +65,7 @@ function SampleIncomeGraph({ key }) {
                     zIndex: 3,
                 } : {
                     height: "100%",
-                    width: "80%",
+                    width: {xs: "100%", sm: "80%"},
                     background: "var(--main-dust-grey)",
                     borderRadius: "10px",
                     color: "var(--main-pine-teal)",
@@ -103,25 +73,15 @@ function SampleIncomeGraph({ key }) {
                 }
             }
         >
-            <Stack direction="row" sx={{ alignItems: "center" }}>
-                <Stack
-                    direction="row"
-                    sx={{ alignItems: "center", flexGrow: 1, justifyContent: "center" }}
-                    spacing={1}
-                >
-                    <Typography variant="h5">Net Income</Typography>
-                    <Explanation explanation={explanation} />
-                </Stack>
-                <Typography
-                    variant="h6"
-                    sx={{color: percentChange >= 0 ? "#3A5A40" : "#bc4749"}}
-                >
-                    {percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}
-                </Typography>
-                <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} menuContainer={graphRef.current} />
-            </Stack>
+            <GraphTitle
+                title="Net Income"
+                explanation={explanation}
+                percentChange={percentChange}
+                timeRange={timeRange}
+                setTimeRange={setTimeRange}
+            />
             <Box
-                style={{ width: "100%", height: "100%" }}
+                sx={{ width: "100%", height: "100%" }}
                 onClick={() => {setGraphClicked(true);}}
             >
                 <ResponsiveContainer>
