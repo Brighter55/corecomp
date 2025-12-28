@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "accounts",
 ]
 
 REST_FRAMEWORK = {
@@ -165,4 +166,4 @@ CACHES = {
     }
 }
 
-AUTH_USER_MODEL = 'api.CustomUser'
+AUTH_USER_MODEL = 'accounts.CustomUser'
