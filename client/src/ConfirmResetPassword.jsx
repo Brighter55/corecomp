@@ -79,7 +79,7 @@ function ConfirmResetPassword() {
         setPasswordError("");
         const payload = {password: password, confirmPassword: confirmPassword, id: id, token: token};
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/confirm-reset-password", {
+            const response = await fetch("http://127.0.0.1:8000/accounts/confirm-reset-password", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

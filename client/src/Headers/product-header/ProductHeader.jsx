@@ -37,7 +37,7 @@ function ProductHeader() {
     async function handleSignoutClicked() {
         // send a request to Django with refresh token to revoke the token
         async function signOut() {
-            const response = await fetch("http://127.0.0.1:8000/api/sign-out", {
+            const response = await fetch("http://127.0.0.1:8000/accounts/sign-out", {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${sessionStorage.getItem("access")}`,

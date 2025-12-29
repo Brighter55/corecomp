@@ -17,7 +17,7 @@ function Return() {
 
 
         async function initialize() {
-            const response = await fetch("http://127.0.0.1:8000/api/session-status", {
+            const response = await fetch("http://127.0.0.1:8000/billings/session-status", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

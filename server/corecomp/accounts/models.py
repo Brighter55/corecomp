@@ -7,4 +7,3 @@ class CustomUser(AbstractUser): # model for User
     subscription_id = models.CharField(max_length=50, null=True)
     date_active = models.DateTimeField(null=True, blank=True)
     account_type = models.CharField(max_length=15, null=True)
-

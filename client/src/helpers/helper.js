@@ -1,6 +1,6 @@
 
 export async function checkPermission(navigate) {
-    const response = await fetch("http://127.0.0.1:8000/api/check-permission", {
+    const response = await fetch("http://127.0.0.1:8000/accounts/check-permission", {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
@@ -11,7 +11,7 @@ export async function checkPermission(navigate) {
     /*get new tokens if access expires*/
     if (!response.ok) {
         if (data?.messages?.[0]?.message === "Token is expired") {
-            const response = await fetch("http://127.0.0.1:8000/api/refresh", {
+            const response = await fetch("http://127.0.0.1:8000/accounts/refresh", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -40,7 +40,7 @@ export async function checkPermission(navigate) {
 }
 
 export async function getNewTokens(data, navigate) {
-    const refreshResponse = await fetch("http://127.0.0.1:8000/api/refresh", {
+    const refreshResponse = await fetch("http://127.0.0.1:8000/accounts/refresh", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

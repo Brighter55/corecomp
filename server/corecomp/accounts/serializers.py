@@ -184,4 +184,3 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, data):
         data = super().validate(data) # returns only {"access": ..., "refresh": ..} but self.user is now avialable
         return data
-
