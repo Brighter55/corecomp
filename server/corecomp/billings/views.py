@@ -7,6 +7,7 @@ import json
 from dotenv import load_dotenv
 import os
 import stripe
+from .models import StripeEvent
 
 
 # Create your views here.
@@ -59,27 +60,25 @@ def portal_session(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def webhook(request):
-    payload = request.body #JSON blob
+    payload = request.body # stripe JSON blob
+    sig_header = request.headers.get('stripe-signature')
 
     try:
-        event = stripe.Event.construct_from(  # turn JSON into Python and into stripe object to catch any error early-on
-        json.loads(payload), stripe.api_key
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
         )
-    except ValueError as e:
-        # Invalid payload
+    except stripe.error.SignatureVerificationError as e:
+        print('⚠️  Webhook signature verification failed.' + str(e))
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    if endpoint_secret:
-            # Only verify the event if you've defined an endpoint secret
-            # Otherwise, use the basic event deserialized with JSON
-            sig_header = request.headers.get('stripe-signature')
-            try:
-                event = stripe.Webhook.construct_event(
-                    payload, sig_header, endpoint_secret
-                )
-            except stripe.error.SignatureVerificationError as e:
-                print('⚠️  Webhook signature verification failed.' + str(e))
-                return jsonify(success=False)
+    handled_events = [
+        "customer.subscription.created",
+        "customer.subscription.updated",
+        "customer.subscription.deleted",
+    ]
+    # check for idempotentcy
+    if StripeEvent.objects.filter(event_id=event.id).exists() or event.type not in handled_events:
+        return Response(status=status.HTTP_200_OK)
 
     # Handle the event
     if event.type == 'customer.subscription.created':
@@ -95,7 +94,8 @@ def webhook(request):
         user = User.objects.get(customer_id=subscription.customer)
         user.subscription_status = subscription.status
         user.save()
-    else:
-        print('Unhandled event type {}'.format(event.type))
+
+
+    StripeEvent.objects.create(event_id=event.id, created_at=event.created)
 
     return Response(status=status.HTTP_200_OK)
