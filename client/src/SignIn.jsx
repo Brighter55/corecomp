@@ -100,7 +100,7 @@ function SignIn() {
         event.preventDefault();
         const payload = {username: username, password: password};
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/sign-in", {
+            const response = await fetch("http://127.0.0.1:8000/accounts/sign-in", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -169,7 +169,7 @@ function SignIn() {
                                 const payload = {JWTToken: credentialResponse.credential};
                                 console.log(credentialResponse);
                                 async function sendJWTToken() {
-                                    const response = await fetch("http://127.0.0.1:8000/api/google-authentication", {
+                                    const response = await fetch("http://127.0.0.1:8000/accounts/google-authentication", {
                                         method: "POST",
                                         headers: {
                                             "Content-Type": "application/json",

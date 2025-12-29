@@ -87,7 +87,7 @@ function SignUp() {
         setConfirmPasswordError("");
         const payload = {email: email, username: username, password: password, confirmPassword: confirmPassword};
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/sign-up", {
+            const response = await fetch("http://127.0.0.1:8000/accounts/sign-up", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -192,7 +192,7 @@ function SignUp() {
                                 const payload = {JWTToken: credentialResponse.credential};
                                 console.log(credentialResponse);
                                 async function sendJWTToken() {
-                                    const response = await fetch("http://127.0.0.1:8000/api/google-authentication", {
+                                    const response = await fetch("http://127.0.0.1:8000/accounts/google-authentication", {
                                         method: "POST",
                                         headers: {
                                             "Content-Type": "application/json",

@@ -7,7 +7,7 @@ function AccountVerification() {
     useEffect(() => {
         const payload = {token: token, user_id: user_id};
         async function verify() {
-            const response = await fetch("http://127.0.0.1:8000/api/verify-email", {
+            const response = await fetch("http://127.0.0.1:8000/accounts/verify-email", {
                 method: "POST",
                 headers: {"Content-Type": "application/json",},
                 body: JSON.stringify(payload),

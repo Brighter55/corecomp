@@ -51,7 +51,7 @@ function OverviewPage() {
 
     async function getReports() {
         const payload = {symbol: symbol, period: period};
-        const response = await fetch("http://127.0.0.1:8000/api/overview", {
+        const response = await fetch("http://127.0.0.1:8000/pages/overview", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

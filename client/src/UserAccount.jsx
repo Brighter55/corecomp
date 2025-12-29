@@ -30,7 +30,7 @@ function UserAccount() {
     const [isCustomer, setIsCustomer] = useState(false);
 
     async function checkIsCustomer() {
-        const response = await fetch("http://127.0.0.1:8000/api/is-customer", {
+        const response = await fetch("http://127.0.0.1:8000/accounts/is-customer", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
@@ -54,7 +54,7 @@ function UserAccount() {
         event.preventDefault();
 
         async function getCheckoutSession() {
-            const response = await fetch("http://127.0.0.1:8000/api/checkout-session", {
+            const response = await fetch("http://127.0.0.1:8000/billings/checkout-session", {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
@@ -90,7 +90,7 @@ function UserAccount() {
 
     async function handleManageClicked() {
         async function getPortalSession() {
-            const response = await fetch("http://127.0.0.1:8000/api/portal-session", {
+            const response = await fetch("http://127.0.0.1:8000/billings/portal-session", {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
