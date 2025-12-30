@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 import os
 import stripe
 from .models import StripeEvent
+from datetime import datetime
+from django.utils.timezone import make_aware
+
 
 
 # Create your views here.
@@ -57,6 +60,11 @@ def portal_session(request):
     )
     return Response({"url": session.url}, status=status.HTTP_200_OK)
 
+def ts_to_dt(timestamp):
+    if not timestamp:
+        return None
+    return make_aware(datetime.fromtimestamp(timestamp))
+
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def webhook(request):
@@ -64,38 +72,48 @@ def webhook(request):
     sig_header = request.headers.get('stripe-signature')
 
     try:
-        event = stripe.Webhook.construct_event(
+        event_object = stripe.Webhook.construct_event(
             payload, sig_header, endpoint_secret
         )
     except stripe.error.SignatureVerificationError as e:
         print('⚠️  Webhook signature verification failed.' + str(e))
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    handled_events = [
+    handled_event_types = [
         "customer.subscription.created",
         "customer.subscription.updated",
         "customer.subscription.deleted",
     ]
     # check for idempotentcy
-    if StripeEvent.objects.filter(event_id=event.id).exists() or event.type not in handled_events:
+    """ development phase
+    if StripeEvent.objects.filter(event_id=event_object.id).exists() or event_object.type not in handled_events:
+        return Response(status=status.HTTP_200_OK)
+    """
+    if event_object.type not in handled_event_types:
         return Response(status=status.HTTP_200_OK)
 
+    subscription = event_object.data.object
     # Handle the event
-    if event.type == 'customer.subscription.created':
-        subscription = event.data.object
+    if event_object.type == 'customer.subscription.created':
         user = User.objects.get(id=subscription["metadata"]["user_id"])
-        user.customer_id = subscription.customer
-        user.subscription_id = subscription.id
-        user.subscription_status = subscription.status
-        user.save()
-        print(f"user: {subscription['metadata']['user_id']}s subscription has been activated")
-    elif event.type in ["customer.subscription.updated", "customer.subscription.deleted"]:
-        subscription = event.data.object
+        # update customer info
+        user.customer_id = subscription["customer"]
+        user.subscription_id = subscription["id"]
+        user.subscription_status = subscription["status"]
+        user.cancel_at_period_end = subscription["cancel_at_period_end"]
+        user.current_period_start = ts_to_dt(subscription["items"]["data"][0]["current_period_start"])
+        user.current_period_end = ts_to_dt(subscription["items"]["data"][0]["current_period_end"])
+    else:
         user = User.objects.get(customer_id=subscription.customer)
-        user.subscription_status = subscription.status
-        user.save()
+        # update customer's subscription status
+        user.subscription_status = subscription["status"]
+        user.cancel_at_period_end = subscription["cancel_at_period_end"]
+        user.current_period_start = ts_to_dt(subscription["items"]["data"][0]["current_period_start"])
+        user.current_period_end = ts_to_dt(subscription["items"]["data"][0]["current_period_end"])
+    user.save()
 
 
+    """ development phase
     StripeEvent.objects.create(event_id=event.id, created_at=event.created)
-
+    """
     return Response(status=status.HTTP_200_OK)
