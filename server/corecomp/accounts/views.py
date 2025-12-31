@@ -75,7 +75,6 @@ def verify_email(request):
     if default_token_generator.check_token(user, token): # if the token belongs to this user
         # activate account
         user.is_active = True
-        user.date_active = now()
         user.save()
         return Response({"success": "yep this is valid user account is activated"}, status=status.HTTP_200_OK)
     return Response({"error": "Nope the token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
@@ -89,7 +88,7 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
     try:
         user_info = id_token.verify_oauth2_token(JWTtoken, google_requests.Request(), os.getenv("GOOGLE_CLIENT_ID"))
         email = user_info["email"]
-        user, created = User.objects.get_or_create(email=email, defaults={"username": email, "email": email, "is_active": True, "date_active": now(), "account_type": "google"})
+        user, created = User.objects.get_or_create(email=email, defaults={"username": email, "email": email, "is_active": True, "account_type": "google"})
         if created:
             user.set_unusable_password()
             user.save()
