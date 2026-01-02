@@ -85,7 +85,12 @@ function SignUp() {
         setEmailError("");
         setPasswordError("");
         setConfirmPasswordError("");
-        const payload = {email: email, username: username, password: password, confirmPassword: confirmPassword};
+        const payload = {
+            email: email,
+            username: username,
+            password: password,
+            confirmPassword: confirmPassword
+        };
         try {
             const response = await fetch("http://127.0.0.1:8000/accounts/sign-up", {
                 method: "POST",

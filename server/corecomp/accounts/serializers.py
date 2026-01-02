@@ -77,7 +77,7 @@ class SignUp(serializers.ModelSerializer):
         password = data["password"]
         confirmPassword = data["confirmPassword"]
         if password != confirmPassword:
-            raise serializers.ValidationError({"password":"Passwords do not match"})
+            raise serializers.ValidationError("Passwords do not match")
         return data
 
     class Meta:

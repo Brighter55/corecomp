@@ -41,7 +41,7 @@ def check_permission(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def sign_up(request):
-    user_data = json.loads(request.body)
+    user_data = json.loads(request.body) # request.body = {email: email, username: username, password: password, confirmPassword: confirmPassword}
     serializer = SignUp(data=user_data)
     if serializer.is_valid():
         email = serializer.validated_data["email"]
