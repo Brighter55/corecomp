@@ -71,13 +71,44 @@ def verify_email(request):
     user_id = data["user_id"]
     token = data["token"]
     # get user object
-    user = User.objects.get(id=user_id)
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({"error": "User doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
+    # check if user has already activated their account
+    if user.is_active == True:
+        return Response({"success": "the account is already activated"}, status=status.HTTP_200_OK)
     if default_token_generator.check_token(user, token): # if the token belongs to this user
         # activate account
         user.is_active = True
         user.save()
         return Response({"success": "yep this is valid user account is activated"}, status=status.HTTP_200_OK)
     return Response({"error": "Nope the token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def resend_verify_email(request):
+    data = json.loads(request.body)
+    user_id = data["user_id"]
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({"error": "User doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
+    if user.is_active == True:
+        return Response({"error": "account is already active"}, status=status.HTTP_400_BAD_REQUEST)
+    token = default_token_generator.make_token(user)
+    link = f"http://localhost:5173/account-verification/{token}/{user.id}"
+    response = requests.post(
+        "https://api.mailgun.net/v3/sandboxcb8d9093dd704fa990c67dc9fb3b0e78.mailgun.org/messages",
+        auth=("api", os.getenv("MAILGUN_API_KEY")),
+        data={
+            "from": "Corecomp <verify@corecomp.cc>",
+            "to": "Peter <sriphrakhunpiyawit@gmail.com>", # change to email in prod.
+            "subject": "Account Verification Email",
+        #   "html": get_html_message(link),
+            "text": f"You have successfully created account with us, click the link below to verify your account and activate your trial {link}"
+        })
+    return Response({"success": "email has been resent"}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([AllowAny])

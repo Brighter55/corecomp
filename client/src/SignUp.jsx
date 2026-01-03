@@ -101,25 +101,20 @@ function SignUp() {
             });
             const data = await response.json();
             console.log(data);
-
             if (!response.ok) {
-                for (const field in data) {
-                    if (field == "username") {
-                        setUsernameError(data.username);
-                    } else if (field == "email") {
-                        setEmailError(data.email);
-                    } else if (field == "password") {
-                        setPasswordError(data.password)
-                    } else if (field == "confirmPassword") {
-                        setConfirmPasswordError(data.confirmPassword);
-                    } else if (field == "non_field_errors") {
-                        setPasswordError(data.non_field_errors);
-                        setConfirmPasswordError(data.non_field_errors);
-                    }
+                if ("username" in data) {
+                    setUsernameError(data.username);
+                } if ("email" in data) {
+                    setEmailError(data.email);
+                } if ("password" in data) {
+                    setPasswordError(data.password);
+                } if ("confirmPassword" in data) {
+                    setConfirmPasswordError(data.confirmPassword);
+                } if ("non_field_errors" in data) {
+                    setPasswordError(data.non_field_errors);
+                    setConfirmPasswordError(data.non_field_errors);
                 }
-
             }
-
         } catch (error) {
             console.error("Error:", error);
         }
