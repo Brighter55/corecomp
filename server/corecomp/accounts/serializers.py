@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 
 User = get_user_model()
@@ -171,9 +172,17 @@ class ConfirmResetPassword(serializers.ModelSerializer):
         # check if two passwords match
         password = data["password"]
         confirmPassword = data["confirmPassword"]
+        user_id = data["id"]
+        token = data["token"]
+        user = User.objects.get(id=user_id)
         if password != confirmPassword:
             raise serializers.ValidationError("Passwords do not match")
 
+        # check if the token is valid
+        token_generator = PasswordResetTokenGenerator()
+        if not token_generator.check_token(user, token):
+            raise serializers.ValidationError("token is invalid")
+        
         return data
 
     class Meta:

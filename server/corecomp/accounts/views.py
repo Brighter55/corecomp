@@ -173,15 +173,9 @@ def confirm_reset_password(request):
         user_id = serializer.validated_data["id"]
         new_password = serializer.validated_data["password"]
         user = User.objects.get(id=user_id)
-        token = serializer.validated_data["token"]
-
-        token_generator = PasswordResetTokenGenerator()
-        if token_generator.check_token(user, token):  # if the token belongs to user
-            user.set_password(new_password)
-            user.save()
-            return Response({"success": f"Your password has been reset!, your token is {token} and user_id is {user_id}"}, status=status.HTTP_200_OK)
-
-        return Response({"token": "token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return Response({"success": "your password has been reset!"}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
