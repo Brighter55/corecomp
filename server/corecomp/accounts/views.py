@@ -11,12 +11,11 @@ import json
 from dotenv import load_dotenv
 import os
 import requests
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
 from django.utils.timezone import now
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from .permissions import IsSubscribed
+from .utils import verify_google_token
 
 
 load_dotenv()
@@ -115,9 +114,9 @@ def resend_verify_email(request):
 def google_authentication(request): #decodes the JWT to get user's info and create or retrieve account to send access and refresh
     # get JWT from request
     data = json.loads(request.body)
-    JWTtoken = data["JWTToken"]
+    jwt_token = data["JWTToken"]
     try:
-        user_info = id_token.verify_oauth2_token(JWTtoken, google_requests.Request(), os.getenv("GOOGLE_CLIENT_ID"))
+        user_info = verify_google_token(jwt_token)
         email = user_info["email"]
         user, created = User.objects.get_or_create(email=email, defaults={"username": email, "email": email, "is_active": True, "account_type": "google"})
         if created:
