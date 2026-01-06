@@ -10,7 +10,7 @@ import stripe
 from .models import StripeEvent
 from datetime import datetime
 from django.utils.timezone import make_aware
-from .utils import checkout, get_checkout_status
+from .utils import checkout, get_checkout_status, create_portal
 
 
 # Create your views here.
@@ -49,17 +49,18 @@ def session_status(request):
         data = json.loads(request.body)
     except json.decoder.JSONDecodeError:
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
     session_id = data.get("sessionId")
+
     try:
         session = get_checkout_status(session_id)
-
     except stripe.InvalidRequestError as e:
         if e.http_status == 404:
             return Response(status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
     except stripe.StripeError:
         return Response(status=status.HTTP_502_BAD_GATEWAY)
+
     return Response({"status": session.status, "payment_status": session.payment_status}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
@@ -67,10 +68,16 @@ def session_status(request):
 def portal_session(request):
     return_url = "http://localhost:5173/user-account"
     customer_id = request.user.customer_id
-    session = stripe.billing_portal.Session.create(
-        customer=customer_id,
-        return_url=return_url,
-    )
+    if not customer_id:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    try:
+        session = create_portal(customer_id, return_url)
+    except stripe.InvalidRequestError as e:
+        if e.http_status == 404:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    except stripe.StripeError:
+        return Response(status=status.HTTP_502_BAD_GATEWAY)
     return Response({"url": session.url}, status=status.HTTP_200_OK)
 
 def ts_to_dt(timestamp):
