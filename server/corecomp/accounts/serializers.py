@@ -2,6 +2,10 @@ from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from rest_framework.exceptions import AuthenticationFailed
+from django.contrib.auth import authenticate
+
 
 
 User = get_user_model()
@@ -77,7 +81,7 @@ class SignUp(serializers.ModelSerializer):
         password = data["password"]
         confirmPassword = data["confirmPassword"]
         if password != confirmPassword:
-            raise serializers.ValidationError({"password":"Passwords do not match"})
+            raise serializers.ValidationError("Passwords do not match")
         return data
 
     class Meta:
@@ -171,8 +175,16 @@ class ConfirmResetPassword(serializers.ModelSerializer):
         # check if two passwords match
         password = data["password"]
         confirmPassword = data["confirmPassword"]
+        user_id = data["id"]
+        token = data["token"]
+        user = User.objects.get(id=user_id)
         if password != confirmPassword:
             raise serializers.ValidationError("Passwords do not match")
+
+        # check if the token is valid
+        token_generator = PasswordResetTokenGenerator()
+        if not token_generator.check_token(user, token):
+            raise serializers.ValidationError("token is invalid")
 
         return data
 
@@ -182,5 +194,21 @@ class ConfirmResetPassword(serializers.ModelSerializer):
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, data):
-        data = super().validate(data) # returns only {"access": ..., "refresh": ..} but self.user is now avialable
+        username = data.get("username")
+        password = data.get("password")
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise AuthenticationFailed("Invalid username or password")
+
+        if not user.check_password(password):
+            raise AuthenticationFailed("Invalid username or password")
+
+        if not user.is_active:
+            raise AuthenticationFailed("This account is inactive")
+
+        #  if it passes your custom validations,
+        # then pass it to django to validate again
+        # and return {"access": ..., "refresh": ..}
+        data = super().validate(data)
         return data
