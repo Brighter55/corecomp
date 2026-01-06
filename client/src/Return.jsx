@@ -27,10 +27,8 @@ function Return() {
             });
             const session = await response.json();
             if (session.status == "open") {
-                window.location.replace("http://localhost:5173/user-account");
+                navigate("/user-account");
             } else if (session.status == "complete") {
-                document.getElementById('success').classList.remove('hidden');
-                document.getElementById('customer-email').textContent = session.customer_email;
                 /*send a request to Django to update database*/
                 navigate("/overview");
             }
