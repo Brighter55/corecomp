@@ -10,7 +10,7 @@ import stripe
 from .models import StripeEvent
 from datetime import datetime
 from django.utils.timezone import make_aware
-from .utils import checkout
+from .utils import checkout, get_checkout_status
 
 
 # Create your views here.
@@ -38,19 +38,29 @@ def checkout_session(request):
                 },
             }
         )
-    except Exception:
-        return Response(status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    except stripe.StripeError as e:
+        return Response(status=status.HTTP_502_BAD_GATEWAY)
     return Response({"client_secret": session.client_secret}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def session_status(request):
-    data = json.loads(request.body)
-    session_id = data["sessionId"]
-    session = stripe.checkout.Session.retrieve(session_id)
-    customer = stripe.Customer.retrieve(session.customer)
+    try:
+        data = json.loads(request.body)
+    except json.decoder.JSONDecodeError:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    session_id = data.get("sessionId")
+    try:
+        session = get_checkout_status(session_id)
 
-    return Response({"status": session.status, "payment_status": session.payment_status, "customer_email": customer.email}, status=status.HTTP_200_OK)
+    except stripe.InvalidRequestError as e:
+        if e.http_status == 404:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    except stripe.StripeError:
+        return Response(status=status.HTTP_502_BAD_GATEWAY)
+    return Response({"status": session.status, "payment_status": session.payment_status}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

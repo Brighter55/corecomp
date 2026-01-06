@@ -26,7 +26,7 @@ function Return() {
                 body: JSON.stringify({sessionId: checkout_session_id}),
             });
             const session = await response.json();
-            if (session.status == "open") {
+            if (["open", "expired"].includes(session.status)) {
                 navigate("/user-account");
             } else if (session.status == "complete") {
                 /*send a request to Django to update database*/
