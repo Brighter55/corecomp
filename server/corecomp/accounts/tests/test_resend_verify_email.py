@@ -5,11 +5,20 @@ import pytest
 User = get_user_model()
 url = reverse("resend_verify_email")
 
-# test for valid request
+# test for valid request passing user_id
 @pytest.mark.django_db
-def test_resend_email(api_client):
+def test_resend_email_with_user_id(api_client):
     user = User.objects.create_user(username="test", is_active=False)
     payload = {"user_id": user.id}
+    response = api_client.post(url, payload, format="json")
+    assert response.status_code == 200
+    assert response.json()["success"] == "email has been resent"
+
+# test for valid request passing username
+@pytest.mark.django_db
+def test_resend_email_with_username(api_client):
+    user = User.objects.create_user(username="test", is_active=False)
+    payload = {"username": user.username}
     response = api_client.post(url, payload, format="json")
     assert response.status_code == 200
     assert response.json()["success"] == "email has been resent"

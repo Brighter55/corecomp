@@ -21,11 +21,10 @@ from .utils import verify_google_token
 load_dotenv()
 User = get_user_model() # Get model listed in settings.py: AUTH_USER_MODEL = 'accounts.CustomUser'
 
-
+# return error message: "invalid username/password", user.isactive == False
 class CustomTokenObtainPairView(TokenObtainPairView):
     # change from default (JSON access and refresh) to cookies once deployed
     serializer_class = CustomTokenObtainPairSerializer
-
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -88,9 +87,13 @@ def verify_email(request):
 @permission_classes([AllowAny])
 def resend_verify_email(request):
     data = json.loads(request.body)
-    user_id = data["user_id"]
+    username = data.get("username")
+    user_id = data.get("user_id")
     try:
-        user = User.objects.get(id=user_id)
+        if username:
+            user = User.objects.get(username=username)
+        elif user_id:
+            user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return Response({"error": "User doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
     if user.is_active == True:

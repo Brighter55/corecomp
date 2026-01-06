@@ -15,6 +15,12 @@ import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 // images
 import facebookLogo from "./assets/facebookLogo.png"
 import tiktokLogo from "./assets/tiktokLogo.png"
@@ -70,8 +76,25 @@ function SignIn() {
     const [password, setPassword] = useState("");
     // validation
     const [error, setError] = useState("");
+    const [open, setOpen] = useState(false);
+
+    function handleClose() {
+        setOpen(false);
+    };
+    async function handleClickResendEmail() {
+        const payload = {username: username};
+        const response = await fetch("http://127.0.0.1:8000/accounts/resend-verify-email", {
+            method: "POST",
+            headers: {"Content-Type": "application/json",},
+            body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        console.log(data);
+        setOpen(false);
+    }
     // hide password
     const [showPassword, setShowPassword] = useState(false);
+
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
@@ -109,9 +132,16 @@ function SignIn() {
             });
             // if account not found
             if (!response.ok) {
-                setError("Username or/and password is incorrect");
-                setUsername("");
-                setPassword("");
+                const data = await response.json();
+                console.log(data);
+                if (data["detail"] == "Invalid username or password") {
+                    setError("Invalid username/password.");
+                    setUsername("");
+                    setPassword("");
+                } else if (data["detail"] == "This account is inactive") {
+                    setError("User's account is inactive");
+                    setOpen(true);
+                }
                 return
             }
 
@@ -202,6 +232,38 @@ function SignIn() {
                     </Stack>
                 </StyledSloganGrid>
             </Grid>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+            >
+                <DialogContent>
+                    <DialogContentText>
+                        Your account is not yet activated, account can be activated by the email we sent when you first sign up.
+                        Couldn't find the email?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={handleClose}
+                        sx={{
+                            color: "var(--main-brick)",
+                            "&:hover": {
+                                "backgroundColor": "hsl(359, 47%, 95%)",
+                            },
+                        }}
+                    >
+                        No
+                    </Button>
+                    <Button
+                        autoFocus
+                        onClick={handleClickResendEmail}
+                        variant="contained"
+                        sx={{ backgroundColor: "#588157", color: "#DAD7CD" }}
+                    >
+                        Resend
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     )
 }
