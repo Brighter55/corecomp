@@ -1,5 +1,6 @@
 import stripe
-
+from datetime import datetime
+from django.utils.timezone import make_aware
 
 def checkout(mode, line_items, ui_mode, return_url, subscription_data):
     session = stripe.checkout.Session.create(
@@ -21,3 +22,14 @@ def create_portal(customer_id, return_url):
         return_url=return_url,
     )
     return session
+
+def ts_to_dt(timestamp):
+    if not timestamp:
+        return None
+    return make_aware(datetime.fromtimestamp(timestamp))
+
+def create_event(payload, sig_header, endpoint_secret):
+    event_object = stripe.Webhook.construct_event(
+        payload, sig_header, endpoint_secret
+    )
+    return event_object
