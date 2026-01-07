@@ -1,6 +1,14 @@
 import stripe
 from datetime import datetime
 from django.utils.timezone import make_aware
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
+# stripe
+stripe.api_key = os.getenv("STRIPE_API_KEY")
 
 def checkout(mode, line_items, ui_mode, return_url, subscription_data):
     session = stripe.checkout.Session.create(

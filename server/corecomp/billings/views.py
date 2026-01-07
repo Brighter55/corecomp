@@ -8,8 +8,6 @@ from dotenv import load_dotenv
 import os
 import stripe
 from .models import StripeEvent
-from datetime import datetime
-from django.utils.timezone import make_aware
 from .utils import checkout, get_checkout_status, create_portal, ts_to_dt, create_event
 
 
