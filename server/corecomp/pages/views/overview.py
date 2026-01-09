@@ -5,17 +5,55 @@ from rest_framework import status
 from django.contrib.auth import get_user_model
 import json
 from dotenv import load_dotenv
+import os
 import requests
-
-
+from pages.utils import get_stock_price
+# permission
+from accounts.permissions import IsSubscribed
+from pages.serializers import SymbolSerializer
 
 load_dotenv()
 User = get_user_model() # Get model listed in settings.py: AUTH_USER_MODEL = 'api.CustomUser'
+api_key = os.getenv("ALPHAVANTAGE_API_KEY")
 
+
+@api_view(["POST"])
+@permission_classes([IsSubscribed])
+def get_most_recent_price(request):
+    """ prod. phase
+
+
+    serializer = SymbolSerializer(data=request.data)
+    if serializer.is_valid():
+        symbol = serializer.validated_data["symbol"]
+        url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={api_key}'
+        data = get_stock_price(url)
+
+        # check if alphavatage api returns an error
+        if "Note" in data or "Information" in data:
+            return Response(
+                {"error": "rate limit issue"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                headers={"Retry-After":  "60000"}
+            )
+        if "Error Message" in data:
+            return Response(
+                {"error": "invalid api call issue"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # check if alphavantage returns {} for invalid symbol or symbol with no data
+        if not data["Global Quote"]:
+            return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
+
+        price = str(round(float(data["Global Quote"]["05. price"]), 2))
+        return Response({"price": price}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    """
+    return Response({"price": "302.47"}, status=status.HTTP_200_OK)
 
 # requests to AlphaVantage and return reports according to period
 def get_reports(symbol, period):
-    # Development phase: api_key = os.getenv("ALPHAVANTAGE_API_KEY")
 
     # request for INCOME_STATEMENT
     # Development phase: url = f"https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol={symbol}&apikey={api_key}"

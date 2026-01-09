@@ -11,7 +11,7 @@ url = reverse('webhook')
 # test for valid webhook for 'customer.subscription.created'
 @patch("billings.views.create_event")
 @pytest.mark.django_db
-def test_valid_webhook(mock_create_event, test_user, api_client):
+def test_valid_webhook(mock_create_event, authenticated_user, api_client):
     payload = {
         "type": "customer.subscription.created",
         "id": "evt_123",
@@ -19,7 +19,7 @@ def test_valid_webhook(mock_create_event, test_user, api_client):
         "data": {
             "object": {
                 "metadata": {
-                    "user_id": test_user.id
+                    "user_id": authenticated_user.id
                 },
                 "customer": "cus_123",
                 "id": "sub_123",
@@ -38,19 +38,19 @@ def test_valid_webhook(mock_create_event, test_user, api_client):
     }
     mock_create_event.return_value = payload
     response = api_client.post(url, payload, format="json")
-    test_user.refresh_from_db()
-    assert test_user.customer_id == "cus_123"
-    assert test_user.subscription_id == "sub_123"
-    assert test_user.subscription_status == "active"
-    assert test_user.cancel_at_period_end == False
-    assert test_user.current_period_start == ts_to_dt(1767126806)
-    assert test_user.current_period_end == ts_to_dt(1767731606)
+    authenticated_user.refresh_from_db()
+    assert authenticated_user.customer_id == "cus_123"
+    assert authenticated_user.subscription_id == "sub_123"
+    assert authenticated_user.subscription_status == "active"
+    assert authenticated_user.cancel_at_period_end == False
+    assert authenticated_user.current_period_start == ts_to_dt(1767126806)
+    assert authenticated_user.current_period_end == ts_to_dt(1767731606)
     assert response.status_code == 200
 
 # test for idempotency
 @patch("billings.views.create_event")
 @pytest.mark.django_db
-def test_for_idempotentcy(mock_create_event, test_user, api_client):
+def test_for_idempotentcy(mock_create_event, authenticated_user, api_client):
     payload = {
         "type": "customer.subscription.created",
         "id": "evt_123",
@@ -58,7 +58,7 @@ def test_for_idempotentcy(mock_create_event, test_user, api_client):
         "data": {
             "object": {
                 "metadata": {
-                    "user_id": test_user.id
+                    "user_id": authenticated_user.id
                 },
                 "customer": "cus_123",
                 "id": "sub_123",
@@ -77,13 +77,13 @@ def test_for_idempotentcy(mock_create_event, test_user, api_client):
     }
     mock_create_event.return_value = payload
     response = api_client.post(url, payload, format="json")
-    test_user.refresh_from_db()
-    assert test_user.customer_id == "cus_123"
-    assert test_user.subscription_id == "sub_123"
-    assert test_user.subscription_status == "active"
-    assert test_user.cancel_at_period_end == False
-    assert test_user.current_period_start == ts_to_dt(1767126806)
-    assert test_user.current_period_end == ts_to_dt(1767731606)
+    authenticated_user.refresh_from_db()
+    assert authenticated_user.customer_id == "cus_123"
+    assert authenticated_user.subscription_id == "sub_123"
+    assert authenticated_user.subscription_status == "active"
+    assert authenticated_user.cancel_at_period_end == False
+    assert authenticated_user.current_period_start == ts_to_dt(1767126806)
+    assert authenticated_user.current_period_end == ts_to_dt(1767731606)
     assert response.status_code == 200
     response = api_client.post(url, payload, format="json")
     assert response.status_code == 200
@@ -92,7 +92,7 @@ def test_for_idempotentcy(mock_create_event, test_user, api_client):
 
 # test invalid case where the signature header is missing or invalid
 @pytest.mark.django_db
-def test_valid_webhook(test_user, api_client):
+def test_valid_webhook(authenticated_user, api_client):
     payload = {
         "type": "customer.subscription.created",
         "id": "evt_123",
@@ -100,7 +100,7 @@ def test_valid_webhook(test_user, api_client):
         "data": {
             "object": {
                 "metadata": {
-                    "user_id": test_user.id
+                    "user_id": authenticated_user.id
                 },
                 "customer": "cus_123",
                 "id": "sub_123",
