@@ -1,41 +1,40 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom";
 // mui components
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import Skeleton from '@mui/material/Skeleton';
 // pictures
-import logo from "../assets/logoPlaceholder.png"
+import logo from "../../assets/logoPlaceholder.png"
+// helper
+import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
 
 
-function Hero({ symbol, fetchVersion }) {
+function Hero({ symbol, fetchVersion, setSymbol }) {
+    const navigate = useNavigate();
     const [price, setPrice] = useState(null);
+    const [name, setName] = useState(null);
 
     useEffect(() => {
         async function getMostRecentPrice() {
-            const payload = {symbol: symbol, period: period};
-            const response = await fetch("http://127.0.0.1:8000/pages/get-most-recent-price", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
-                },
-                body: JSON.stringify(payload),
-            });
-
-            /*get new tokens if access expires*/
-            if (!response.ok) {
-                if (response.status === 403) { /*Unauthorized user, aka, don't have permission to use*/
-                    navigate("/user-account");
-                } else {
-                    navigate("/sign-up");
-                }
+            const payload = {symbol: symbol};
+            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/get-most-recent-price", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
             }
             const data = await response.json();
-            console.log(data);
-            setPrice(data.price);
+            console.log(data)
+            setPrice(data["price"]);
+            setName(data["name"]);
         }
 
-        getMostRecentPrice()
+        let isActive = true;
+        getMostRecentPrice();
+
+        return  () => {
+            isActive = false;
+        };
     }, [symbol, fetchVersion]);
 
     return (
@@ -53,10 +52,36 @@ function Hero({ symbol, fetchVersion }) {
                     borderRadius: "50%"
                 }}
             />
-            <Stack spacing={2}>
-                <Typography sx={{ fontSize: { xs: "2rem", sm: "3rem", md: "4rem" }, fontWeight: "bold" }}>{symbol}</Typography>
-                <Typography sx={{ fontSize: { xs: "2rem", sm: "3rem", md: "4rem" }, fontWeight: "bold" }}>{price} <Typography component="span" sx={{ fontSize: { xs: "1rem", sm: "2rem", md: "3rem" }, fontWeight: "bold" }}>USD</Typography></Typography>
-            </Stack>
+            { price ? (
+                <Stack spacing={2}>
+                    <Typography
+                    sx={{
+                        fontSize: { xs: "1rem", sm: "2rem", md: "3rem" },
+                        fontWeight: "bold"
+                    }}>
+                        {symbol.toUpperCase()} | {name}
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontSize: { xs: "2rem", sm: "3rem", md: "4rem" },
+                            fontWeight: "bold"
+                        }}
+                    >
+                        {price}
+                        <Typography
+                            component="span"
+                            sx={{
+                                fontSize: { xs: "0.5rem", sm: "1rem", md: "2rem" },
+                                fontWeight: "bold"
+                            }}
+                        >
+                            USD
+                        </Typography>
+                    </Typography>
+                </Stack>
+            ) : (
+                <Skeleton variant="rounded" width={600} height={250} />
+            )}
         </Stack>
     )
 }

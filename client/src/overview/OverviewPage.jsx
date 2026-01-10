@@ -1,8 +1,8 @@
 import {useState, useRef} from "react"
-import {useNavigate} from "react-router-dom"
 import {useEffect} from "react"
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
 import PeriodSwitch from "./components/PeriodSwitch.jsx"
+import {useNavigate} from "react-router-dom"
 // mui components
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
@@ -17,7 +17,7 @@ import { Hero, About, Fundamentals, TotalRevenueGraph, NetIncomeGraph, Operating
 } from "./index.js"
 import StyledTextField from "../shared/StyledTextField.jsx"
 // helpers
-import {checkPermission, getNewTokens} from "../helpers/helper.js"
+import {checkPermission} from "../helpers/helper.js"
 
 
 const GraphsContainer = styled(Stack)({
@@ -30,8 +30,8 @@ const GraphsContainer = styled(Stack)({
 function OverviewPage() {
     // when opens up the page check if user is authorized
     // TODO: implement "refresh lock" in prod. to prevent multiple components hitting refreshing the tokens
-    const navigate = useNavigate();
     const ran = useRef(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         /*prevent checkPermission to run second time in developement*/
@@ -65,7 +65,7 @@ function OverviewPage() {
                             sx={{ width: "100%" }}
                         />
                     </form>
-                    <Hero symbol={symbol} fetchVersion={fetchVersion}></Hero>
+                    <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
                     {/*
                     <About></About>
                     <Fundamentals></Fundamentals>

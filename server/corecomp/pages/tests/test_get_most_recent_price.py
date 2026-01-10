@@ -31,11 +31,22 @@ def test_get_price(mock_get_price, authorized_client):
             '10. change percent': '2.5426%'
         }
     }
-
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.status_code == 200
     assert response.json()["price"] == "302.47"
+
+# test for authenticated request
+@pytest.mark.django_db
+def test_authenticated_user(authenticated_client):
+    response = authenticated_client.post(url)
+    assert response.status_code == 403
+
+# test for unauthenticated request
+@pytest.mark.django_db
+def test_browser(api_client):
+    response = api_client.post(url)
+    assert response.status_code == 401
 
 # test for invalid symbol where the symbol is not in the database
 @pytest.mark.django_db

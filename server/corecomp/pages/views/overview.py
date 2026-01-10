@@ -10,7 +10,10 @@ import requests
 from pages.utils import get_stock_price
 # permission
 from accounts.permissions import IsSubscribed
+# serializer
 from pages.serializers import SymbolSerializer
+# model
+from pages.models import Symbol
 
 load_dotenv()
 User = get_user_model() # Get model listed in settings.py: AUTH_USER_MODEL = 'api.CustomUser'
@@ -20,9 +23,7 @@ api_key = os.getenv("ALPHAVANTAGE_API_KEY")
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def get_most_recent_price(request):
-    """ prod. phase
-
-
+    """ prod.
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -47,10 +48,24 @@ def get_most_recent_price(request):
             return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
 
         price = str(round(float(data["Global Quote"]["05. price"]), 2))
-        return Response({"price": price}, status=status.HTTP_200_OK)
+        company = Symbol.objects.get(symbol=symbol)
+        name = company.name
+        return Response({"price": price, "name": name}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     """
-    return Response({"price": "302.47"}, status=status.HTTP_200_OK)
+    # development phase
+    # valid case
+    return Response({"price": "302.47", "name": "International Business Machines Corp"}, status=status.HTTP_200_OK)
+
+    # invalid case 400
+    #return Response({"symbol": ["symbol not in Symbol model"]}, status=status.HTTP_400_BAD_REQUEST)
+
+    # invalid case 503 rate limit
+    #return Response(
+    #    {"error": "rate limit issue", "price": "experiencing high traffick, refetching...", "name": "experiencing high traffick, refetching..."},
+    #    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+    #    headers={"Retry-After":  "10000"}
+    #)
 
 # requests to AlphaVantage and return reports according to period
 def get_reports(symbol, period):
