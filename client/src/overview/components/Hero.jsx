@@ -5,8 +5,6 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
-// pictures
-import logo from "../../assets/logoPlaceholder.png"
 // helper
 import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
 
@@ -15,6 +13,8 @@ function Hero({ symbol, fetchVersion, setSymbol }) {
     const navigate = useNavigate();
     const [price, setPrice] = useState(null);
     const [name, setName] = useState(null);
+
+    const logoUrl = `https://img.logo.dev/ticker/${symbol}?token=${import.meta.env.VITE_LOGO_DEV_PUBLISHABLE_KEY}&size=450`
 
     useEffect(() => {
         async function getMostRecentPrice() {
@@ -45,7 +45,7 @@ function Hero({ symbol, fetchVersion, setSymbol }) {
         >
             <Box
                 component="img"
-                src={logo}
+                src={logoUrl}
                 sx={{
                     width: {xs: "7rem", sm: "15rem", md: "20rem"},
                     height: {xs: "7rem", sm: "15rem", md: "20rem"},
