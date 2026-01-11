@@ -66,8 +66,9 @@ function OverviewPage() {
                         />
                     </form>
                     <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
+                    <About symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></About>
                     {/*
-                    <About></About>
+
                     <Fundamentals></Fundamentals>
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
                         <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>

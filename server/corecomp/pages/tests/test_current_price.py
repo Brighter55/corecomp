@@ -1,11 +1,10 @@
 import pytest
 from django.urls import reverse
 from unittest.mock import patch
-from types import SimpleNamespace
 from pages.models import Symbol
 
 
-url = reverse('get_most_recent_price')
+url = reverse('current_price')
 
 # test for valid request
 @patch("pages.views.overview.get_stock_price")

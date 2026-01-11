@@ -1,44 +1,126 @@
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom";
+// helper
+import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
 // mui
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
-function About() {
+import Skeleton from '@mui/material/Skeleton';
+import { styled } from '@mui/material/styles';
+import Link from '@mui/material/Link'
+
+
+const Info = styled(Stack)({
+    flex: 1,
+    minWidth: "15rem",
+    gap: ".5rem",
+});
+
+function About({ symbol, fetchVersion, setSymbol }) {
+    const navigate = useNavigate();
+    const [sector, setSector] = useState(null);
+    const [industry, setIndustry] = useState(null);
+    const [country, setCountry] = useState(null);
+    const [exchange, setExchange] =  useState(null);
+    const [website, setWebsite] = useState(null);
+    const [address, setAddress] =  useState(null);
+    const [fiscalYearEnd, setFiscalYearEnd] =  useState(null);
+    const [description, setDescription] = useState(null);
+
+    useEffect(() => {
+        async function getData() {
+            const payload = {symbol: symbol};
+            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/overview/info", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            const data = await response.json();
+            console.log(data)
+            setSector(data["sector"]);
+            setIndustry(data["industry"]);
+            setCountry(data["country"]);
+            setExchange(data["exchange"]);
+            setWebsite(data["website"]);
+            setAddress(data["address"]);
+            setFiscalYearEnd(data["fiscalYearEnd"]);
+            setDescription(data["description"]);
+        }
+
+        let isActive = true;
+        getData();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion]);
 
     return (
         <Stack spacing={2}>
             <Typography variant="h4">About</Typography>
             <Stack
                 direction={{ xs: "column", sm: "row" }}
-                spacing={2}
+                gap={4}
                 divider={ <Divider orientation="horizontal" flexItem sx={{ backgroundColor: "white" }}/> }
+                sx={{ flexWrap: 'wrap'}}
             >
-                <Stack sx={{ flex: 1 }}>
+                <Info>
                     <Typography variant="h6">Sector</Typography>
                     <Typography variant="body1">
-                        Technology Service
+                        {sector ? sector : <Skeleton />}
                     </Typography>
-                </Stack>
-                <Stack sx={{ flex: 1 }}>
+                </Info>
+                <Info>
                     <Typography variant="h6">Industry</Typography>
                     <Typography variant="body1">
-                        Packaged Software
+                        {industry ? industry : <Skeleton />}
                     </Typography>
-                </Stack>
-                <Stack sx={{ flex: 1 }}>
-                    <Typography variant="h6">CEO</Typography>
+                </Info>
+                <Info>
+                    <Typography variant="h6">Country</Typography>
                     <Typography variant="body1">
-                        Satya Nadella
+                        {country ? country : <Skeleton />}
                     </Typography>
-                </Stack>
-                <Stack sx={{ flex: 1 }}>
-                    <Typography variant="h6">Founded</Typography>
+                </Info>
+                <Info>
+                    <Typography variant="h6">Exchange</Typography>
                     <Typography variant="body1">
-                        1975
+                        {exchange ? exchange : <Skeleton />}
                     </Typography>
-                </Stack>
+                </Info>
+                <Info>
+                    <Typography variant="h6">Website</Typography>
+                    <Link
+                        href={website ? website : ""}
+                        color="inherit"
+                    >
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                "&:hover": {
+                                    transform: "translateY(-1px)",
+                                },
+                            }}
+                        >
+                            {website ? website : <Skeleton />}
+                        </Typography>
+                    </Link>
+                </Info>
+                <Info>
+                    <Typography variant="h6">Address</Typography>
+                    <Typography variant="body1">
+                        {address ? address : <Skeleton />}
+                    </Typography>
+                </Info>
+                <Info>
+                    <Typography variant="h6">Fiscal Year End</Typography>
+                    <Typography variant="body1">
+                        {fiscalYearEnd ? fiscalYearEnd : <Skeleton />}
+                    </Typography>
+                </Info>
             </Stack>
             <Typography variant="body1">
-                Microsoft Corp engages in the development and support of software, services, devices, and solutions. It operates through the following business segments: Productivity and Business Processes; Intelligent Cloud; and More Personal Computing. The Productivity and Business Processes segment comprises products and services in the portfolio of productivity, communication, and information services of the company spanning a variety of devices and platform. The Intelligent Cloud segment refers to the public, private, and hybrid serve products and cloud services of the company which can power modern business. The More Personal Computing segment encompasses products and services geared towards the interests of end users, developers, and IT professionals across all devices. The firm also offers operating systems; cross-device productivity applications; server applications; business solution applications; desktop and server management tools; software development tools; video games; personal computers, tablets; gaming and entertainment consoles; other intelligent devices; and related accessories. The company was founded by Paul Gardner Allen and William Henry Gates III in 1975 and is headquartered in Redmond, WA.
+                {description ? description : <Skeleton />}
             </Typography>
         </Stack>
     )

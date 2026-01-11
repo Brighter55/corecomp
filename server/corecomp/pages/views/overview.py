@@ -7,7 +7,7 @@ import json
 from dotenv import load_dotenv
 import os
 import requests
-from pages.utils import get_stock_price
+from pages.utils import get_stock_price, fetchAlphaVantage
 # permission
 from accounts.permissions import IsSubscribed
 # serializer
@@ -22,7 +22,7 @@ api_key = os.getenv("ALPHAVANTAGE_API_KEY")
 
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
-def get_most_recent_price(request):
+def current_price(request):
     """ prod.
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
@@ -62,10 +62,75 @@ def get_most_recent_price(request):
 
     # invalid case 503 rate limit
     #return Response(
-    #    {"error": "rate limit issue", "price": "experiencing high traffick, refetching...", "name": "experiencing high traffick, refetching..."},
+    #    {"error": "rate limit issue"},
     #    status=status.HTTP_503_SERVICE_UNAVAILABLE,
     #    headers={"Retry-After":  "10000"}
     #)
+
+@api_view(["POST"])
+@permission_classes([IsSubscribed])
+def info(request):
+    """
+    serializer = SymbolSerializer(data=request.data)
+    if serializer.is_valid():
+        symbol = serializer.validated_data["symbol"]
+        url = f'https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}'
+
+        data = fetchAlphaVantage(url)
+        # if "data" is a Response object, then return the error
+        if isinstance(data, Response):
+            return data
+
+        # check if alphavantage returns {} for invalid symbol or symbol with no data
+        if not data:
+            return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
+
+        description = data["Description"]
+        sector = data["Sector"]
+        industry = data["Industry"]
+        country = data["Country"]
+        exchange = data["Exchange"]
+        website = data["OfficialSite"]
+        address = data["Address"]
+        fiscalYearEnd = data["FiscalYearEnd"]
+
+        return (
+            Response({
+                "description": description,
+                "sector": sector,
+                "industry": industry,
+                "country": country,
+                "exchange": exchange,
+                "website": website,
+                "address": address,
+                "fiscalYearEnd": fiscalYearEnd,
+            }, status=status.HTTP_200_OK))
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    """
+    # development phase
+    # valid case
+    return (
+        Response({
+                "description": "International Business Machines Corporation (IBM) is a leading multinational technology company based in Armonk, New York, with a robust global presence in over 170 countries. Founded in 1911, IBM has consistently been at the forefront of technological innovation, focusing on areas such as artificial intelligence, quantum computing, and cloud computing services. The company is renowned for its strong commitment to research and development, holding the record for the most U.S. patents granted for 28 consecutive years, which underscores its role as a pioneer in the tech industry. With a rich history of impactful inventions including the ATM and relational database systems, IBM continues to adapt and evolve, providing advanced technological solutions that cater to the dynamic needs of multiple sectors in today's fast-paced digital economy.",
+                "sector": "TECHNOLOGY",
+                "industry": "INFORMATION TECHNOLOGY SERVICES",
+                "country": "USA",
+                "exchange": "NYSE",
+                "website": "https://www.ibm.com",
+                "address": "ONE NEW ORCHARD ROAD, ARMONK, NY, UNITED STATES, 10504",
+                "fiscalYearEnd": "December",
+            }, status=status.HTTP_200_OK)
+    )
+    """
+    # invalid case 400
+    return Response({"symbol": ["symbol not in Symbol model"]}, status=status.HTTP_400_BAD_REQUEST)
+    # invalid case 503 rate limit
+    return Response(
+        {"error": "rate limit issue"},
+        status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        headers={"Retry-After":  "10000"}
+    )
+    """
 
 # requests to AlphaVantage and return reports according to period
 def get_reports(symbol, period):

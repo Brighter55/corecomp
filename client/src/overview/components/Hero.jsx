@@ -19,7 +19,7 @@ function Hero({ symbol, fetchVersion, setSymbol }) {
     useEffect(() => {
         async function getMostRecentPrice() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/get-most-recent-price", payload, () => isActive, navigate, setSymbol);
+            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/overview/current-price", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }
