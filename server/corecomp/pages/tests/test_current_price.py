@@ -2,21 +2,23 @@ import pytest
 from django.urls import reverse
 from unittest.mock import patch
 from pages.models import Symbol
+from rest_framework.response import Response
+from rest_framework import status
 
 
 url = reverse('current_price')
 
 # test for valid request
-@patch("pages.views.overview.get_stock_price")
+@patch("pages.views.overview.fetchAlphaVantage")
 @pytest.mark.django_db
-def test_get_price(mock_get_price, authorized_client):
+def test_get_price(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
         type="Stock"
     )
     symbol.save()
-    mock_get_price.return_value = {
+    mock_fetchAlphaVantage.return_value = {
         'Global Quote': {
             '01. symbol': 'IBM',
             '02. open': '295.0000',
@@ -56,61 +58,66 @@ def test_symbol_not_in_database(authorized_client):
     assert response.json()["symbol"][0] == "symbol not in Symbol model"
 
 # test for invalid case where Alpha Vantage returns error message about rate limit
-@patch("pages.views.overview.get_stock_price")
+@patch("pages.views.overview.fetchAlphaVantage")
 @pytest.mark.django_db
-def test_exceeds_rate_limit(mock_get_price, authorized_client):
+def test_exceeds_rate_limit(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
         type="Stock"
     )
     symbol.save()
-    mock_get_price.return_value = {
-        "Information": "Our standard APIcall frequency is ..."
-    }
+    mock_fetchAlphaVantage.return_value = Response(
+        {"error": "rate limit issue"},
+        status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        headers={"Retry-After":  "60000"}
+    )
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.status_code == 503
     assert response.headers.get("Retry-After") == "60000"
     assert response.json()["error"] == "rate limit issue"
 
-    mock_get_price.return_value = {
-        "Note": "Our standard APIcall frequency is ..."
-    }
+    mock_fetchAlphaVantage.return_value = Response(
+        {"error": "rate limit issue"},
+        status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        headers={"Retry-After":  "60000"}
+    )
     response = authorized_client.post(url, payload, format="json")
     assert response.status_code == 503
     assert response.headers.get("Retry-After") == "60000"
     assert response.json()["error"] == "rate limit issue"
 
 # test for invalid case where Alpha Vantage returns error message about invalid api call
-@patch("pages.views.overview.get_stock_price")
+@patch("pages.views.overview.fetchAlphaVantage")
 @pytest.mark.django_db
-def test_invalid_api_call(mock_get_price, authorized_client):
+def test_invalid_api_call(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
         type="Stock"
     )
     symbol.save()
-    mock_get_price.return_value = {
-        "Error Message": "Invalid API key ..."
-    }
+    mock_fetchAlphaVantage.return_value = Response(
+        {"error": "invalid api call issue"},
+        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.status_code == 500
     assert response.json()["error"] == "invalid api call issue"
 
 # test for invalid case where the symbol exists in Symbol but not in Alpha Vantage or Alpha Vantage doesn't have data
-@patch("pages.views.overview.get_stock_price")
+@patch("pages.views.overview.fetchAlphaVantage")
 @pytest.mark.django_db
-def test_symbol_not_in_alpha_vantage(mock_get_price, authorized_client):
+def test_symbol_not_in_alpha_vantage(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
         type="Stock"
     )
     symbol.save()
-    mock_get_price.return_value = {
+    mock_fetchAlphaVantage.return_value = {
         'Global Quote': {}
     }
     payload = {"symbol": "IBM"}

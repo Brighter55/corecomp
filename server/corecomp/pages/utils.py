@@ -3,12 +3,6 @@ from rest_framework.response import Response
 from rest_framework import status
 
 
-def get_stock_price(url):
-    response = requests.get(url)
-    data = response.json()
-    return data
-
-
 def fetchAlphaVantage(url):
     response = requests.get(url)
     data = response.json()

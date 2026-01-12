@@ -7,7 +7,7 @@ import json
 from dotenv import load_dotenv
 import os
 import requests
-from pages.utils import get_stock_price, fetchAlphaVantage
+from pages.utils import fetchAlphaVantage
 # permission
 from accounts.permissions import IsSubscribed
 # serializer
@@ -28,20 +28,10 @@ def current_price(request):
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
         url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={api_key}'
-        data = get_stock_price(url)
+        data = fetchAlphaVantage(url)
 
-        # check if alphavatage api returns an error
-        if "Note" in data or "Information" in data:
-            return Response(
-                {"error": "rate limit issue"},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                headers={"Retry-After":  "60000"}
-            )
-        if "Error Message" in data:
-            return Response(
-                {"error": "invalid api call issue"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        if isinstance(data, Response):
+            return data
 
         # check if alphavantage returns {} for invalid symbol or symbol with no data
         if not data["Global Quote"]:
@@ -53,20 +43,21 @@ def current_price(request):
         return Response({"price": price, "name": name}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     """
-    # development phase
+
+
     # valid case
     return Response({"price": "302.47", "name": "International Business Machines Corp"}, status=status.HTTP_200_OK)
-
+    """
     # invalid case 400
-    #return Response({"symbol": ["symbol not in Symbol model"]}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({"symbol": ["symbol not in Symbol model"]}, status=status.HTTP_400_BAD_REQUEST)
 
     # invalid case 503 rate limit
-    #return Response(
-    #    {"error": "rate limit issue"},
-    #    status=status.HTTP_503_SERVICE_UNAVAILABLE,
-    #    headers={"Retry-After":  "10000"}
-    #)
-
+    return Response(
+        {"error": "rate limit issue"},
+        status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        headers={"Retry-After":  "10000"}
+    )
+    """
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def info(request):
