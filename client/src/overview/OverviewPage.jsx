@@ -11,7 +11,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 // components
-import { Hero, About, Fundamentals, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
+import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
     SharesOutstandingGraph, EPSGraph, PricingGraph
 } from "./index.js"
@@ -66,10 +66,8 @@ function OverviewPage() {
                         />
                     </form>
                     <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
-                    <About symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></About>
+                    <Info symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Info>
                     {/*
-
-                    <Fundamentals></Fundamentals>
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
                         <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
                         <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>

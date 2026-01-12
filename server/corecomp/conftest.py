@@ -1,6 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 
 
 User = get_user_model()
@@ -33,3 +34,9 @@ def authenticated_client(api_client, authenticated_user):
 def authorized_client(api_client, authorized_user):
     api_client.force_authenticate(user=authorized_user)
     return api_client
+
+# help clear the cache before/after each test run
+@pytest.fixture(autouse=True)
+def clear_cache_between_tests():
+    yield
+    cache.clear()

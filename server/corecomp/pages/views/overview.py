@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import os
 import requests
 from pages.utils import fetchAlphaVantage
+from django.core.cache import cache
 # permission
 from accounts.permissions import IsSubscribed
 # serializer
@@ -23,10 +24,16 @@ api_key = os.getenv("ALPHAVANTAGE_API_KEY")
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def current_price(request):
-    """ prod.
+    """
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
+
+        key = f"current_price_{symbol}"
+        cached_data = cache.get(key)
+        if cached_data:
+            return Response(cached_data, status=status.HTTP_200_OK)
+
         url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={api_key}'
         data = fetchAlphaVantage(url)
 
@@ -40,7 +47,11 @@ def current_price(request):
         price = str(round(float(data["Global Quote"]["05. price"]), 2))
         company = Symbol.objects.get(symbol=symbol)
         name = company.name
-        return Response({"price": price, "name": name}, status=status.HTTP_200_OK)
+
+        report = {"price": price, "name": name}
+
+        cache.set(key, report, timeout=600)
+        return Response(report, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     """
 
@@ -61,10 +72,16 @@ def current_price(request):
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def info(request):
-    """
+    """ prod.
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
+
+        key = f"info_{symbol}"
+        cached_data = cache.get(key)
+        if cached_data:
+            return Response(cached_data, status=status.HTTP_200_OK)
+
         url = f'https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}'
 
         data = fetchAlphaVantage(url)
@@ -76,45 +93,108 @@ def info(request):
         if not data:
             return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
 
-        description = data["Description"]
-        sector = data["Sector"]
-        industry = data["Industry"]
-        country = data["Country"]
-        exchange = data["Exchange"]
-        website = data["OfficialSite"]
-        address = data["Address"]
-        fiscalYearEnd = data["FiscalYearEnd"]
-
-        return (
-            Response({
-                "description": description,
-                "sector": sector,
-                "industry": industry,
-                "country": country,
-                "exchange": exchange,
-                "website": website,
-                "address": address,
-                "fiscalYearEnd": fiscalYearEnd,
-            }, status=status.HTTP_200_OK))
+        report = {
+            "description": data["Description"],
+            "sector": data["Sector"],
+            "industry": data["Industry"],
+            "country": data["Country"],
+            "exchange": data["Exchange"],
+            "website": data["OfficialSite"],
+            "address": data["Address"],
+            "fiscalYearEnd": data["FiscalYearEnd"],
+            "marketCapitalization": data["MarketCapitalization"],
+            "peRatio": data["PERatio"],
+            "pegRatio": data["PEGRatio"],
+            "priceToSalesRatioTtm": data["PriceToSalesRatioTTM"],
+            "priceToBookRatio": data["PriceToBookRatio"],
+            "evToRevenue": data["EVToRevenue"],
+            "evToEbitda": data["EVToEBITDA"],
+            "beta": data["Beta"],
+            "sharesOutstanding": data["SharesOutstanding"],
+            "ebitda": data["EBITDA"],
+            "eps": data["EPS"],
+            "dilutedEpsTtm": data["DilutedEPSTTM"],
+            "profitMargin": data["ProfitMargin"],
+            "operatingMarginTtm": data["OperatingMarginTTM"],
+            "returnOnAssetsTtm": data["ReturnOnAssetsTTM"],
+            "returnOnEquityTtm": data["ReturnOnEquityTTM"],
+            "quarterlyEarningsGrowthYoy": data["QuarterlyEarningsGrowthYOY"],
+            "quarterlyRevenueGrowthYoy": data["QuarterlyRevenueGrowthYOY"],
+            "revenueTtm": data["RevenueTTM"],
+            "grossProfitTtm": data["GrossProfitTTM"],
+            "revenuePerShareTtm": data["RevenuePerShareTTM"],
+            "fiftyTwoWeekHigh": data["52WeekHigh"],
+            "fiftyTwoWeekLow": data["52WeekLow"],
+            "fiftyDayMovingAverage": data["50DayMovingAverage"],
+            "twoHundredDayMovingAverage": data["200DayMovingAverage"],
+            "dividendPerShare": data["DividendPerShare"],
+            "dividendYield": data["DividendYield"],
+            "dividendDate": data["DividendDate"],
+            "exDividendDate": data["ExDividendDate"],
+            "analystTargetPrice": data["AnalystTargetPrice"],
+            "analystRatingStrongBuy": data["AnalystRatingStrongBuy"],
+            "analystRatingBuy": data["AnalystRatingBuy"],
+            "analystRatingHold": data["AnalystRatingHold"],
+            "analystRatingSell": data["AnalystRatingSell"],
+            "analystRatingStrongSell": data["AnalystRatingStrongSell"],
+        }
+        cache.set(key, report, timeout=604800)
+        return Response(report, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     """
-    # development phase
     # valid case
-    return (
-        Response({
-                "description": "International Business Machines Corporation (IBM) is a leading multinational technology company based in Armonk, New York, with a robust global presence in over 170 countries. Founded in 1911, IBM has consistently been at the forefront of technological innovation, focusing on areas such as artificial intelligence, quantum computing, and cloud computing services. The company is renowned for its strong commitment to research and development, holding the record for the most U.S. patents granted for 28 consecutive years, which underscores its role as a pioneer in the tech industry. With a rich history of impactful inventions including the ATM and relational database systems, IBM continues to adapt and evolve, providing advanced technological solutions that cater to the dynamic needs of multiple sectors in today's fast-paced digital economy.",
-                "sector": "TECHNOLOGY",
-                "industry": "INFORMATION TECHNOLOGY SERVICES",
-                "country": "USA",
-                "exchange": "NYSE",
-                "website": "https://www.ibm.com",
-                "address": "ONE NEW ORCHARD ROAD, ARMONK, NY, UNITED STATES, 10504",
-                "fiscalYearEnd": "December",
-            }, status=status.HTTP_200_OK)
-    )
+    report = {
+        "description": "International Business Machines Corporation (IBM) is a leading multinational technology company based in Armonk, New York, with a robust global presence in over 170 countries. Founded in 1911, IBM has consistently been at the forefront of technological innovation, focusing on areas such as artificial intelligence, quantum computing, and cloud computing services. The company is renowned for its strong commitment to research and development, holding the record for the most U.S. patents granted for 28 consecutive years, which underscores its role as a pioneer in the tech industry. With a rich history of impactful inventions including the ATM and relational database systems, IBM continues to adapt and evolve, providing advanced technological solutions that cater to the dynamic needs of multiple sectors in today's fast-paced digital economy.",
+        "exchange": "NYSE",
+        "country": "USA",
+        "sector": "TECHNOLOGY",
+        "industry": "INFORMATION TECHNOLOGY SERVICES",
+        "address": "ONE NEW ORCHARD ROAD, ARMONK, NY, UNITED STATES, 10504",
+        "website": "https://www.ibm.com",
+        "fiscalYearEnd": "December",
+        "marketCapitalization": "284365160000",
+        "ebitda": "15042000000",
+        "peRatio": "36.22",
+        "pegRatio": "2.082",
+        "bookValue": "29.85",
+        "dividendPerShare": "6.7",
+        "dividendYield": "0.0221",
+        "eps": "8.4",
+        "revenuePerShareTtm": "70.35",
+        "profitMargin": "0.121",
+        "operatingMarginTtm": "0.172",
+        "returnOnAssetsTtm": "0.0514",
+        "returnOnEquityTtm": "0.302",
+        "revenueTtm": "65401999000",
+        "grossProfitTtm": "37808001000",
+        "dilutedEpsTtm": "8.4",
+        "quarterlyEarningsGrowthYoy": "0.177",
+        "quarterlyRevenueGrowthYoy": "0.091",
+        "analystTargetPrice": "301.0",
+        "analystRatingStrongBuy": "1",
+        "analystRatingBuy": "8",
+        "analystRatingHold": "8",
+        "analystRatingSell": "2",
+        "analystRatingStrongSell": "2",
+        "priceToSalesRatioTtm": "4.348",
+        "priceToBookRatio": "10.19",
+        "evToRevenue": "5.14",
+        "evToEbitda": "20.73",
+        "beta": "0.698",
+        "fiftyTwoWeekHigh": "324.9",
+        "fiftyTwoWeekLow": "209.2",
+        "fiftyDayMovingAverage": "303.94",
+        "twoHundredDayMovingAverage": "273.37",
+        "sharesOutstanding": "934735000",
+        "dividendDate": "2025-12-10",
+        "exDividendDate": "2025-11-10"
+    }
+    return Response(report, status=status.HTTP_200_OK)
     """
     # invalid case 400
     return Response({"symbol": ["symbol not in Symbol model"]}, status=status.HTTP_400_BAD_REQUEST)
+
     # invalid case 503 rate limit
     return Response(
         {"error": "rate limit issue"},
