@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
+import AnalystRatings from "./AnalystRatings.jsx"
 // helper
 import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
 // mui
@@ -10,7 +11,6 @@ import Skeleton from '@mui/material/Skeleton';
 import { styled } from '@mui/material/styles';
 import Link from '@mui/material/Link'
 import Box from '@mui/material/Box';
-
 
 const Profile = styled(Stack)(({ theme }) => ({
     [theme.breakpoints.up("xs")] : {
@@ -297,9 +297,21 @@ function Info({ symbol, fetchVersion, setSymbol }) {
                         </Fact>
                     </Stack>
                 </Stack>
+
+                {companyData ?
+                    <AnalystRatings
+                        analystTargetPrice={companyData.analystTargetPrice}
+                        analystRatingStrongBuy={companyData.analystRatingStrongBuy}
+                        analystRatingBuy={companyData.analystRatingBuy}
+                        analystRatingHold={companyData.analystRatingHold}
+                        analystRatingSell={companyData.analystRatingSell}
+                        analystRatingStrongSell={companyData.analystRatingStrongSell}
+                    />
+                :
+                    <Skeleton variant="rounded" height={200} />
+                }
             </Stack>
         </Stack>
-
     )
 }
 

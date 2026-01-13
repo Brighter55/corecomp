@@ -203,6 +203,7 @@ def info(request):
     )
     """
 
+
 # requests to AlphaVantage and return reports according to period
 def get_reports(symbol, period):
 
