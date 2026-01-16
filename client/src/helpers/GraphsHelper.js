@@ -1,71 +1,85 @@
 
-function getStartIndex(reports, year) {
-    /*get targetMonth and targetYear from the last element in reports*/
-    const lastDate = reports[reports.length - 1].date;
-    const lastDateObject = new Date(lastDate);
-    const targetMonth = lastDateObject.getMonth();
-    const targetYear = lastDateObject.getFullYear() - year;
-    // get the startIndex to filter the reports
-    const startIndex = reports.findIndex((report) => {
-        const currentReportDateObject = new Date(report.date);
+function getEndIndex(reports, year, dateField) {
+    // get targetMonth and targetYear
+    const startDate = reports[0][dateField];
+    const startDateObject = new Date(startDate);
+    const targetMonth = startDateObject.getMonth();
+    const targetYear = startDateObject.getFullYear() - year;
+    // get the endIndex to filter the reports
+    const endIndex = reports.findIndex((report) => {
+        const currentReportDateObject = new Date(report[dateField]);
         const currentReportDateMonth = currentReportDateObject.getMonth();
         const currentReportDateYear = currentReportDateObject.getFullYear();
         return (currentReportDateMonth === targetMonth && currentReportDateYear === targetYear);
     });
-    return startIndex;
+    if (endIndex === -1) {
+        return  0
+    }
+    return endIndex;
 }
 
 
-export function filterReports(reports, timeRange) {
-    let filteredReports;
+export function filterReports(reports, timeRange, dateField) {
+    let filteredReports = reports.slice(0);
     switch (timeRange) {
         case "YTD": {
-            /*get targetMonth and targetYear from the last element in reports*/
-            const lastDate = reports[reports.length - 1].date;
-            const lastDateObject = new Date(lastDate);
-            const targetYear = lastDateObject.getFullYear();
+            // get targetYear from the current date
+            const startDate = reports[0][dateField];
+            const startDateObject = new Date(startDate);
+            const targetYear = startDateObject.getFullYear();
             console.log(targetYear);
-            // get the startIndex to filter the reports
-            const startIndex = reports.findIndex((report) => {
-                const currentReportDateObject = new Date(report.date);
+            // get the endIndex to filter the reports
+            const endIndex = reports.findIndex((report) => {
+                const currentReportDateObject = new Date(report[dateField]);
                 const currentReportDateYear = currentReportDateObject.getFullYear();
-                return (currentReportDateYear === targetYear); // will get the index of the first element that has the year matches targetYear
+                return (currentReportDateYear != targetYear);
             });
-            filteredReports = reports.slice(startIndex);
+
+            if (endIndex === -1) {
+                break;
+            }
+
+            filteredReports = reports.slice(0, endIndex);
             break;
         }
         case "1Y": {
-            const startIndex = getStartIndex(reports, 1);
-            filteredReports = reports.slice(startIndex);
+            const endIndex = getEndIndex(reports, 1, dateField);
+            filteredReports = reports.slice(0, endIndex + 1);
             break;
         }
         case "5Y": {
-            const startIndex = getStartIndex(reports, 5);
-            filteredReports = reports.slice(startIndex);
+            const endIndex = getEndIndex(reports, 5, dateField);
+            filteredReports = reports.slice(0, endIndex + 1);
             break;
         }
         case "10Y": {
-            const startIndex = getStartIndex(reports, 10);
-            filteredReports = reports.slice(startIndex);
+            const endIndex = getEndIndex(reports, 10, dateField);
+            filteredReports = reports.slice(0, endIndex + 1);
             break;
         }
         default:
             console.log("return all (default)");
-            return reports;
     }
-    console.log("return", filteredReports, timeRange);
-    return filteredReports;
+    return filteredReports.reverse();
 }
 
 export function getPercentChange(reports, value) {
     // ((today’s price - years ago price) / years ago price) * 100
-    if (reports.length === 0) {
+    if (!reports.length) {
         return 0;
     }
     console.log("percentChangeReports:", reports);
-    const lastValue = reports[reports.length - 1][value];
-    const firstValue = reports[0][value];
-    const percentChange = ((lastValue - firstValue) / firstValue) * 100;
-    console.log(`percentChange is ${percentChange} and lastValue is ${lastValue} and firstValue is ${firstValue}`);
+    const newValue = reports[reports.length - 1][value];
+    const oldValue = reports[0][value];
+    const percentChange = ((newValue - oldValue) / oldValue) * 100;
+    console.log(`percentChange is ${percentChange} old value = ${oldValue} new value = ${newValue} `);
     return percentChange.toFixed(2);
+}
+
+
+export function countDigits(value) {
+    if (value === 0) {
+        return 1;
+    }
+    return Math.floor(Math.log10(Math.abs(value))) + 1;
 }

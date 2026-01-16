@@ -13,7 +13,7 @@ import { styled } from '@mui/material/styles';
 // components
 import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
-    SharesOutstandingGraph, EPSGraph, PricingGraph
+    SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph
 } from "./index.js"
 import StyledTextField from "../shared/StyledTextField.jsx"
 // helpers
@@ -74,8 +74,13 @@ function OverviewPage() {
                         <PricingGraph reports={reports.PRICING}></PricingGraph>
                     </GraphsContainer>
                     */}
-                    {/*
+
                     <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
+                    <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                        {/*<ProfitMargin symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></ProfitMargin>*/}
+                        <TotalRevenueGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
+                    </GraphsContainer>
+                    {/*
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
                         <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
                         <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
