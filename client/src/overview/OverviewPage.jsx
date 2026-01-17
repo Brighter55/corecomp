@@ -77,7 +77,7 @@ function OverviewPage() {
 
                     <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
-                        {/*<ProfitMargin symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></ProfitMargin>*/}
+                        <ProfitMarginGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></ProfitMarginGraph>
                         <TotalRevenueGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
                     </GraphsContainer>
                     {/*
