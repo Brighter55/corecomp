@@ -7,7 +7,7 @@ import json
 from dotenv import load_dotenv
 import os
 import requests
-from pages.utils import fetchAlphaVantage
+from pages.utils import fetchAlphaVantage, annotate_profit_margin
 from django.core.cache import cache
 from django_redis import get_redis_connection
 # permission
@@ -207,7 +207,7 @@ def info(request):
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def income_statement(request):
-    """prod.
+
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -233,15 +233,20 @@ def income_statement(request):
             if not data:
                 return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
             
+            data = annotate_profit_margin(data)
+            
             cache.set(key, data, timeout=604800)
 
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
     """
     path = "pages/statement_samples/income_statement.json"
     with open(path, 'r') as file:
         data = json.load(file)
     return Response(data, status=status.HTTP_200_OK)
+    """
 
 
 # requests to AlphaVantage and return reports according to period

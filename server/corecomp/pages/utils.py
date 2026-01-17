@@ -21,3 +21,19 @@ def fetchAlphaVantage(url):
         )
 
     return data
+
+def annotate_profit_margin(data):
+    annual_reports = data["annualReports"]
+    quarterly_reports = data["quarterlyReports"]
+    
+    # profitMarginPercent = (net income / revenue) * 100
+    for report in annual_reports:
+        report["profitMarginPercent"] = round((int(report["netIncome"]) / int(report["totalRevenue"])) * 100, 2)
+    
+    for report in quarterly_reports:
+        report["profitMarginPercent"] = round((int(report["netIncome"]) / int(report["totalRevenue"])) * 100, 2)
+    
+    return data
+
+
+
