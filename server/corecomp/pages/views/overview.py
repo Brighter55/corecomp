@@ -7,7 +7,7 @@ import json
 from dotenv import load_dotenv
 import os
 import requests
-from pages.utils import fetchAlphaVantage, annotate_profit_margin
+from pages.utils import fetchAlphaVantage, annotate_profit_margin, annotate_free_cash_flow
 from django.core.cache import cache
 from django_redis import get_redis_connection
 # permission
@@ -274,15 +274,16 @@ def cash_flow(request):
             
             if not data:
                 return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
+
+            data = annotate_free_cash_flow(data)
             
             cache.set(key, data, timeout=604800)
 
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     """
-
     path = "pages/statement_samples/cashflow.json"
     with open(path, 'r') as file:
         data = json.load(file)
+    data = annotate_free_cash_flow(data)
     return Response(data, status=status.HTTP_200_OK)

@@ -7,9 +7,10 @@ from rest_framework import status
 
 url = reverse('cash_flow')
 # test for valid request where the endpoint fetches
+@patch("pages.views.overview.annotate_free_cash_flow")
 @patch("pages.views.overview.fetchAlphaVantage")
 @pytest.mark.django_db
-def test_valid_fetch(mock_fetchAlphaVantage, authorized_client):
+def test_valid_fetch(mock_fetchAlphaVantage, mock_annotate_free_cash_flow, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
@@ -20,15 +21,17 @@ def test_valid_fetch(mock_fetchAlphaVantage, authorized_client):
         "data": "valid data"
     }
     mock_fetchAlphaVantage.return_value = return_value
+    mock_annotate_free_cash_flow.return_value = return_value
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.json() == return_value
     assert response.status_code == 200
 
 # test for valid request where the endpoint returns cached_data
+@patch("pages.views.overview.annotate_free_cash_flow")
 @patch("pages.views.overview.fetchAlphaVantage")
 @pytest.mark.django_db
-def test_valid_cache(mock_fetchAlphaVantage, authorized_client):
+def test_valid_cache(mock_fetchAlphaVantage, mock_annotate_free_cash_flow, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
@@ -39,6 +42,7 @@ def test_valid_cache(mock_fetchAlphaVantage, authorized_client):
         "data": "valid data"
     }
     mock_fetchAlphaVantage.return_value = return_value
+    mock_annotate_free_cash_flow.return_value = return_value
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.json() == return_value

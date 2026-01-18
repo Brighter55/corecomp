@@ -35,5 +35,17 @@ def annotate_profit_margin(data):
     
     return data
 
+def annotate_free_cash_flow(data):
+    annual_reports = data["annualReports"]
+    quarterly_reports = data["quarterlyReports"]
+
+    # freeCashFlow = operatingCashFlow - CapitalExpenditures
+    for report in annual_reports:
+        report["freeCashFlow"] = int(report["operatingCashflow"]) - int(report["capitalExpenditures"])
+    for report in quarterly_reports:
+        report["freeCashFlow"] = int(report["operatingCashflow"]) - int(report["capitalExpenditures"])
+    
+    return data
+
 
 
