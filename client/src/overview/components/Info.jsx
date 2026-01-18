@@ -46,7 +46,7 @@ function Info({ symbol, fetchVersion, setSymbol }) {
     useEffect(() => {
         async function getData() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/overview/info", payload, () => isActive, navigate, setSymbol);
+            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/info", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }

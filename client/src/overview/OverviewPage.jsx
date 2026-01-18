@@ -79,12 +79,12 @@ function OverviewPage() {
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
                         <ProfitMarginGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></ProfitMarginGraph>
                         <TotalRevenueGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
+                        <NetIncomeGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></NetIncomeGraph>
+                        <OperatingCashflowGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></OperatingCashflowGraph>
                     </GraphsContainer>
                     {/*
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
-                        <TotalRevenueGraph reports={reports.INCOME_STATEMENT}></TotalRevenueGraph>
-                        <NetIncomeGraph reports={reports.INCOME_STATEMENT}></NetIncomeGraph>
-                        <OperatingCashflowGraph reports={reports.CASH_FLOW}></OperatingCashflowGraph>
+                        
                         <CapitalExpendituresGraph reports={reports.CASH_FLOW}></CapitalExpendituresGraph>
                         <FreeCashflowGraph reports={reports.CASH_FLOW} ></FreeCashflowGraph>
                         <CashVsDebtGraph reports={reports.BALANCE_SHEET} ></CashVsDebtGraph>

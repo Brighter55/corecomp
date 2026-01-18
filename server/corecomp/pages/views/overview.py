@@ -245,3 +245,44 @@ def income_statement(request):
         data = json.load(file)
     data = annotate_profit_margin(data)
     return Response(data, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+@permission_classes([IsSubscribed])
+def cash_flow(request):
+    """
+    serializer = SymbolSerializer(data=request.data)
+    if serializer.is_valid():
+        symbol = serializer.validated_data["symbol"]
+        redis = get_redis_connection("default")
+
+        key = f"cash_flow_{symbol}"
+        cached_data = cache.get(key)
+        if cached_data:
+            return Response(cached_data, status=status.HTTP_200_OK)
+        
+        lock = redis.lock(f"lock:{key}", timeout=10)
+        with lock:
+            cached_data = cache.get(key)
+            if cached_data:
+                return Response(cached_data, status=status.HTTP_200_OK)
+            
+            url = f"https://www.alphavantage.co/query?function=CASH_FLOW&symbol={symbol}&apikey={api_key}"
+            data = fetchAlphaVantage(url)
+
+            if isinstance(data, Response):
+                return data
+            
+            if not data:
+                return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            cache.set(key, data, timeout=604800)
+
+        return Response(data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    """
+
+    path = "pages/statement_samples/cashflow.json"
+    with open(path, 'r') as file:
+        data = json.load(file)
+    return Response(data, status=status.HTTP_200_OK)

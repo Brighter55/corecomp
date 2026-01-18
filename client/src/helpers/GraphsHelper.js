@@ -76,10 +76,14 @@ export function getPercentChange(reports, value) {
     return percentChange.toFixed(2);
 }
 
-
-export function countDigits(value) {
-    if (value === 0) {
-        return 1;
+export function formatToUnits(value) {
+    if (value >= 1_000_000_000 || value <= -1_000_000_000) {
+        return `${(value / 1_000_000_000).toFixed(2)}B`;
     }
-    return Math.floor(Math.log10(Math.abs(value))) + 1;
+    if (value >= 1_000_000 || value <= -1_000_000) {
+        return `${(value / 1_000_000).toFixed(2)}M`;
+    }
+    
+    return value;
+
 }

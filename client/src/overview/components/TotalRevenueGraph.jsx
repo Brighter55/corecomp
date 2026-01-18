@@ -3,7 +3,7 @@ import CustomBar from "./CustomBar.jsx"
 import CustomActiveBar from "./CustomActiveBar.jsx"
 import {useState, useEffect, useRef, useMemo} from "react"
 import { useNavigate } from "react-router-dom";
-import {filterReports, getPercentChange, countDigits} from "../../helpers/GraphsHelper.js"
+import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
 import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
@@ -60,7 +60,7 @@ function TotalRevenueGraph({ symbol, fetchVersion, setSymbol, period }) {
     useEffect(() => {
         async function getStatement() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/overview/income-statement", payload, () => isActive, navigate, setSymbol);
+            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/income-statement", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }
@@ -130,17 +130,9 @@ function TotalRevenueGraph({ symbol, fetchVersion, setSymbol, period }) {
                             >
                                 <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
                                 <XAxis dataKey="fiscalDateEnding" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}} />
-                                <YAxis tickFormatter={(value) => {
-                                    if (countDigits(value) >= 10) {return `${(value / 1000000000).toFixed(2)}B`}
-                                    if (countDigits(value) >= 7) {return `${(value / 1000000).toFixed(2)}M`}
-                                    return value
-                                }} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]} />
-                                <Tooltip formatter={(value) => {
-                                    if (countDigits(value) >= 10) {return `${value / 1000000000}B`}
-                                    if (countDigits(value) >= 7) {return `${value / 1000000}M`}
-                                    return value
-                                }}/>
-                                <Bar dataKey="totalRevenue" shape={<CustomBar></CustomBar>}  activeBar={<CustomActiveBar></CustomActiveBar>} />
+                                <YAxis tickFormatter={(value) => formatToUnits(value)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]} />
+                                <Tooltip formatter={(value) => formatToUnits(value)}/>
+                                <Bar name="Total Revenue" dataKey="totalRevenue" shape={<CustomBar></CustomBar>}  activeBar={<CustomActiveBar></CustomActiveBar>} />
                             </BarChart>
                         </ResponsiveContainer>
                     </Box>

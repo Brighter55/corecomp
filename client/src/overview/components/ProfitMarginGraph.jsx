@@ -59,7 +59,7 @@ export default function ProfitMarginGraph({ symbol, fetchVersion, setSymbol, per
     useEffect(() => {
         async function getStatement() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/overview/income-statement", payload, () => isActive, navigate, setSymbol);
+            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/income-statement", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }
