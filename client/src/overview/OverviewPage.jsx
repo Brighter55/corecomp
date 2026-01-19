@@ -84,12 +84,8 @@ function OverviewPage() {
                         <CapitalExpendituresGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></CapitalExpendituresGraph>
                         <FreeCashflowGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
                         <CashVsDebtGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></CashVsDebtGraph>
+                        <EPSGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></EPSGraph>
                     </GraphsContainer>
-                    {/*
-                    <GraphsContainer direction={{ xs: "column", md: "row" }}>
-                        <EPSGraph reports={reports.EARNINGS} period={period}></EPSGraph>
-                    </GraphsContainer>
-                    */}
                 </Stack>
             </Container>
         )
