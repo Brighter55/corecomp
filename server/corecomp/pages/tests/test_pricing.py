@@ -5,12 +5,12 @@ from pages.models import Symbol
 from rest_framework.response import Response
 from rest_framework import status
 
-url = reverse('income_statement')
+url = reverse('pricing')
 # test for valid request where the endpoint fetches
-@patch("pages.views.overview.annotate_profit_margin")
+@patch("pages.views.overview.transform_pricing")
 @patch("pages.views.overview.fetchAlphaVantage")
 @pytest.mark.django_db
-def test_valid_fetch(mock_fetchAlphaVantage, mock_annotate_profit_margin, authorized_client):
+def test_valid_fetch(mock_fetchAlphaVantage, mock_transform_pricing, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
@@ -21,17 +21,17 @@ def test_valid_fetch(mock_fetchAlphaVantage, mock_annotate_profit_margin, author
         "data": "valid data"
     }
     mock_fetchAlphaVantage.return_value = return_value
-    mock_annotate_profit_margin.return_value = return_value
+    mock_transform_pricing.return_value = return_value
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.json() == return_value
     assert response.status_code == 200
 
 # test for valid request where the endpoint returns cached_data
-@patch("pages.views.overview.annotate_profit_margin")
+@patch("pages.views.overview.transform_pricing")
 @patch("pages.views.overview.fetchAlphaVantage")
 @pytest.mark.django_db
-def test_valid_cache(mock_fetchAlphaVantage, mock_annotate_profit_margin, authorized_client):
+def test_valid_cache(mock_fetchAlphaVantage, mock_transform_pricing, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
@@ -42,7 +42,7 @@ def test_valid_cache(mock_fetchAlphaVantage, mock_annotate_profit_margin, author
         "data": "valid data"
     }
     mock_fetchAlphaVantage.return_value = return_value
-    mock_annotate_profit_margin.return_value = return_value
+    mock_transform_pricing.return_value = return_value
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.json() == return_value
@@ -61,29 +61,33 @@ def test_exceeds_rate_limit(mock_fetchAlphaVantage, authorized_client):
         type="Stock"
     )
     symbol.save()
+    payload = {"symbol": "IBM"}
+    
     mock_fetchAlphaVantage.return_value = Response(
         {"error": "rate limit issue"},
         status=status.HTTP_503_SERVICE_UNAVAILABLE,
         headers={"Retry-After":  "60000"}
     )
-    payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.status_code == 503
     assert response.headers.get("Retry-After") == "60000"
     assert response.json()["error"] == "rate limit issue"
 
-# test for invalid case where the symbol exists in Symbol but not in Alpha Vantage or Alpha Vantage doesn't have data
+# test for invalid case where the symbol is invalid
 @patch("pages.views.overview.fetchAlphaVantage")
 @pytest.mark.django_db
-def test_symbol_not_in_alpha_vantage(mock_fetchAlphaVantage, authorized_client):
+def test_invalid_symbol(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
         type="Stock"
     )
     symbol.save()
-    mock_fetchAlphaVantage.return_value = {}
     payload = {"symbol": "IBM"}
+    
+    mock_fetchAlphaVantage.return_value = Response(
+        {"error": "invalid api call issue"},
+        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
     response = authorized_client.post(url, payload, format="json")
-    assert response.status_code == 400
-    assert response.json()["error"] == "invalid symbol"
+    assert response.status_code == 500

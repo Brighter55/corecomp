@@ -47,5 +47,11 @@ def annotate_free_cash_flow(data):
     
     return data
 
+def transform_pricing(data):
+    records = data["Monthly Adjusted Time Series"]
+    transformed_data = []
+    for date in records:
+        transformed_data.append({"date": date, "adjustedClose": round(float(records[date]["5. adjusted close"]), 2)})
 
+    return transformed_data
 

@@ -78,16 +78,6 @@ def test_exceeds_rate_limit(mock_fetchAlphaVantage, authorized_client):
     assert response.headers.get("Retry-After") == "60000"
     assert response.json()["error"] == "rate limit issue"
 
-    mock_fetchAlphaVantage.return_value = Response(
-        {"error": "rate limit issue"},
-        status=status.HTTP_503_SERVICE_UNAVAILABLE,
-        headers={"Retry-After":  "60000"}
-    )
-    response = authorized_client.post(url, payload, format="json")
-    assert response.status_code == 503
-    assert response.headers.get("Retry-After") == "60000"
-    assert response.json()["error"] == "rate limit issue"
-
 # test for invalid case where Alpha Vantage returns error message about invalid api call
 @patch("pages.views.overview.fetchAlphaVantage")
 @pytest.mark.django_db

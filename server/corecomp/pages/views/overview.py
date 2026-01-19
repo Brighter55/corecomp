@@ -7,7 +7,7 @@ import json
 from dotenv import load_dotenv
 import os
 import requests
-from pages.utils import fetchAlphaVantage, annotate_profit_margin, annotate_free_cash_flow
+from pages.utils import fetchAlphaVantage, annotate_profit_margin, annotate_free_cash_flow, transform_pricing
 from django.core.cache import cache
 from django_redis import get_redis_connection
 # permission
@@ -409,3 +409,41 @@ def dividends(request):
         data = json.load(file)
     return Response(data, status=status.HTTP_200_OK)
 
+@api_view(["POST"])
+@permission_classes([IsSubscribed])
+def pricing(request):
+    """
+    serializer = SymbolSerializer(data=request.data)
+    if serializer.is_valid():
+        symbol = serializer.validated_data["symbol"]
+        redis = get_redis_connection("default")
+
+        key = f"pricing_{symbol}"
+        cached_data = cache.get(key)
+        if cached_data:
+            return Response(cached_data, status=status.HTTP_200_OK)
+        
+        lock = redis.lock(f"lock:{key}", timeout=10)
+        with lock:
+            cached_data = cache.get(key)
+            if cached_data:
+                return Response(cached_data, status=status.HTTP_200_OK)
+
+            url = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol={symbol}&apikey={api_key}"
+            data = fetchAlphaVantage(url)
+
+            if isinstance(data, Response): # Alpha Vantage returns invalid symbol error as "Error Message" for pricing endpoint
+                return data            
+            
+            data = transform_pricing(data)
+
+            cache.set(key, data, timeout=604800)
+
+        return Response(data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    """
+    path = "pages/statement_samples/pricing.json"
+    with open(path, 'r') as file:
+        data = json.load(file)
+    data = transform_pricing(data)
+    return Response(data, status=status.HTTP_200_OK)
