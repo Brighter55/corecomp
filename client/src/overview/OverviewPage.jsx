@@ -67,14 +67,14 @@ function OverviewPage() {
                     </form>
                     <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
                     <Info symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Info>
-                    {/*
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
-                        <DividendsPayoutGraph reports={reports.DIVIDENDS}></DividendsPayoutGraph>
+                        <DividendsPayoutGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></DividendsPayoutGraph>
+
+                        {/*
                         <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
                         <PricingGraph reports={reports.PRICING}></PricingGraph>
+                        */}
                     </GraphsContainer>
-                    */}
-
                     <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
                         <ProfitMarginGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></ProfitMarginGraph>

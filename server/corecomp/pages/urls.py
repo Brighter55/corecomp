@@ -10,4 +10,5 @@ urlpatterns = [
     path("cash-flow", overview.cash_flow, name="cash_flow"),
     path("balance-sheet", overview.balance_sheet, name="balance_sheet"),
     path("earnings", overview.earnings, name="earnings"),
+    path("dividends", overview.dividends, name="dividends"),
 ]
