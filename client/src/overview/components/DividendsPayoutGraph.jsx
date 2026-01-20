@@ -1,14 +1,17 @@
-import { useState, useRef, useEffect} from "react"
-import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import Explanation from "./Explanation.jsx"
+import { useState, useRef, useEffect, useMemo} from "react"
+import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import GraphCard from "./GraphCard.jsx"
+import GraphTitle from "./GraphTitle.jsx"
+import { useNavigate } from "react-router-dom";
+import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
+import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
 //mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-
+import Skeleton from '@mui/material/Skeleton';
 
 const explanation = (
     <Stack spacing={2}>
@@ -42,10 +45,33 @@ const explanation = (
     </Stack>
 )
 
-function DividendsPayoutGraph(props) {
+function DividendsPayoutGraph({ symbol, fetchVersion, setSymbol, period }) {
+    const navigate = useNavigate();
+    const [statement, setStatement] = useState(null);
+    const [timeRange, setTimeRange] = useState("all");
     const [graphClicked, setGraphClicked] = useState(false);
 
     const graphRef = useRef(null);
+
+    useEffect(() => {
+        async function getStatement() {
+            const payload = {symbol: symbol};
+            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/dividends", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            const data = await response.json();
+            console.log(data)
+            setStatement(data);
+        }
+
+        let isActive = true;
+        getStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -60,47 +86,57 @@ function DividendsPayoutGraph(props) {
         };
     }, []);
 
-    function formatXAxis() {
-        return props.reports ? props.reports.map((report, index) => {
-            if (report.payment_date === "None") {
-                return {...report, payment_date: `UnknownDate #${index}`};
-            }
-            return {...report, payment_date: `${report.payment_date} #${index}`};
-        }) : [];
-    }
+    const reports = useMemo(() => {
+        if (!statement) return [];
+
+        const filteredReports = filterReports(statement["data"], timeRange, "ex_dividend_date");
+        console.log("filteredReports: ", filteredReports);
+        return filteredReports;
+    }, [statement, timeRange, period]);
+
+    const percentChange = useMemo(() => {
+        if (!reports.length) {
+            return null;
+        }
+        const percentChange = getPercentChange(reports, "amount");
+        return percentChange;
+    }, [reports]);
 
     return (
-        <Box sx={{ flex: 1 }}> {/* will set the width for the graph */}
-            <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                <Stack
-                    direction="row"
-                    sx={{ alignItems: "center", flexGrow: 1, justifyContent: "center" }}
-                    spacing={1}
-                >
-                    <Typography variant="h6" textAlign="center">Dividends Payout per Share</Typography>
-                    <Explanation explanation={explanation} />
-                </Stack>
-                <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
-                    <ResponsiveContainer>
-                        <BarChart
-                            data={formatXAxis()}
-                            margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                            }}
-                        >
-                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A" />
-                            <XAxis dataKey="payment_date" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}}/>
-                            <YAxis stroke="#344E41"/>
-                            <Tooltip />
-                            <Bar dataKey="amount" fill="#588157" activeBar={<Rectangle fill="#A3B18A"/>}/>
-                        </BarChart>
-                    </ResponsiveContainer>
-                </Box>
-            </GraphCard>
-        </Box>
+        statement ? (
+            <Box sx={{ flex: 1 }}>
+                <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                    <GraphTitle
+                        title="Dividend Payouts"
+                        explanation={explanation}
+                        percentChange={percentChange}
+                        timeRange={timeRange}
+                        setTimeRange={setTimeRange}
+                    />
+                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                        <ResponsiveContainer>
+                            <BarChart
+                                data={reports}
+                                margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                                }}
+                            >
+                                <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A" />
+                                <XAxis dataKey="ex_dividend_date" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}}/>
+                                <YAxis stroke="#344E41" tickFormatter={(value) => `$${value}`}/>
+                                <Tooltip formatter={(value) => `$${value}`}/>
+                                <Bar dataKey="amount" fill="#588157" activeBar={<Rectangle fill="#A3B18A"/>}/>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </Box>
+                </GraphCard>
+            </Box>
+        ) : (
+            <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>
+        )
     )
 }
 

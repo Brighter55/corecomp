@@ -1,55 +1,54 @@
-import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import CustomBar from "./CustomBar.jsx"
-import CustomActiveBar from "./CustomActiveBar.jsx"
-import {useState, useEffect, useRef, useMemo} from "react"
-import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
-import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
-import { useNavigate } from "react-router-dom";
-// mui
+import Box from '@mui/material/Box';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import {useState, useEffect, useRef, useMemo} from "react"
+import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
+import { useNavigate } from "react-router-dom";
+import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
 import Skeleton from '@mui/material/Skeleton';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import CustomBar from "./CustomBar.jsx"
+import CustomActiveBar from "./CustomActiveBar.jsx"
 
-export const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
-            Net income is a company's profit after all expenses and taxes have been deducted from its total revenue.
-        </Typography>
-        <Typography variant="explanationTopic">Calculation</Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
-            Net Income = Total Revenue – Total Expenses
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
-                A positive trend shows the company is improving its financial performance.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
-                A negative trend can be a warning sign, even if it remains positive. It suggests the company may be facing challenges in its operations or market.
-            </Typography>
-        </Stack>
-    </Stack>
+const explanation = (
+  <Stack spacing={2}>
+      <Typography variant="explanationTopic">What is it?</Typography>
+      <Typography variant="explanationText">
+          A profit margin shows the percentage of revenue a company keeps as profit after subtracting its costs
+      </Typography>
+      <Typography variant="explanationTopic">Calculation</Typography>
+      <Typography
+          variant="explanationText"
+          sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
+      >
+          Profit Margin Percent = (net income / total revenue) * 100
+      </Typography>
+      <Typography variant="explanationTopic">Interpretation</Typography>
+      <Stack direction="row" spacing={1}>
+          <TrendingUpIcon
+              sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
+          />
+          <Typography variant="explanationText">
+              A positive trend in a company's profit margin percentage means it's keeping more profit for every dollar of sales over time, signaling improved financial health, better cost control, pricing power, and operational efficiency, making it more attractive to investors and indicating a sustainable business model
+          </Typography>
+      </Stack>
+      <Stack direction="row" spacing={1}>
+          <TrendingDownIcon
+              sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
+          />
+          <Typography variant="explanationText">
+                A negative trend in a company's profit margin means it's losing more money relative to its revenue over time, signaling deeper issues like rising costs (materials, labor, operations), falling sales, poor pricing, or inefficient management, indicating an unsustainable model
+          </Typography>
+      </Stack>
+  </Stack>
 )
 
 
-function NetIncomeGraph({ symbol, fetchVersion, setSymbol, period }) {
+export default function ProfitMarginGraph({ symbol, fetchVersion, setSymbol, period }) {
     const navigate = useNavigate();
     const [statement, setStatement] = useState(null);
     const [timeRange, setTimeRange] = useState("all");
@@ -102,7 +101,7 @@ function NetIncomeGraph({ symbol, fetchVersion, setSymbol, period }) {
         if (!reports.length) {
             return null;
         }
-        const percentChange = getPercentChange(reports, "netIncome");
+        const percentChange = getPercentChange(reports, "profitMarginPercent");
         return percentChange;
     }, [reports]);
 
@@ -111,7 +110,7 @@ function NetIncomeGraph({ symbol, fetchVersion, setSymbol, period }) {
             <Box sx={{ flex: 1 }}>
                 <GraphCard ref={graphRef} graphClicked={graphClicked}>
                     <GraphTitle
-                        title="Net Income"
+                        title="Profit Margin Percentage"
                         explanation={explanation}
                         percentChange={percentChange}
                         timeRange={timeRange}
@@ -130,9 +129,14 @@ function NetIncomeGraph({ symbol, fetchVersion, setSymbol, period }) {
                             >
                                 <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
                                 <XAxis dataKey="fiscalDateEnding" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}} />
-                                <YAxis tickFormatter={(value) => formatToUnits(value)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]} />
-                                <Tooltip formatter={(value) => formatToUnits(value)} />
-                                <Bar name="Net Income" dataKey="netIncome" shape={<CustomBar></CustomBar>}  activeBar={<CustomActiveBar></CustomActiveBar>} />
+                                <YAxis
+                                    tickFormatter={(value) => `${value}%`}
+                                    stroke="#344E41"
+                                />
+                                <Tooltip
+                                    formatter={(value) => `${value}%`}
+                                />
+                                <Bar name="Profit Margin" dataKey="profitMarginPercent" shape={<CustomBar></CustomBar>} activeBar={<CustomActiveBar></CustomActiveBar>}/>
                             </BarChart>
                         </ResponsiveContainer>
                     </Box>
@@ -141,8 +145,5 @@ function NetIncomeGraph({ symbol, fetchVersion, setSymbol, period }) {
         ) : (
         <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>
         )
-    )
-}
-
-
-export default NetIncomeGraph
+    );
+    }

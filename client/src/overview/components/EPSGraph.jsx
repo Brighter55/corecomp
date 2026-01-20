@@ -1,22 +1,78 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import {useState, useEffect, useRef} from "react"
-import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
+import {useState, useEffect, useRef, useMemo} from "react"
+import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
+import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
+import { useNavigate } from "react-router-dom";
 // mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import Skeleton from '@mui/material/Skeleton';
 
-function EPSGraph(props) {
+const explanation = (
+    <Stack spacing={2}>
+        <Typography variant="explanationTopic">What is it?</Typography>
+        <Typography variant="explanationText">
+            A measure of a company's profitability, showing how much profit is generated for each share of stock
+        </Typography>
+        <Typography variant="explanationTopic">Calculation</Typography>
+        <Typography
+            variant="explanationText"
+            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
+        >
+            EPS = Net Income / # of outstanding shares
+        </Typography>
+        <Typography variant="explanationTopic">Interpretation</Typography>
+        <Stack direction="row" spacing={1}>
+            <TrendingUpIcon
+                sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
+            />
+            <Typography variant="explanationText">
+                Upward trend in EPS generally signifies growing profitability, which can lead to a higher stock price and increased investor confidence.
+            </Typography>
+        </Stack>
+        <Stack direction="row" spacing={1}>
+            <TrendingDownIcon
+                sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
+            />
+            <Typography variant="explanationText">
+                Downward trend in EPS signals declining profits, which often leads to a lower stock price and may indicate financial challenges.
+            </Typography>
+        </Stack>
+    </Stack>
+)
+
+function EPSGraph({ symbol, fetchVersion, setSymbol, period }) {
+    const navigate = useNavigate();
+    const [statement, setStatement] = useState(null);
     const [timeRange, setTimeRange] = useState("all");
-    const reports = filterReports(props.reports, timeRange);
-    const percentChange = getPercentChange(reports, "reportedEPS");
     const [graphClicked, setGraphClicked] = useState(false);
 
     const graphRef = useRef(null);
+
+    useEffect(() => {
+        async function getStatement() {
+            const payload = {symbol: symbol};
+            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/earnings", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            const data = await response.json();
+            console.log(data)
+            setStatement(data);
+        }
+
+        let isActive = true;
+        getStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -30,6 +86,23 @@ function EPSGraph(props) {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    const reports = useMemo(() => {
+        if (!statement) return [];
+
+        const filteredReports = filterReports(statement[period === "annually" ? "annualEarnings" : "quarterlyEarnings"], timeRange, "fiscalDateEnding");
+        console.log("filteredReports: ", filteredReports);
+        return filteredReports;
+    }, [statement, timeRange, period]);
+
+    const percentChange = useMemo(() => {
+        if (!reports.length) {
+            return null;
+        }
+        const percentChange = getPercentChange(reports, "reportedEPS");
+        return percentChange;
+    }, [reports]);
+
 
     /*CustomTooltip*/
     function CustomTooltip(props) {
@@ -49,7 +122,10 @@ function EPSGraph(props) {
                         <p>{`Year: ${label}`}</p>
                         <p style={report}>{`${payload[1].name}: ${payload[1].value}`}</p>
                         <p style={report}>{`${payload[0].name}: ${payload[0].value}`}</p>
-                        <p style={report}>{payload[0].payload.surprisePercentage >= 0 ? "beat by" : "missed by"}: <span style={ payload[0].payload.surprisePercentage >= 0 ? {color: "green"} : {color: "red"} }>{payload[0].payload.surprisePercentage}%</span></p>
+                        <p style={report}>
+                            {payload[0].payload.surprisePercentage >= 0 ? "beat by" : "missed by"}: 
+                            <span style={ payload[0].payload.surprisePercentage >= 0 ? {color: "green"} : {color: "red"} }>{parseFloat(payload[0].payload.surprisePercentage).toFixed(2)}%</span>
+                        </p>
                     </>
                 )}
             </div>
@@ -68,107 +144,80 @@ function EPSGraph(props) {
         return <circle cx={cx} cy={cy} stroke={stroke} payload={payload} value={value} fill={color} r={8} strokeWidth={1}></circle>
     }
 
-    const explanation = (
-        <Stack spacing={2}>
-            <Typography variant="explanationTopic">What is it?</Typography>
-            <Typography variant="explanationText">
-                A measure of a company's profitability, showing how much profit is generated for each share of stock
-            </Typography>
-            <Typography variant="explanationTopic">Calculation</Typography>
-            <Typography
-                variant="explanationText"
-                sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-            >
-                EPS = Net Income / # of outstanding shares
-            </Typography>
-            <Typography variant="explanationTopic">Interpretation</Typography>
-            <Stack direction="row" spacing={1}>
-                <TrendingUpIcon
-                    sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-                />
-                <Typography variant="explanationText">
-                    Upward trend in EPS generally signifies growing profitability, which can lead to a higher stock price and increased investor confidence.
-                </Typography>
-            </Stack>
-            <Stack direction="row" spacing={1}>
-                <TrendingDownIcon
-                    sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-                />
-                <Typography variant="explanationText">
-                    Downward trend in EPS signals declining profits, which often leads to a lower stock price and may indicate financial challenges.
-                </Typography>
-            </Stack>
-        </Stack>
-    )
+    if (statement) {
+        return (
+            period === "quarterly" ? (
+                <Box sx={{ flex: 1 }}>
+                    <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                        <GraphTitle
+                            title="Earning per Share"
+                            explanation={explanation}
+                            percentChange={percentChange}
+                            timeRange={timeRange}
+                            setTimeRange={setTimeRange}
+                        />
+                        <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                            <ResponsiveContainer>
+                                <LineChart
+                                data={reports}
+                                margin={{
+                                    top: 5,
+                                    right: 30,
+                                    left: 20,
+                                    bottom: 5,
+                                }}
+                                >
+                                <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
+                                <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
+                                <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                                <Tooltip content={<CustomTooltip></CustomTooltip>} />
+                                <Legend />
+                                <Line name="estimated EPS" type="monotone" dataKey="estimatedEPS" stroke="grey" strokeWidth={0} dot={{ fill: "grey", fillOpacity: 0.3, r: 5}} activeDot={{ r: 8, strokeWidth: 1}} legendType="circle"/>
+                                <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={<CustomDot></CustomDot>} activeDot={<CustomActiveDot></CustomActiveDot>} legendType="circle" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </Box>
+                    </GraphCard>
+                </Box>
+                )
+            : (
+                <Box sx={{ flex: 1 }}>
+                    <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                        <GraphTitle
+                            title="Earning per Share"
+                            explanation={explanation}
+                            percentChange={percentChange}
+                            timeRange={timeRange}
+                            setTimeRange={setTimeRange}
+                        />
+                        <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                            <ResponsiveContainer>
+                                <LineChart
+                                data={reports}
+                                margin={{
+                                    top: 5,
+                                    right: 30,
+                                    left: 20,
+                                    bottom: 5,
+                                }}
+                                >
+                                <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
+                                <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
+                                <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                                <Tooltip formatter={(value) => `$${value}`}/>
+                                <Legend />
+                                <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </Box>
+                    </GraphCard>
+                </Box>
+            )
+        )
+    }
 
     return (
-        props.period === "quarterly" ? (
-            <Box sx={{ flex: 1 }}>
-                <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                    <GraphTitle
-                        title="Earning per Share"
-                        explanation={explanation}
-                        percentChange={percentChange}
-                        timeRange={timeRange}
-                        setTimeRange={setTimeRange}
-                    />
-                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
-                        <ResponsiveContainer>
-                            <LineChart
-                            data={reports}
-                            margin={{
-                                top: 5,
-                                right: 30,
-                                left: 20,
-                                bottom: 5,
-                            }}
-                            >
-                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                            <XAxis dataKey="date" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                            <YAxis tickFormatter={(value) => value.toFixed(2)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
-                            <Tooltip content={<CustomTooltip></CustomTooltip>} />
-                            <Legend />
-                            <Line type="monotone" dataKey="estimatedEPS" stroke="grey" strokeWidth={0} dot={{ fill: "grey", fillOpacity: 0.3, r: 5}} activeDot={{ r: 8, strokeWidth: 1}} legendType="circle"/>
-                            <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={<CustomDot></CustomDot>} activeDot={<CustomActiveDot></CustomActiveDot>} legendType="circle" />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </Box>
-                </GraphCard>
-            </Box>
-            )
-        : (
-            <Box sx={{ flex: 1 }}>
-                <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                    <GraphTitle
-                        title="Earning per Share"
-                        explanation={explanation}
-                        percentChange={percentChange}
-                        timeRange={timeRange}
-                        setTimeRange={setTimeRange}
-                    />
-                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
-                        <ResponsiveContainer>
-                            <LineChart
-                            data={reports}
-                            margin={{
-                                top: 5,
-                                right: 30,
-                                left: 20,
-                                bottom: 5,
-                            }}
-                            >
-                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                            <XAxis dataKey="date" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                            <YAxis tickFormatter={(value) => value.toFixed(2)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </Box>
-                </GraphCard>
-            </Box>
-        )
+        <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>
     )
 }
 

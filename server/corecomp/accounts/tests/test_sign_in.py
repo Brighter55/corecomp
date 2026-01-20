@@ -30,7 +30,7 @@ def test_account_not_active(api_client):
 
 # test for invalid case where the password/username is invalid
 @pytest.mark.django_db
-def test_unsuccessful_sign_in(api_client, test_user):
+def test_unsuccessful_sign_in(api_client, authenticated_user):
     payload = {
         "username": "test",
         "password": "invalid password",

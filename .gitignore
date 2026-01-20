@@ -23,6 +23,9 @@ client/*.njsproj
 client/*.sln
 client/*.sw?
 
+# samples
+server/corecomp/pages/statement_samples
+
 # keys
 .env
 client/.env

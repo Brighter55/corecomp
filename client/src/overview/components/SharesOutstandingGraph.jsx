@@ -1,15 +1,19 @@
-import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import TimeRanges from "./TimeRanges.jsx"
-import {useState, useEffect, useRef} from "react"
-import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import CustomBar from "./CustomBar.jsx"
+import CustomActiveBar from "./CustomActiveBar.jsx"
+import {useState, useEffect, useRef, useMemo} from "react"
+import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
-// mui compoenents
+import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
+import { useNavigate } from "react-router-dom";
+// mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import Skeleton from '@mui/material/Skeleton';
 
 const explanation = (
     <Stack spacing={2}>
@@ -42,13 +46,35 @@ const explanation = (
     </Stack>
 )
 
-function SharesOutstandingGraph(props) {
+
+function SharesOutstandingGraph({ symbol, fetchVersion, setSymbol, period }) {
+    const navigate = useNavigate();
+    const [statement, setStatement] = useState(null);
     const [timeRange, setTimeRange] = useState("all");
-    const reports = filterReports(props.reports, timeRange);
-    const percentChange = getPercentChange(reports, "shares_outstanding_basic");
     const [graphClicked, setGraphClicked] = useState(false);
 
     const graphRef = useRef(null);
+
+    useEffect(() => {
+        async function getStatement() {
+            const payload = {symbol: symbol};
+            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/shares-outstanding", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            const data = await response.json();
+            console.log(data)
+            setStatement(data);
+        }
+
+        let isActive = true;
+        getStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion]);
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (graphRef.current && !graphRef.current.contains(event.target)) {
@@ -62,55 +88,59 @@ function SharesOutstandingGraph(props) {
         };
     }, []);
 
-    function countDigits(value) {
-        if (value === 0) {
-            return 1;
+    const reports = useMemo(() => {
+        if (!statement) return [];
+
+        const filteredReports = filterReports(statement["data"], timeRange, "date");
+        console.log("filteredReports: ", filteredReports);
+        return filteredReports;
+    }, [statement, timeRange, period]);
+
+    const percentChange = useMemo(() => {
+        if (!reports.length) {
+            return null;
         }
-        return Math.floor(Math.log10(Math.abs(value))) + 1;
-    }
+        const percentChange = getPercentChange(reports, "shares_outstanding_basic");
+        return percentChange;
+    }, [reports]);
 
     return (
-        <Box sx={{ flex: 1 }}>
-            <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                <GraphTitle
-                    title="SharesOutstanding"
-                    explanation={explanation}
-                    percentChange={percentChange}
-                    timeRange={timeRange}
-                    setTimeRange={setTimeRange}
-                />
-                <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
-                    <ResponsiveContainer>
-                        <BarChart
-                            data={reports}
-                            margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                            }}
-                        >
-                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A" />
-                            <XAxis dataKey="date" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}}/>
-                            <YAxis tickFormatter={(value) => {
-                                if (countDigits(value) >= 10) {return `${(value / 1000000000).toFixed(2)}B`}
-                                if (countDigits(value) >= 7) {return `${(value / 1000000).toFixed(2)}M`}
-                                return value
-                            }} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}
-
-                            />
-                            <Tooltip formatter={(value) => {
-                                if (countDigits(value) >= 10) {return `${value / 1000000000}B`}
-                                if (countDigits(value) >= 7) {return `${value / 1000000}M`}
-                                return value
-                            }} />
-                            <Bar dataKey="shares_outstanding_basic" fill="#588157" activeBar={<Rectangle fill="#A3B18A"/>}/>
-                        </BarChart>
-                    </ResponsiveContainer>
-                </Box>
-            </GraphCard>
-        </Box>
+        statement ? (
+            <Box sx={{ flex: 1 }}>
+                <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                    <GraphTitle
+                        title="Basic Shares Outstanding"
+                        explanation={explanation}
+                        percentChange={percentChange}
+                        timeRange={timeRange}
+                        setTimeRange={setTimeRange}
+                    />
+                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                        <ResponsiveContainer>
+                            <BarChart
+                                data={reports}
+                                margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                                }}
+                            >
+                                <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
+                                <XAxis dataKey="date" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}} />
+                                <YAxis tickFormatter={(value) => formatToUnits(value)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]} />
+                                <Tooltip formatter={(value) => formatToUnits(value)} />
+                                <Bar name="Basic Shares Outstanding" dataKey="shares_outstanding_basic" shape={<CustomBar></CustomBar>}  activeBar={<CustomActiveBar></CustomActiveBar>} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </Box>
+                </GraphCard>
+            </Box>
+        ) : (
+        <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>
+        )
     )
 }
+
 
 export default SharesOutstandingGraph

@@ -8,8 +8,8 @@ url = reverse("sign_out")
 
 # test for valid sign out
 @pytest.mark.django_db
-def test_valid_sign_out(authenticated_client, test_user):
-    refresh_object = RefreshToken.for_user(test_user)
+def test_valid_sign_out(authenticated_client, authenticated_user):
+    refresh_object = RefreshToken.for_user(authenticated_user)
     refresh = str(refresh_object)
     payload = {
         "refresh": refresh,
