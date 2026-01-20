@@ -14,6 +14,7 @@ from django_redis import get_redis_connection
 from accounts.permissions import IsSubscribed
 # serializer
 from pages.serializers import SymbolSerializer
+from django.core.serializers import serialize
 # model
 from pages.models import Symbol
 
@@ -487,3 +488,10 @@ def shares_outstanding(request):
     with open(path, 'r') as file:
         data = json.load(file)
     return Response(data, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+@permission_classes([IsSubscribed])
+def symbol_search(request):
+    # return all symbols in Symbol model
+    symbols = list(Symbol.objects.all().values("name", "symbol", "type"))
+    return Response(symbols, status=status.HTTP_200_OK)

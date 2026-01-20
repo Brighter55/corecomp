@@ -3,6 +3,7 @@ import {useEffect} from "react"
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
 import PeriodSwitch from "./components/PeriodSwitch.jsx"
 import {useNavigate} from "react-router-dom"
+import SymbolSearch from "../shared/SymbolSearch.jsx"
 // mui components
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
@@ -48,7 +49,9 @@ function OverviewPage() {
 
     async function handleSearchSubmit(event) {
         event.preventDefault();
+
         setSymbol(input);
+        console.log("sent", symbol);
         setFetchVersion(v => v + 1);
     }
 
@@ -111,12 +114,15 @@ function OverviewPage() {
                     Enter stock symbol and get started now!
                 </Typography>
                 <form onSubmit={handleSearchSubmit} style={{ width: "100%" }}>
+                    {/*
                     <StyledTextField
                         label="stock symbol"
                         value={input}
                         onChange={(event) => {setInput(event.target.value)}}
                         sx={{ width: "100%" }}
                     />
+                    */}
+                    <SymbolSearch input={input} setInput={setInput}/>
                 </form>
             </Stack>
         </Container>
