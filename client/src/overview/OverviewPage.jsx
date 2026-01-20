@@ -70,10 +70,7 @@ function OverviewPage() {
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
                         <DividendsPayoutGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></DividendsPayoutGraph>
                         <PricingGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
-                        {/*
-                        <SharesOutstandingGraph reports={reports.SHARES_OUTSTANDING}></SharesOutstandingGraph>
-                        
-                        */}
+                        <SharesOutstandingGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></SharesOutstandingGraph>
                     </GraphsContainer>
                     <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>

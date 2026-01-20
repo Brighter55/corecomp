@@ -12,4 +12,5 @@ urlpatterns = [
     path("earnings", overview.earnings, name="earnings"),
     path("dividends", overview.dividends, name="dividends"),
     path("pricing", overview.pricing, name="pricing"),
+    path("shares-outstanding", overview.shares_outstanding, name="shares_outstanding"),
 ]
