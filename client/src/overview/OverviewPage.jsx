@@ -3,6 +3,7 @@ import {useEffect} from "react"
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
 import PeriodSwitch from "./components/PeriodSwitch.jsx"
 import {useNavigate} from "react-router-dom"
+import SymbolSearch from "../shared/SymbolSearch.jsx"
 // mui components
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
@@ -44,11 +45,13 @@ function OverviewPage() {
     const [symbol, setSymbol] = useState("");
     const [period, setPeriod] = useState("annually");
     const [fetchVersion, setFetchVersion] = useState(0);
-    const [input, setInput] = useState("");
 
-    async function handleSearchSubmit(event) {
+
+    function handleSearchSubmit(event, symbolFromChild) {
         event.preventDefault();
-        setSymbol(input);
+
+        setSymbol(symbolFromChild);
+        console.log("sent", symbol);
         setFetchVersion(v => v + 1);
     }
 
@@ -57,14 +60,6 @@ function OverviewPage() {
             <Container maxWidth="lg">
                 <ProductHeader></ProductHeader>
                 <Stack spacing={5} sx={{ alignItems: "center" }}>
-                    <form onSubmit={handleSearchSubmit} style={{ width: "50%" }}>
-                        <StyledTextField
-                            label="stock symbol"
-                            value={input}
-                            onChange={(event) => {setInput(event.target.value)}}
-                            sx={{ width: "100%" }}
-                        />
-                    </form>
                     <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
                     <Info symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Info>
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
@@ -111,12 +106,15 @@ function OverviewPage() {
                     Enter stock symbol and get started now!
                 </Typography>
                 <form onSubmit={handleSearchSubmit} style={{ width: "100%" }}>
+                    {/*
                     <StyledTextField
                         label="stock symbol"
                         value={input}
                         onChange={(event) => {setInput(event.target.value)}}
                         sx={{ width: "100%" }}
                     />
+                    */}
+                    <SymbolSearch handleSearchSubmit={handleSearchSubmit} />
                 </form>
             </Stack>
         </Container>
