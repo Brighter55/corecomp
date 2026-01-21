@@ -13,6 +13,8 @@ def test_valid(authorized_client):
         type="Stock"
     )
     symbol.save()
-    response = authorized_client.post(url)
+
+    payload = {"symbol": "IB"}
+    response = authorized_client.post(url, payload, format="json")
     data = response.json()
-    assert data == [{'name': 'International Business Machines Corp', 'symbol': 'IBM', 'type': 'Stock'}]
+    assert data == [{'name': 'International Business Machines Corp', 'symbol': 'IBM'}]

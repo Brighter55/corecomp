@@ -16,6 +16,7 @@ from accounts.permissions import IsSubscribed
 from pages.serializers import SymbolSerializer
 from django.core.serializers import serialize
 # model
+from django.db.models import Q
 from pages.models import Symbol
 
 
@@ -492,6 +493,9 @@ def shares_outstanding(request):
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def symbol_search(request):
-    # return all symbols in Symbol model
-    symbols = list(Symbol.objects.all().values("name", "symbol", "type"))
+    identifier = request.data["symbol"]
+    include_identifier = Q(name__icontains=identifier) | Q(symbol__icontains=identifier)
+    symbols_queryset = Symbol.objects.filter(include_identifier)[:20]
+    symbols = list(symbols_queryset.values("name", "symbol"))
+    print(symbols)
     return Response(symbols, status=status.HTTP_200_OK)

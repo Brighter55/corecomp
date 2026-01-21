@@ -45,12 +45,12 @@ function OverviewPage() {
     const [symbol, setSymbol] = useState("");
     const [period, setPeriod] = useState("annually");
     const [fetchVersion, setFetchVersion] = useState(0);
-    const [input, setInput] = useState("");
 
-    async function handleSearchSubmit(event) {
+
+    function handleSearchSubmit(event, symbolFromChild) {
         event.preventDefault();
 
-        setSymbol(input);
+        setSymbol(symbolFromChild);
         console.log("sent", symbol);
         setFetchVersion(v => v + 1);
     }
@@ -60,14 +60,6 @@ function OverviewPage() {
             <Container maxWidth="lg">
                 <ProductHeader></ProductHeader>
                 <Stack spacing={5} sx={{ alignItems: "center" }}>
-                    <form onSubmit={handleSearchSubmit} style={{ width: "50%" }}>
-                        <StyledTextField
-                            label="stock symbol"
-                            value={input}
-                            onChange={(event) => {setInput(event.target.value)}}
-                            sx={{ width: "100%" }}
-                        />
-                    </form>
                     <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
                     <Info symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Info>
                     <GraphsContainer direction={{ xs: "column", md: "row" }}>
@@ -122,7 +114,7 @@ function OverviewPage() {
                         sx={{ width: "100%" }}
                     />
                     */}
-                    <SymbolSearch input={input} setInput={setInput}/>
+                    <SymbolSearch handleSearchSubmit={handleSearchSubmit} />
                 </form>
             </Stack>
         </Container>
