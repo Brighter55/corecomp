@@ -1,5 +1,5 @@
 
-function getEndIndex(reports, year, dateField) {
+export function getEndIndex(reports, year, dateField) {
     // get targetMonth and targetYear
     const startDate = reports[0][dateField];
     const startDateObject = new Date(startDate);
@@ -12,9 +12,7 @@ function getEndIndex(reports, year, dateField) {
         const currentReportDateYear = currentReportDateObject.getFullYear();
         return (currentReportDateMonth === targetMonth && currentReportDateYear === targetYear);
     });
-    if (endIndex === -1) {
-        return  0
-    }
+
     return endIndex;
 }
 
@@ -44,16 +42,31 @@ export function filterReports(reports, timeRange, dateField) {
         }
         case "1Y": {
             const endIndex = getEndIndex(reports, 1, dateField);
+
+            if (endIndex === -1) {
+                break;
+            }
+
             filteredReports = reports.slice(0, endIndex + 1);
             break;
         }
         case "5Y": {
             const endIndex = getEndIndex(reports, 5, dateField);
+
+            if (endIndex === -1) {
+                break;
+            }
+
             filteredReports = reports.slice(0, endIndex + 1);
             break;
         }
         case "10Y": {
             const endIndex = getEndIndex(reports, 10, dateField);
+
+            if (endIndex === -1) {
+                break;
+            }
+
             filteredReports = reports.slice(0, endIndex + 1);
             break;
         }
@@ -64,26 +77,25 @@ export function filterReports(reports, timeRange, dateField) {
 }
 
 export function getPercentChange(reports, value) {
-    // ((today’s price - years ago price) / years ago price) * 100
+    // ((newValue - oldValue) / oldValue) * 100
     if (!reports.length) {
         return 0;
     }
-    console.log("percentChangeReports:", reports);
-    const newValue = reports[reports.length - 1][value];
-    const oldValue = reports[0][value];
-    const percentChange = ((newValue - oldValue) / oldValue) * 100;
-    console.log(`percentChange is ${percentChange} old value = ${oldValue} new value = ${newValue} `);
-    return percentChange.toFixed(2);
-}
 
+    const newValue = parseInt(reports[reports.length - 1][value]);
+    const oldValue = parseInt(reports[0][value]);
+    const percentChange = ((newValue - oldValue) / oldValue) * 100;
+    return parseFloat(percentChange.toFixed(2));
+}
+// receive string integer
 export function formatToUnits(value) {
-    if (value >= 1_000_000_000 || value <= -1_000_000_000) {
-        return `${(value / 1_000_000_000).toFixed(2)}B`;
+    const integerValue = parseInt(value);
+    if (integerValue >= 1_000_000_000 || integerValue <= -1_000_000_000) {
+        return `$${(integerValue / 1_000_000_000).toFixed(2)}B`;
     }
-    if (value >= 1_000_000 || value <= -1_000_000) {
-        return `${(value / 1_000_000).toFixed(2)}M`;
+    if (integerValue >= 1_000_000 || integerValue <= -1_000_000) {
+        return `$${(integerValue / 1_000_000).toFixed(2)}M`;
     }
     
-    return value;
-
+    return `$${value}`;
 }
