@@ -16,16 +16,50 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from .permissions import IsSubscribed
 from .utils import verify_google_token
+from django.conf import settings
+from rest_framework.request import Request
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 load_dotenv()
 User = get_user_model() # Get model listed in settings.py: AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # return error message: "invalid username/password", user.isactive == False
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class CustomTokenObtainPairView(TokenObtainPairView):
-    # change from default (JSON access and refresh) to cookies once deployed
     serializer_class = CustomTokenObtainPairSerializer
 
+    def post(self, request: Request, *args, **kwargs) -> Response:
+        response = super().post(request, *args, **kwargs)
+
+        access_token = response.data["access"]
+        refresh_token = response.data["refresh"]
+
+        response.set_cookie(
+            key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+            value=access_token,
+            domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+            path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+            max_age=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
+            secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+            httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+        )
+
+        response.set_cookie(
+            key=settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"],
+            value=refresh_token,
+            domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+            path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+            max_age=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"],
+            secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+            httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+        )
+
+        return response
+    
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def check_permission(request):
