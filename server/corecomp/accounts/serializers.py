@@ -210,5 +210,5 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         #  if it passes your custom validations,
         # then pass it to django to validate again
         # and return {"access": ..., "refresh": ..}
-        data = super().validate(data)
+        data = super().validate(attr)
         return data

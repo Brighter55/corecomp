@@ -22,6 +22,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 
+
 load_dotenv()
 User = get_user_model() # Get model listed in settings.py: AUTH_USER_MODEL = 'accounts.CustomUser'
 
@@ -148,9 +149,10 @@ def resend_verify_email(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@ensure_csrf_cookie
 def google_authentication(request): #decodes the JWT to get user's info and create or retrieve account to send access and refresh
     # get JWT from request
-    data = json.loads(request.body)
+    data = request.data
     jwt_token = data["JWTToken"]
     try:
         user_info = verify_google_token(jwt_token)
@@ -161,7 +163,33 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
             user.save()
         # uses email to generate access and refresh tokens and return them to react
         refresh = RefreshToken.for_user(user)
-        return Response({"access": str(refresh.access_token), "refresh": str(refresh)}, status=status.HTTP_200_OK) # TODO: return these tokens via cookies in prod.
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+        response = Response({"access": access_token, "refresh": refresh_token}, status=status.HTTP_200_OK)
+
+        response.set_cookie(
+            key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+            value=access_token,
+            domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+            path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+            max_age=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
+            secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+            httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+        )
+
+        response.set_cookie(
+            key=settings.SIMPLE_JWT["AUTH_REFRESH_COOKIE"],
+            value=refresh_token,
+            domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+            path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+            max_age=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"],
+            secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+            httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+        )
+
+        return response
     except ValueError:
         return Response({"error": "Token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
 

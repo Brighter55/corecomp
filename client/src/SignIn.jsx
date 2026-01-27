@@ -83,7 +83,7 @@ function SignIn() {
     };
     async function handleClickResendEmail() {
         const payload = {username: username};
-        const response = await fetch("http://127.0.0.1:8000/accounts/resend-verify-email", {
+        const response = await fetch("http://localhost:8000/accounts/resend-verify-email", {
             method: "POST",
             headers: {"Content-Type": "application/json",},
             body: JSON.stringify(payload),
@@ -123,11 +123,12 @@ function SignIn() {
         event.preventDefault();
         const payload = {username: username, password: password};
         try {
-            const response = await fetch("http://127.0.0.1:8000/accounts/sign-in", {
+            const response = await fetch("http://localhost:8000/accounts/sign-in", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                credentials: "include",
                 body: JSON.stringify(payload),
             });
             // if account not found
@@ -148,9 +149,6 @@ function SignIn() {
             const data = await response.json();
             // development phase
             console.log(data);
-            sessionStorage.setItem("access", data.access);
-            sessionStorage.setItem("refresh", data.refresh);
-            console.log(sessionStorage);
             // redirect user to their "search" page
             navigate("/overview");
         } catch (error) {
@@ -199,16 +197,16 @@ function SignIn() {
                                 const payload = {JWTToken: credentialResponse.credential};
                                 console.log(credentialResponse);
                                 async function sendJWTToken() {
-                                    const response = await fetch("http://127.0.0.1:8000/accounts/google-authentication", {
+                                    const response = await fetch("http://localhost:8000/accounts/google-authentication", {
                                         method: "POST",
                                         headers: {
                                             "Content-Type": "application/json",
                                         },
+                                        credentials: "include",
                                         body: JSON.stringify(payload)
                                     });
                                     const data = await response.json()
-                                    sessionStorage.setItem("access", data.access);
-                                    sessionStorage.setItem("refresh", data.refresh);
+                                    console.log(data)
                                     navigate("/overview");
                                 }
 
