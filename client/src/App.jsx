@@ -1,4 +1,5 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom"
+import ProtectedRoute from "./auth/ProtectedRoute.jsx"
 import Landing from "./landing-page/Landing.jsx"
 import SignIn from "./SignIn.jsx"
 import SignUp from "./SignUp.jsx"
@@ -18,7 +19,7 @@ function App() {
         <Route path="/sign-up" element={<SignUp></SignUp>} />
         <Route path="/overview" element={<OverviewPage></OverviewPage>} />
         <Route path="/account-verification/:token/:user_id" element={<AccountVerification></AccountVerification>} />
-        <Route path="/user-account" element={<UserAccount></UserAccount>} />
+        <Route path="/user-account" element={<ProtectedRoute><UserAccount></UserAccount></ProtectedRoute>} />
         <Route path="/return/:checkout_session_id" element={<Return></Return>} />
         <Route path="/reset-password" element={<ResetPassword></ResetPassword>} />
         <Route path="/reset-password/:token/:id" element={<ConfirmResetPassword />} />

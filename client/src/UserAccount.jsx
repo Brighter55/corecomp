@@ -26,28 +26,7 @@ const StyledButton = styled(Button)({
 
 function UserAccount() {
     const navigate = useNavigate();
-    const ran = useRef(false);
-    const [isCustomer, setIsCustomer] = useState(false);
-
-    async function checkIsCustomer() {
-        const response = await fetch("http://127.0.0.1:8000/accounts/is-customer", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
-            },
-        });
-        const data = await response.json();
-        setIsCustomer(data.is_customer);
-    }
-
-    useEffect(() => {
-        if (ran.current) {return;}
-        ran.current = true;
-        checkPermission(navigate);
-        checkIsCustomer();
-    }, []);
-
-
+    
     const [clientSecret, setClientSecret] = useState(null);
 
     async function handleSubscribeClicked(event) {

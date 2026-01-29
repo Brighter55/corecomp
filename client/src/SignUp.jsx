@@ -2,6 +2,7 @@ import {useState} from "react"
 import {GoogleLogin} from "@react-oauth/google"
 import {useNavigate} from "react-router-dom"
 import LandingHeader from "./headers/LandingHeader.jsx"
+import { apiClient } from "./helpers/api.js"
 // styled components
 import StyledTextField from "./shared/StyledTextField.jsx";
 // mui components
@@ -92,13 +93,7 @@ function SignUp() {
             confirmPassword: confirmPassword
         };
         try {
-            const response = await fetch("http://127.0.0.1:8000/accounts/sign-up", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            });
+            const response = await apiClient({endpoint: "/accounts/sign-up", payload: payload});
             const data = await response.json();
             console.log(data);
             if (!response.ok) {
@@ -192,13 +187,7 @@ function SignUp() {
                                 const payload = {JWTToken: credentialResponse.credential};
                                 console.log(credentialResponse);
                                 async function sendJWTToken() {
-                                    const response = await fetch("http://127.0.0.1:8000/accounts/google-authentication", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                        },
-                                        body: JSON.stringify(payload)
-                                    });
+                                    const response = await apiClient({endpoint: "/accounts/google-authentication", payload: payload});
                                     const data = await response.json()
                                     sessionStorage.setItem("access", data.access);
                                     sessionStorage.setItem("refresh", data.refresh);
