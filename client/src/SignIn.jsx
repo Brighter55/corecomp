@@ -188,9 +188,10 @@ function SignIn() {
                                 const payload = {JWTToken: credentialResponse.credential};
                                 console.log(credentialResponse);
                                 async function sendJWTToken() {
-                                    const response = await apiClient({endpoint: "accounts/google-authentication", payload: payload});
+                                    const response = await apiClient({endpoint: "/accounts/google-authentication", payload: payload});
                                     const data = await response.json()
-                                    console.log(data)
+                                    console.log(data);
+                                    setUser(data);
                                     navigate("/overview");
                                 }
 

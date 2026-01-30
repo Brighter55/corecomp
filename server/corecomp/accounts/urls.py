@@ -13,9 +13,7 @@ urlpatterns = [
     path("sign-out", views.sign_out, name="sign_out"),
     path("reset-password", views.reset_password, name="reset_password"),
     path("confirm-reset-password", views.confirm_reset_password, name="confirm_reset_password"),
-    # Authorization
-    path("check-permission", views.check_permission, name="check_permission"),
-    path("is-customer", views.is_customer, name="is_customer"),
+    path("me", views.me, name="me"),
     # handle access token expires | refresh endpoint
     path("refresh", TokenRefreshView.as_view(), name="refresh"),
 ]

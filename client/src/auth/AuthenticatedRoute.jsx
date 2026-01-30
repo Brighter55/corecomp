@@ -1,8 +1,9 @@
 import { useAuth } from "./AuthProvider.jsx"
 import { Navigate } from "react-router-dom";
 
-function ProtectedRoute({ children }) {
+function AuthenticatedRoute({ children }) {
     const { user, loading } = useAuth();
+    console.log(user);
 
     // TODO: make a loading page
     if (loading) return <div>Loading...</div>;
@@ -11,3 +12,5 @@ function ProtectedRoute({ children }) {
 
     return children
 }
+
+export default AuthenticatedRoute

@@ -61,15 +61,18 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
         return response
     
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def check_permission(request):
-    subscribed = IsSubscribed().has_permission(request, view=None)
-    if subscribed:
-        permission = "IsSubscribed"
-    else:
-        permission = "IsAuthenticated"
-    return Response({"permission": permission}, status=status.HTTP_200_OK)
+def me(request):
+    user = request.user
+    data = {
+        "username": user.username,
+        "email": user.email,
+        "subscription_status": user.subscription_status,
+        "current_period_end": user.current_period_end,
+        "current_period_start": user.current_period_start,
+    }
+    return Response(data, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -242,12 +245,3 @@ def confirm_reset_password(request):
         user.save()
         return Response({"success": "your password has been reset!"}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def is_customer(request):
-    user = request.user
-    if user.subscription_status in ["trialing", "active"]: # if user has customer_id, aka, if user has subscribed before and has stripe account
-        return Response({"is_customer": True}, status=status.HTTP_200_OK)
-    return Response({"is_customer": False}, status=status.HTTP_400_BAD_REQUEST)

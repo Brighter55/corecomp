@@ -1,8 +1,6 @@
-import {useState, useRef} from "react"
-import {useEffect} from "react"
+import {useState} from "react"
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
 import PeriodSwitch from "./components/PeriodSwitch.jsx"
-import {useNavigate} from "react-router-dom"
 import SymbolSearch from "../shared/SymbolSearch.jsx"
 // mui components
 import Container from '@mui/material/Container';
@@ -17,8 +15,6 @@ import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph
 } from "./index.js"
 import StyledTextField from "../shared/StyledTextField.jsx"
-// helpers
-import {checkPermission} from "../helpers/helper.js"
 
 
 const GraphsContainer = styled(Stack)({
@@ -29,19 +25,6 @@ const GraphsContainer = styled(Stack)({
 });
 
 function OverviewPage() {
-    // when opens up the page check if user is authorized
-    // TODO: implement "refresh lock" in prod. to prevent multiple components hitting refreshing the tokens
-    const ran = useRef(false);
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        /*prevent checkPermission to run second time in developement*/
-        if (ran.current) {return;}
-        ran.current = true;
-        checkPermission(navigate);
-    }, []);
-
-
     const [symbol, setSymbol] = useState("");
     const [period, setPeriod] = useState("annually");
     const [fetchVersion, setFetchVersion] = useState(0);

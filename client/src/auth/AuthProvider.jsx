@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext } from "react";
-import { authenticatatedClient } from "../helpers/api.jsx"
+import { authenticatedClient } from "../helpers/api.js"
 
 const AuthContext = createContext();
 
@@ -9,16 +9,19 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         async function getUser() {
-            try {
-                const response = await authenticatatedClient({endpoint: "/accounts/me"});
-                const data = await response.json();
-                setUser(data);
-                setLoading(false);
-            } catch (error) {
+            const response = await authenticatedClient({endpoint: "/accounts/me"});
+            if (!response.ok) {
                 setUser(null);
                 setLoading(false);
+                console.log("user is null");
+                return;
             }
+            const data = await response.json();
+            setUser(data);
+            setLoading(false);
+            console.log(data);
         }
+
         
         getUser();
     }, []);
