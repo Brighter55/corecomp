@@ -4,9 +4,7 @@ import PeriodSwitch from "./components/PeriodSwitch.jsx"
 import SymbolSearch from "../shared/SymbolSearch.jsx"
 // mui components
 import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 // components
@@ -14,7 +12,6 @@ import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
     SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph
 } from "./index.js"
-import StyledTextField from "../shared/StyledTextField.jsx"
 
 
 const GraphsContainer = styled(Stack)({
@@ -89,14 +86,6 @@ function OverviewPage() {
                     Enter stock symbol and get started now!
                 </Typography>
                 <form onSubmit={handleSearchSubmit} style={{ width: "100%" }}>
-                    {/*
-                    <StyledTextField
-                        label="stock symbol"
-                        value={input}
-                        onChange={(event) => {setInput(event.target.value)}}
-                        sx={{ width: "100%" }}
-                    />
-                    */}
                     <SymbolSearch handleSearchSubmit={handleSearchSubmit} />
                 </form>
             </Stack>

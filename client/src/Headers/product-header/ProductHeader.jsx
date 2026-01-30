@@ -34,7 +34,7 @@ function ProductHeader() {
     };
 
 
-    async function handleSignoutClicked() {
+    function handleSignoutClicked() {
         // send a request to Django with refresh token to revoke the token
         console.log("TODO: sign out");
         setUser(null);

@@ -9,7 +9,7 @@ function AuthorizedRoute() {
     if (loading) return <div>Loading...</div>;
 
     if (!authorizedStatuses.includes(user.subscription_status)) {
-        return <Navigate to="/authenticated-user-account" replace />;
+        return <Navigate to="/account" replace />;
     }
 
     return children
