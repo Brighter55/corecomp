@@ -9,7 +9,7 @@ import StyledButton from "./shared/StyledButton.jsx"
 // mui components
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
-
+import { authenticatedClient } from "./helpers/api.js"
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY, {
 });

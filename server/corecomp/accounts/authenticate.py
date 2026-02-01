@@ -1,8 +1,6 @@
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.conf import settings
 from rest_framework.authentication import CSRFCheck
 from rest_framework import exceptions
-from django.contrib.auth.models import AnonymousUser
 
 def enforce_csrf(request):
     """
@@ -17,7 +15,10 @@ def enforce_csrf(request):
 class CustomJWTAuthentication(JWTAuthentication):
     """Custom authentication class"""
     def authenticate(self, request):
-        if hasattr(request, 'user') and not isinstance(request.user, AnonymousUser):
-            enforce_csrf(request)
-            return request.user, None
-        return None
+        user = getattr(request, "_user", None)
+
+        if user is None or not user.is_authenticated:
+            return None
+
+        enforce_csrf(request)
+        return user, None

@@ -3,7 +3,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 import os
 from dotenv import load_dotenv
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth import get_user_model
 
 
 """
@@ -16,6 +16,11 @@ flow:
 
 """
 load_dotenv()
+User = get_user_model()
+
+def get_user_object(user_id):
+    user = User.objects.get(id=user_id)
+    return user
 
 class AutoRefreshJWTMiddleware:
     def __init__(self, get_response):
@@ -25,23 +30,30 @@ class AutoRefreshJWTMiddleware:
         access = request.COOKIES.get("access_token")
         refresh = request.COOKIES.get("refresh_token")
 
-        user = AnonymousUser()
+        user = None
         try:
-            user = jwt.decode(access, os.getenv("DJANGO_SECRET_KEY"), algorithms=["HS256"])
+            user_dict = jwt.decode(access, os.getenv("DJANGO_SECRET_KEY"), algorithms=["HS256"])
+            user = get_user_object(user_dict["user_id"])
         except jwt.DecodeError:
-            pass
-        except jwt.ExpiredSignatureError:
-            try:
-                refresh_object = RefreshToken(refresh)
-                request.new_access_token = str(refresh_object.access_token)
-                request.new_refresh_token = str(refresh_object)
-                refresh_object.blacklist() # blacklist the old refresh
-                user = jwt.decode(request.new_access_token, os.getenv("DJANGO_SECRET_KEY"), algorithms=["HS256"])
-            except Exception:
-                pass
-        
+            if refresh:
+                try:
+                    #renew the access
+                    refresh_object = RefreshToken(refresh)
+                    request.new_access_token = str(refresh_object.access_token)
+                    
+                    refresh_object.blacklist() # blacklist the old refresh
 
-        request.user = user
+                    user_dict = jwt.decode(request.new_access_token, os.getenv("DJANGO_SECRET_KEY"), algorithms=["HS256"])
+                    user = get_user_object(user_dict["user_id"])
+
+                    #renew the refresh
+                    new_refresh_object = RefreshToken.for_user(user)
+                    request.new_refresh_token = str(new_refresh_object)
+
+                except Exception:
+                    pass
+        
+        request._user = user
 
         # Continue to view
         response = self.get_response(request)
@@ -59,7 +71,6 @@ class AutoRefreshJWTMiddleware:
                 httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
                 samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
             )
-            print("new access is set")
 
         if hasattr(request, "new_refresh_token"):
             response.set_cookie(
@@ -72,6 +83,5 @@ class AutoRefreshJWTMiddleware:
                 httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
                 samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
             )
-            print("new refresh is set")
 
         return response

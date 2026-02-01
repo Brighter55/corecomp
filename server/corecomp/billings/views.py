@@ -19,7 +19,7 @@ User = get_user_model() # Get model listed in settings.py: AUTH_USER_MODEL = 'ac
 stripe.api_key = os.getenv("STRIPE_API_KEY")
 endpoint_secret = os.getenv("STRIPE_ENDPOINT_SECRET")
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def checkout_session(request):
     user = request.user
