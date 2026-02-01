@@ -17,6 +17,7 @@ pytest = "*"
 pytest-django = "*"
 redis = "*"
 django-redis = "*"
+pyjwt = "*"
 
 [dev-packages]
 
