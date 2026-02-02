@@ -34,6 +34,9 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request: Request, *args, **kwargs) -> Response:
         response = super().post(request, *args, **kwargs)
 
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         access_token = response.data["access"]
         refresh_token = response.data["refresh"]
 
@@ -59,6 +62,15 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
         )
 
+        user = serializer.user
+        payload = {
+            "username": user.username,
+            "email": user.email,
+            "subscription_status": user.subscription_status,
+            "current_period_end": str(user.current_period_end),
+            "current_period_start": str(user.current_period_start),
+        }
+        response.content = json.dumps(payload)
         return response
     
 @api_view(["GET"])
@@ -69,8 +81,8 @@ def me(request):
         "username": user.username,
         "email": user.email,
         "subscription_status": user.subscription_status,
-        "current_period_end": user.current_period_end,
-        "current_period_start": user.current_period_start,
+        "current_period_end": str(user.current_period_end),
+        "current_period_start": str(user.current_period_start),
     }
     return Response(data, status=status.HTTP_200_OK)
 
@@ -192,6 +204,14 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
             samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
         )
 
+        payload = {
+            "username": user.username,
+            "email": user.email,
+            "subscription_status": user.subscription_status,
+            "current_period_end": str(user.current_period_end),
+            "current_period_start": str(user.current_period_start),
+        }
+        response.content = json.dumps(payload)
         return response
     except ValueError:
         return Response({"error": "Token is invalid"}, status=status.HTTP_400_BAD_REQUEST)

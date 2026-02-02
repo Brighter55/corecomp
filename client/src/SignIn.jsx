@@ -82,6 +82,7 @@ function SignIn() {
     function handleClose() {
         setOpen(false);
     };
+    
     async function handleClickResendEmail() {
         const payload = {username: username};
         const response = await apiClient({endpoint: "/accounts/resend-verify-email", payload: payload});

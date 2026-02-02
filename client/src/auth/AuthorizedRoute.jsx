@@ -2,7 +2,7 @@ import { useAuth } from "./AuthProvider.jsx"
 import { Navigate } from "react-router-dom";
 
 
-function AuthorizedRoute() {
+function AuthorizedRoute({ children }) {
     const { user, loading } = useAuth();
     const authorizedStatuses = ["active", "trialing"];
 
