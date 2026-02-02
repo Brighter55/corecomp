@@ -20,6 +20,7 @@ import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
 // images
 import logo from "../../assets/logoDarkMode.png"
+import { authenticatedClient } from '../../helpers/api.js';
 
 function ProductHeader() {
     const navigate = useNavigate();
@@ -34,11 +35,10 @@ function ProductHeader() {
     };
 
 
-    function handleSignoutClicked() {
+    async function handleSignoutClicked() {
         // send a request to Django with refresh token to revoke the token
-        console.log("TODO: sign out");
+        const response = await authenticatedClient({endpoint: "/accounts/sign-out"});
         setUser(null);
-        console.log("set user to null");
         navigate("/sign-in");
     }
 

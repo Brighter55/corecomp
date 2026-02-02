@@ -216,14 +216,18 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
     except ValueError:
         return Response({"error": "Token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def sign_out(request):
+    refresh_token = request.COOKIES.get("refresh_token")
     try:
-        refresh_token = request.data["refresh"]
         token = RefreshToken(refresh_token)
         token.blacklist()
-        return Response({"success": "Refresh token has been blacklisted successfully"}, status=status.HTTP_200_OK)
+        response = Response({"success": "Refresh token has been blacklisted successfully"}, status=status.HTTP_200_OK)
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+        response.delete_cookie("csrftoken")
+        return response
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
