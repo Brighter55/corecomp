@@ -3,7 +3,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import Link from '@mui/material/Link';
 import { styled } from '@mui/material/styles';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useNavigate } from 'react-router-dom';
@@ -19,17 +18,24 @@ export default function Features() {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event) => {
+
+  const handleOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleItemClick = (path) => {
+    setAnchorEl(null);
+    navigate(path);
   };
 
   return (
     <Box  sx={{ display: "flex", flexGrow: 1, justifyContent: "center"}}>
       <StyledButton /*show in md and up*/
-        onClick={handleClick}
+        onClick={handleOpen}
         endIcon={<KeyboardArrowDownIcon />}
         sx={{
           display: {xs: "none", md: "flex"},
@@ -38,7 +44,7 @@ export default function Features() {
         features
       </StyledButton>
       <StyledButton /*show in xs only*/
-        onClick={handleClick}
+        onClick={handleOpen}
         sx={{
           display: {xs: "flex", md: "none"},
         }}
@@ -58,10 +64,8 @@ export default function Features() {
           ".MuiMenuItem-root": {color: "white"},
         }}
       >
-        <MenuItem onClick={handleClose}>
-          <Link href="/overview" color="inherit">
+        <MenuItem onClick={() => handleItemClick("/overview")}>
             overview
-          </Link>
         </MenuItem>
       </Menu>
     </Box>

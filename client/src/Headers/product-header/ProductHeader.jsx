@@ -5,6 +5,7 @@ import { useAuth } from "../../auth/AuthProvider.jsx"
 import Features from "./components/Features.jsx"
 import Brand from "../../shared/Brand.jsx";
 import HideOnScroll from "../components/HideOnScroll.jsx"
+import { authenticatedClient } from '../../helpers/api.js';
 // mui components
 import Button from '@mui/material/Button';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -16,11 +17,8 @@ import Stack from '@mui/material/Stack';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
-// images
-import logo from "../../assets/logoDarkMode.png"
-import { authenticatedClient } from '../../helpers/api.js';
+
 
 function ProductHeader() {
     const navigate = useNavigate();
@@ -34,6 +32,9 @@ function ProductHeader() {
         setAnchorElNav(null);
     };
 
+    function handleItemClicked(path) {
+        navigate(path);
+    }
 
     async function handleSignoutClicked() {
         // send a request to Django with refresh token to revoke the token
@@ -60,7 +61,7 @@ function ProductHeader() {
                         <Features />
                         <Stack direction="row" sx={{ display: { xs: "none", md: "flex" } }}>
                             <Button
-                                href="/account"
+                                onClick={() => {handleItemClicked("/account")}}
                                 sx={{
                                     color: "grey",
                                     borderRadius: "10px",
@@ -112,14 +113,8 @@ function ProductHeader() {
                                     ".MuiMenuItem-root": {color: "white"},
                                 }}
                             >
-                                <MenuItem>
-                                    <Link
-                                        href="/account"
-                                        color="inherit"
-                                        sx={{ margin: "auto" }}
-                                    >
-                                        <AccountCircleIcon />
-                                    </Link>
+                                <MenuItem onClick={() => handleItemClicked("/account")}>
+                                    <AccountCircleIcon />
                                 </MenuItem>
                                 <MenuItem onClick={handleSignoutClicked} sx={{ "&:hover": {backgroundColor: "var(--main-brick)"} }}>
                                     Sign Out
