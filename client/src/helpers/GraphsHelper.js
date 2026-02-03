@@ -82,8 +82,8 @@ export function getPercentChange(reports, value) {
         return 0;
     }
 
-    const newValue = parseInt(reports[reports.length - 1][value]);
-    const oldValue = parseInt(reports[0][value]);
+    const newValue = parseFloat(reports[reports.length - 1][value]);
+    const oldValue = parseFloat(reports[0][value]);
     const percentChange = ((newValue - oldValue) / oldValue) * 100;
     return parseFloat(percentChange.toFixed(2));
 }
