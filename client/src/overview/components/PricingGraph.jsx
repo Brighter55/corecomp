@@ -1,10 +1,10 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {useState, useEffect, useRef, useMemo} from "react"
-import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
+import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
 import { useNavigate } from "react-router-dom";
-import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
+import { authenticatedClientWithRetry } from "../../helpers/api.js"
 // mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
@@ -65,7 +65,7 @@ function PricingGraph({ symbol, fetchVersion, setSymbol, period }) {
     useEffect(() => {
         async function getStatement() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/pricing", payload, () => isActive, navigate, setSymbol);
+            const response = await authenticatedClientWithRetry("/pages/pricing", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }

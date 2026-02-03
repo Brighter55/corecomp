@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Autocomplete from '@mui/material/Autocomplete';
 import StyledTextField from "./StyledTextField";
 import CircularProgress from '@mui/material/CircularProgress';
+import { authenticatedClient } from "../helpers/api.js"
 
 // user types => setDebounced if pauses for 300ms => getOptions() => options now works!
 export default function SymbolSearch({ handleSearchSubmit }) {
@@ -37,14 +38,7 @@ export default function SymbolSearch({ handleSearchSubmit }) {
   }, [inputValue]);
 
   async function getOptions() {
-    const response = await fetch("http://127.0.0.1:8000/pages/symbol-search", {
-      method: "POST",
-      headers: {
-            "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
-            "Content-Type": "application/json"
-        },
-      body: JSON.stringify({symbol: debounced})
-    });
+    const response = await authenticatedClient({endpoint: "/pages/symbol-search", payload: {symbol: debounced}});
     const data = await response.json();
     setLoading(false);
     console.log("load");

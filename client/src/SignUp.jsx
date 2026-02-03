@@ -92,27 +92,26 @@ function SignUp() {
             password: password,
             confirmPassword: confirmPassword
         };
-        try {
-            const response = await apiClient({endpoint: "/accounts/sign-up", payload: payload});
-            const data = await response.json();
-            console.log(data);
-            if (!response.ok) {
-                if ("username" in data) {
-                    setUsernameError(data.username);
-                } if ("email" in data) {
-                    setEmailError(data.email);
-                } if ("password" in data) {
-                    setPasswordError(data.password);
-                } if ("confirmPassword" in data) {
-                    setConfirmPasswordError(data.confirmPassword);
-                } if ("non_field_errors" in data) {
-                    setPasswordError(data.non_field_errors);
-                    setConfirmPasswordError(data.non_field_errors);
-                }
+        const response = await apiClient({endpoint: "/accounts/sign-up", payload: payload});
+        const data = await response.json();
+        console.log(data);
+        if (!response.ok) {
+            if ("username" in data) {
+                setUsernameError(data.username);
+            } if ("email" in data) {
+                setEmailError(data.email);
+            } if ("password" in data) {
+                setPasswordError(data.password);
+            } if ("confirmPassword" in data) {
+                setConfirmPasswordError(data.confirmPassword);
+            } if ("non_field_errors" in data) {
+                setPasswordError(data.non_field_errors);
+                setConfirmPasswordError(data.non_field_errors);
             }
-        } catch (error) {
-            console.error("Error:", error);
+
+            return;
         }
+        // TODO: pop up saying account created successfully
     }
 
     const hidePasswordAdornment = {
@@ -188,9 +187,11 @@ function SignUp() {
                                 console.log(credentialResponse);
                                 async function sendJWTToken() {
                                     const response = await apiClient({endpoint: "/accounts/google-authentication", payload: payload});
-                                    const data = await response.json()
-                                    sessionStorage.setItem("access", data.access);
-                                    sessionStorage.setItem("refresh", data.refresh);
+                                    if (!response.ok) {
+                                        return
+                                    }
+                                    const data = await response.json();
+                                    setUser(data);
                                     navigate("/overview");
                                 }
 

@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react"
 import { useParams } from 'react-router-dom';
 import LandingHeader from "./headers/LandingHeader.jsx"
+import { apiClient } from "./helpers/api.js";
 // mui components
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
@@ -32,11 +33,7 @@ function AccountVerification() {
     useEffect(() => {
         const payload = {token: token, user_id: user_id};
         async function verify() {
-            const response = await fetch("http://127.0.0.1:8000/accounts/verify-email", {
-                method: "POST",
-                headers: {"Content-Type": "application/json",},
-                body: JSON.stringify(payload),
-            });
+            const response = await apiClient({endpoint: "/accounts/verify-email", payload: payload});
             if (response.ok) {
                 setSuccessful(true)
             }
@@ -49,11 +46,7 @@ function AccountVerification() {
 
     async function handleResendClicked() {
         const payload = {user_id: user_id};
-        const response = await fetch("http://127.0.0.1:8000/accounts/resend-verify-email", {
-            method: "POST",
-            headers: {"Content-Type": "application/json",},
-            body: JSON.stringify(payload),
-        });
+        const response = await apiClient({endpoint: "/accounts/resend-verify-email", payload: payload});
         const data = await response.json();
         console.log(data);
     }

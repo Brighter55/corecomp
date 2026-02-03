@@ -2,7 +2,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import {useState, useEffect, useRef, useMemo} from "react"
 import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 import GraphCard from "./GraphCard.jsx"
-import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
+import { authenticatedClientWithRetry } from "../../helpers/api.js"
 import { useNavigate } from "react-router-dom";
 import Explanation from "./Explanation.jsx"
 import TimeRanges from "./TimeRanges.jsx"
@@ -85,7 +85,7 @@ function CashVsDebtGraph({ symbol, fetchVersion, setSymbol, period }) {
     useEffect(() => {
         async function getStatement() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/balance-sheet", payload, () => isActive, navigate, setSymbol);
+            const response = await authenticatedClientWithRetry("/pages/balance-sheet", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }

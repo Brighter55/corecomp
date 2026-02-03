@@ -120,32 +120,30 @@ function SignIn() {
     async function handleSubmit(event) {
         event.preventDefault();
         const payload = {username: username, password: password};
-        try {
-            const response = await apiClient({endpoint: "/accounts/sign-in", payload: payload});
-            // if account not found
-            if (!response.ok) {
-                const data = await response.json();
-                console.log(data);
-                if (data["detail"] == "Invalid username or password") {
-                    setError("Invalid username/password.");
-                    setUsername("");
-                    setPassword("");
-                } else if (data["detail"] == "This account is inactive") {
-                    setError("User's account is inactive");
-                    setOpen(true);
-                }
-                return
-            }
 
+        const response = await apiClient({endpoint: "/accounts/sign-in", payload: payload});
+
+        // if account not found
+        if (!response.ok) {
             const data = await response.json();
-            // development phase
             console.log(data);
-            setUser(data);
-            // redirect user to their "search" page
-            navigate("/overview");
-        } catch (error) {
-            console.error("Error:", error);
+            if (data["detail"] == "Invalid username or password") {
+                setError("Invalid username/password.");
+                setUsername("");
+                setPassword("");
+            } else if (data["detail"] == "This account is inactive") {
+                setError("User's account is inactive");
+                setOpen(true);
+            }
+            return
         }
+        ///////////////
+
+        const data = await response.json();
+        setUser(data);
+
+        // redirect user to their "search" page
+        navigate("/overview");
     }
 
     return (
@@ -187,11 +185,9 @@ function SignIn() {
                         <GoogleLogin
                             onSuccess={credentialResponse => {
                                 const payload = {JWTToken: credentialResponse.credential};
-                                console.log(credentialResponse);
                                 async function sendJWTToken() {
                                     const response = await apiClient({endpoint: "/accounts/google-authentication", payload: payload});
-                                    const data = await response.json()
-                                    console.log(data);
+                                    const data = await response.json();
                                     setUser(data);
                                     navigate("/overview");
                                 }

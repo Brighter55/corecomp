@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 import {useState, useEffect, useRef, useMemo} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import { useNavigate } from "react-router-dom";
-import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
+import { authenticatedClientWithRetry } from "../../helpers/api.js"
 import Skeleton from '@mui/material/Skeleton';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import CustomBar from "./CustomBar.jsx"
@@ -59,7 +59,7 @@ export default function ProfitMarginGraph({ symbol, fetchVersion, setSymbol, per
     useEffect(() => {
         async function getStatement() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/income-statement", payload, () => isActive, navigate, setSymbol);
+            const response = await authenticatedClientWithRetry("/pages/income-statement", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }

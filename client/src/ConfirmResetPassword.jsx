@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import LandingHeader from "./headers/LandingHeader.jsx"
+import { apiClient } from "./helpers/api.js"
 // mui components
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
@@ -78,39 +79,31 @@ function ConfirmResetPassword() {
         event.preventDefault();
         setPasswordError("");
         const payload = {password: password, confirmPassword: confirmPassword, id: id, token: token};
-        try {
-            const response = await fetch("http://127.0.0.1:8000/accounts/confirm-reset-password", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            });
-            const data = await response.json();
-            console.log(data);
+        
+        const response = await apiClient({endpoint: "/accounts/confirm-reset-password", payload: payload});
+        const data = await response.json();
+        console.log(data);
 
-            if (!response.ok) {
-                for (const field in data) {
-                    if (field == "password") { // if email provided fails the test
-                        setPasswordError(data.password);
-                    } else if (field == "confirmPassword") {
-                        setConfirmPasswordError(data.confirmPassword);
-                    } else if (field == "id") {
-                        setIdError(data.id);
-                    } else if (field == "token") {
-                        setTokenError(data.token);
-                    } else if (field == "non_field_errors") { // if passwords not match
-                        setPasswordError(data.non_field_errors);
-                        setConfirmPasswordError(data.non_field_errors);
-                    }
+        // error handlings
+        if (!response.ok) {
+            for (const field in data) {
+                if (field == "password") { // if email provided fails the test
+                    setPasswordError(data.password);
+                } else if (field == "confirmPassword") {
+                    setConfirmPasswordError(data.confirmPassword);
+                } else if (field == "id") {
+                    setIdError(data.id);
+                } else if (field == "token") {
+                    setTokenError(data.token);
+                } else if (field == "non_field_errors") { // if passwords not match
+                    setPasswordError(data.non_field_errors);
+                    setConfirmPasswordError(data.non_field_errors);
                 }
-
-                return;
             }
-        } catch (error) {
-            console.error("Error:", error);
+
             return;
         }
+        ////////////////////
 
         // runs only if not a bad request and no network issue
         navigate("/sign-in");
