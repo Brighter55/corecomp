@@ -56,7 +56,6 @@ export async function authenticatedClientWithRetry(endpoint, payload, isActive, 
         body: JSON.stringify(payload),
     });
 
-    /*TODO: server job! get new tokens if access expires*/
     if (!response.ok) {
         if (response.status === 403) { /*Unauthorized user, aka, don't have permission to use*/
             navigate("/account");
