@@ -122,16 +122,16 @@ def verify_email(request):
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return Response({"error": "User doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "User doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
     # check if user has already activated their account
     if user.is_active == True:
-        return Response({"success": "the account is already activated"}, status=status.HTTP_200_OK)
+        return Response({"message": "the account is already activated"}, status=status.HTTP_200_OK)
     if default_token_generator.check_token(user, token): # if the token belongs to this user
         # activate account
         user.is_active = True
         user.save()
-        return Response({"success": "yep this is valid user account is activated"}, status=status.HTTP_200_OK)
-    return Response({"error": "Nope the token is invalid"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "Account is now active and your trial starts now!"}, status=status.HTTP_200_OK)
+    return Response({"message": "Token is either invalid or expired"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -145,9 +145,9 @@ def resend_verify_email(request):
         elif user_id:
             user = User.objects.get(id=user_id)
     except User.DoesNotExist:
-        return Response({"error": "User doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "User doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
     if user.is_active == True:
-        return Response({"error": "account is already active"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "account is already active"}, status=status.HTTP_400_BAD_REQUEST)
     token = default_token_generator.make_token(user)
     link = f"http://localhost:5173/account-verification/{token}/{user.id}"
     response = requests.post(
@@ -160,7 +160,7 @@ def resend_verify_email(request):
         #   "html": get_html_message(link),
             "text": f"You have successfully created account with us, click the link below to verify your account and activate your trial {link}"
         })
-    return Response({"success": "email has been resent"}, status=status.HTTP_200_OK)
+    return Response({"message": "email has been resent"}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
