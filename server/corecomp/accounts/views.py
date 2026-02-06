@@ -253,7 +253,7 @@ def reset_password(request):
                 "text": f"Click the link below to reset your password {reset_password_url}"
             }
         )
-        return Response({"success": f"valid email is {email} and email has been sent"}, status=status.HTTP_200_OK)
+        return Response({"message": f"valid email is {email} and email has been sent"}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
