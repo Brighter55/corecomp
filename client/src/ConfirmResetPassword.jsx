@@ -149,7 +149,7 @@ function ConfirmResetPassword() {
                         <TextField
                             value={confirmPassword}
                             onChange={(event) => {setConfirmPassword(event.target.value)}}
-                            label="confirm password"
+                            label="confirm-password"
                             variant="outlined"
                             sx={textFieldStyle}
                             error={confirmPasswordError ? true : false}

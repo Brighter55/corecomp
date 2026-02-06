@@ -267,5 +267,5 @@ def confirm_reset_password(request):
         user = User.objects.get(id=user_id)
         user.set_password(new_password)
         user.save()
-        return Response({"success": "your password has been reset!"}, status=status.HTTP_200_OK)
+        return Response({"message": "your password has been reset!"}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
