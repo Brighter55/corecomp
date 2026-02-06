@@ -7,7 +7,7 @@ import SignUp from "./SignUp.jsx"
 import OverviewPage from "./overview/OverviewPage.jsx"
 import AccountVerification from "./AccountVerification.jsx"
 import Account from "./Account.jsx"
-import Return from "./Return.jsx"
+import CheckoutReturn from "./CheckoutReturn.jsx"
 import ResetPassword from "./ResetPassword.jsx"
 import ConfirmResetPassword from "./ConfirmResetPassword.jsx"
 
@@ -21,7 +21,7 @@ function App() {
         <Route path="/overview" element={<AuthenticatedRoute><AuthorizedRoute><OverviewPage /></AuthorizedRoute></AuthenticatedRoute>} />
         <Route path="/account-verification/:token/:user_id" element={<AccountVerification></AccountVerification>} />
         <Route path="/account" element={<AuthenticatedRoute><Account /></AuthenticatedRoute>} />
-        <Route path="/return/:checkout_session_id" element={<AuthenticatedRoute><Return /></AuthenticatedRoute>} />
+        <Route path="/return/:checkout_session_id" element={<AuthenticatedRoute><CheckoutReturn/></AuthenticatedRoute>} />
         <Route path="/reset-password" element={<ResetPassword></ResetPassword>} />
         <Route path="/reset-password/:token/:id" element={<ConfirmResetPassword />} />
       </Routes>
