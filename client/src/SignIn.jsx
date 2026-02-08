@@ -76,7 +76,8 @@ function SignIn() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     // validation
-    const [error, setError] = useState("");
+    const [usernameError, setUsernameError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
     const [open, setOpen] = useState(false);
 
     function handleClose() {
@@ -120,29 +121,35 @@ function SignIn() {
     async function handleSubmit(event) {
         event.preventDefault();
         const payload = {username: username, password: password};
-
         const response = await apiClient({endpoint: "/accounts/sign-in", payload: payload});
+        const data = await response.json();
 
-        // if account not found
+        /// error
         if (!response.ok) {
-            const data = await response.json();
             console.log(data);
-            if (data["detail"] == "Invalid username or password") {
-                setError("Invalid username/password.");
+            if ("username" in data) {
+                setUsernameError(data.username);
+            }
+            if ("password" in data) {
+                setPasswordError(data.password);
+            }
+            if ("detail" in data) {
+                if (data.detail == "This account is inactive") {
+                    setUsernameError(data.detail);
+                    setPasswordError(data.detail);
+                    setOpen(true);
+                    return
+                }
+                setUsernameError(data.detail);
+                setPasswordError(data.detail);
                 setUsername("");
                 setPassword("");
-            } else if (data["detail"] == "This account is inactive") {
-                setError("User's account is inactive");
-                setOpen(true);
             }
-            return
+            return;
         }
         ///////////////
 
-        const data = await response.json();
         setUser(data);
-
-        // redirect user to their "search" page
         navigate("/overview");
     }
 
@@ -159,8 +166,8 @@ function SignIn() {
                                 onChange={(event) => {setUsername(event.target.value)}}
                                 label="username"
                                 variant="outlined"
-                                error={error ? true : false}
-                                helperText={error ? error : " "}
+                                error={usernameError ? true : false}
+                                helperText={usernameError ? usernameError : " "}
                                 sx={{ "& .MuiFormHelperText-root": {backgroundColor: "var(--main-brown)"} }}
                             />
                             <StyledTextField
@@ -168,8 +175,8 @@ function SignIn() {
                                 onChange={(event) => {setPassword(event.target.value)}}
                                 label="password"
                                 variant="outlined"
-                                error={error ? true : false}
-                                helperText={error ? error : " "}
+                                error={passwordError ? true : false}
+                                helperText={passwordError ? passwordError : " "}
                                 type={showPassword ? 'text' : 'password'}
                                 InputProps={hidePasswordAdornment}
                                 sx={{ "& .MuiFormHelperText-root": {backgroundColor: "var(--main-brown)"} }}
@@ -178,7 +185,10 @@ function SignIn() {
                                 type="submit"
                                 variant="contained"
                                 sx={{ backgroundColor: "#588157", color: "#DAD7CD" }}
-                            >Sign in</Button>
+                                aria-label="sign in button"
+                            >
+                                Sign in
+                            </Button>
                         </form>
                         <span onClick={() => {navigate("/reset-password");}} style={{ cursor: "pointer" }}>forgot your password?</span>
                         <Divider sx={{ width: "100%", '&::before, &::after': { borderColor: "#DAD7CD" } }}>or</Divider>
@@ -239,6 +249,7 @@ function SignIn() {
                         onClick={handleClickResendEmail}
                         variant="contained"
                         sx={{ backgroundColor: "#588157", color: "#DAD7CD" }}
+                        aria-label="resend-email-button"
                     >
                         Resend
                     </Button>

@@ -1,6 +1,5 @@
 import CheckoutReturn from "./CheckoutReturn.jsx";
-import Return from "./CheckoutReturn.jsx"
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 const mockFetch = vi.fn();
 const mockUseParams = vi.fn();
