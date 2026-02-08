@@ -3,6 +3,7 @@ import {GoogleLogin} from "@react-oauth/google"
 import {useNavigate} from "react-router-dom"
 import LandingHeader from "./headers/LandingHeader.jsx"
 import { apiClient } from "./helpers/api.js"
+import { useAuth } from "./auth/AuthProvider.jsx"
 // styled components
 import StyledTextField from "./shared/StyledTextField.jsx";
 // mui components
@@ -59,6 +60,7 @@ const formStyle = {
 
 function SignUp() {
     const navigate = useNavigate();
+    const {setUser} = useAuth();
     // payload
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
@@ -78,7 +80,6 @@ function SignUp() {
     const handleMouseUpPassword = (event) => {
         event.preventDefault();
     };
-
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -178,6 +179,7 @@ function SignUp() {
                                 type="submit"
                                 variant="contained"
                                 sx={{ backgroundColor: "var(--main-fern)" }}
+                                aria-label="sign-up-button"
                             >Sign Up</Button>
                         </form>
                         <Divider sx={{ width: "100%" }}>or</Divider>

@@ -109,7 +109,7 @@ def sign_up(request):
                 "subject": "Account Verification Email",
             #   "html": get_html_message(link),
                 "text": f"You have successfully created account with us, click the link below to verify your account and activate your trial {link}"})
-        return Response({"success": "User has been created!"}, status=status.HTTP_201_CREATED)
+        return Response({"message": "User has been created!"}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
