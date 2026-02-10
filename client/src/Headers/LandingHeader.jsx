@@ -1,5 +1,6 @@
 import Brand from "../shared/Brand.jsx"
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 // components
 import HideOnScroll from "./components/HideOnScroll.jsx"
 // mui components
@@ -8,7 +9,6 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
@@ -21,6 +21,7 @@ const sections = ["features", "pricing"];
 
 
 function LandingHeader() {
+    const navigate = useNavigate();
 
     const [anchorElNav, setAnchorElNav] = useState(null);
 
@@ -30,6 +31,10 @@ function LandingHeader() {
     const handleCloseNavMenu = () => {
         setAnchorElNav(null);
     };
+
+    function handleItemClicked(path) {
+        navigate(path);
+    }
 
 
     return (
@@ -87,21 +92,11 @@ function LandingHeader() {
                                         </Link>
                                     </MenuItem>
                                 ))}
-                                <MenuItem onClick={handleCloseNavMenu}>
-                                    <Link
-                                        href="/sign-in"
-                                        color="inherit"
-                                    >
-                                        sign in
-                                    </Link>
+                                <MenuItem onClick={() => {handleItemClicked("/sign-in")}}>
+                                    sign in
                                 </MenuItem>
-                                <MenuItem onClick={handleCloseNavMenu}>
-                                    <Link
-                                        href="/sign-up"
-                                        color="inherit"
-                                    >
-                                        sign up
-                                    </Link>
+                                <MenuItem onClick={() => {handleItemClicked("/sign-in")}}>
+                                    sign up
                                 </MenuItem>
                             </Menu>
                         </Box>
@@ -126,7 +121,7 @@ function LandingHeader() {
                         </Stack>
                         <Stack direction="row" sx={{ display: {xs: "none", md: "flex"}}} >
                             <Button
-                                href="/sign-in"
+                                onClick={() => {handleItemClicked("/sign-in")}}
                                 sx={{
                                     "&:hover": { color: "var(--main-dust-grey)" },
                                     borderRadius: "10px",
@@ -136,7 +131,7 @@ function LandingHeader() {
                                 Sign in
                             </Button>
                             <Button
-                                href="/sign-up"
+                                onClick={() => {handleItemClicked("/sign-up")}}
                                 sx={{
                                     color: "black",
                                     fontFamily: "'Segoe Ui', Arial, sans-serif",

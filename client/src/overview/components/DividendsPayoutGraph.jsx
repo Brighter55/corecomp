@@ -3,8 +3,8 @@ import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Respons
 import GraphCard from "./GraphCard.jsx"
 import GraphTitle from "./GraphTitle.jsx"
 import { useNavigate } from "react-router-dom";
-import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
-import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
+import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
+import { authenticatedClientWithRetry } from "../../helpers/api.js"
 //mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
@@ -56,7 +56,7 @@ function DividendsPayoutGraph({ symbol, fetchVersion, setSymbol, period }) {
     useEffect(() => {
         async function getStatement() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/dividends", payload, () => isActive, navigate, setSymbol);
+            const response = await authenticatedClientWithRetry("/pages/dividends", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }

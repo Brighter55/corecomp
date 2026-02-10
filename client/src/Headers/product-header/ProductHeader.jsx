@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { getNewTokens } from "../../helpers/helper.js"
 import { useState } from "react"
+import { useAuth } from "../../auth/AuthProvider.jsx"
 // components
 import Features from "./components/Features.jsx"
 import Brand from "../../shared/Brand.jsx";
 import HideOnScroll from "../components/HideOnScroll.jsx"
+import { authenticatedClient } from '../../helpers/api.js';
 // mui components
 import Button from '@mui/material/Button';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -16,14 +17,12 @@ import Stack from '@mui/material/Stack';
 import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
-// images
-import logo from "../../assets/logoDarkMode.png"
+
 
 function ProductHeader() {
     const navigate = useNavigate();
-
+    const { setUser } = useAuth();
 
     const [anchorElNav, setAnchorElNav] = useState(null);
     const handleOpenNavMenu = (event) => {
@@ -33,39 +32,14 @@ function ProductHeader() {
         setAnchorElNav(null);
     };
 
+    function handleItemClicked(path) {
+        navigate(path);
+    }
 
     async function handleSignoutClicked() {
         // send a request to Django with refresh token to revoke the token
-        async function signOut() {
-            const response = await fetch("http://127.0.0.1:8000/accounts/sign-out", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${sessionStorage.getItem("access")}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({refresh: sessionStorage.getItem("refresh")}),
-            });
-            return response;
-        }
-        let response = await signOut();
-        let data = await response.json();
-
-        /*get new tokens if access expires*/
-        if (!response.ok) {
-            if (data?.messages?.[0]?.message === "Token is expired") {
-                await getNewTokens(data, navigate);
-                response = await signOut();
-                data = await response.json();
-            } else if (response.status === 403) { /*Unauthorized user, aka, don't have permission to use*/
-                navigate("/user-account");
-            } else {
-                navigate("/sign-up");
-            }
-        }
-        /*--------------*/
-        console.log(data.success);
-        sessionStorage.removeItem("access");
-        sessionStorage.removeItem("refresh");
+        const response = await authenticatedClient({endpoint: "/accounts/sign-out"});
+        setUser(null);
         navigate("/sign-in");
     }
 
@@ -87,7 +61,7 @@ function ProductHeader() {
                         <Features />
                         <Stack direction="row" sx={{ display: { xs: "none", md: "flex" } }}>
                             <Button
-                                href="/user-account"
+                                onClick={() => {handleItemClicked("/account")}}
                                 sx={{
                                     color: "grey",
                                     borderRadius: "10px",
@@ -139,14 +113,8 @@ function ProductHeader() {
                                     ".MuiMenuItem-root": {color: "white"},
                                 }}
                             >
-                                <MenuItem>
-                                    <Link
-                                        href="/user-account"
-                                        color="inherit"
-                                        sx={{ margin: "auto" }}
-                                    >
-                                        <AccountCircleIcon />
-                                    </Link>
+                                <MenuItem onClick={() => handleItemClicked("/account")}>
+                                    <AccountCircleIcon />
                                 </MenuItem>
                                 <MenuItem onClick={handleSignoutClicked} sx={{ "&:hover": {backgroundColor: "var(--main-brick)"} }}>
                                     Sign Out

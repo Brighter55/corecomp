@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom"
 import { GoogleLogin } from "@react-oauth/google"
 import LandingHeader from "./headers/LandingHeader.jsx"
 import StyledTextField from "./shared/StyledTextField.jsx";
+import {apiClient} from "./helpers/api.js"
+import { useAuth } from "./auth/AuthProvider.jsx"
 // mui components
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -15,12 +17,10 @@ import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 // images
 import facebookLogo from "./assets/facebookLogo.png"
 import tiktokLogo from "./assets/tiktokLogo.png"
@@ -71,23 +71,22 @@ const formStyle = {
 };
 
 function SignIn() {
+    const { setUser } = useAuth();
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     // validation
-    const [error, setError] = useState("");
+    const [usernameError, setUsernameError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
     const [open, setOpen] = useState(false);
 
     function handleClose() {
         setOpen(false);
     };
+    
     async function handleClickResendEmail() {
         const payload = {username: username};
-        const response = await fetch("http://127.0.0.1:8000/accounts/resend-verify-email", {
-            method: "POST",
-            headers: {"Content-Type": "application/json",},
-            body: JSON.stringify(payload),
-        });
+        const response = await apiClient({endpoint: "/accounts/resend-verify-email", payload: payload});
         const data = await response.json();
         console.log(data);
         setOpen(false);
@@ -122,40 +121,36 @@ function SignIn() {
     async function handleSubmit(event) {
         event.preventDefault();
         const payload = {username: username, password: password};
-        try {
-            const response = await fetch("http://127.0.0.1:8000/accounts/sign-in", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            });
-            // if account not found
-            if (!response.ok) {
-                const data = await response.json();
-                console.log(data);
-                if (data["detail"] == "Invalid username or password") {
-                    setError("Invalid username/password.");
-                    setUsername("");
-                    setPassword("");
-                } else if (data["detail"] == "This account is inactive") {
-                    setError("User's account is inactive");
-                    setOpen(true);
-                }
-                return
-            }
+        const response = await apiClient({endpoint: "/accounts/sign-in", payload: payload});
+        const data = await response.json();
 
-            const data = await response.json();
-            // development phase
+        /// error
+        if (!response.ok) {
             console.log(data);
-            sessionStorage.setItem("access", data.access);
-            sessionStorage.setItem("refresh", data.refresh);
-            console.log(sessionStorage);
-            // redirect user to their "search" page
-            navigate("/overview");
-        } catch (error) {
-            console.error("Error:", error);
+            if ("username" in data) {
+                setUsernameError(data.username);
+            }
+            if ("password" in data) {
+                setPasswordError(data.password);
+            }
+            if ("detail" in data) {
+                if (data.detail == "This account is inactive") {
+                    setUsernameError(data.detail);
+                    setPasswordError(data.detail);
+                    setOpen(true);
+                    return
+                }
+                setUsernameError(data.detail);
+                setPasswordError(data.detail);
+                setUsername("");
+                setPassword("");
+            }
+            return;
         }
+        ///////////////
+
+        setUser(data);
+        navigate("/overview");
     }
 
     return (
@@ -171,8 +166,8 @@ function SignIn() {
                                 onChange={(event) => {setUsername(event.target.value)}}
                                 label="username"
                                 variant="outlined"
-                                error={error ? true : false}
-                                helperText={error ? error : " "}
+                                error={usernameError ? true : false}
+                                helperText={usernameError ? usernameError : " "}
                                 sx={{ "& .MuiFormHelperText-root": {backgroundColor: "var(--main-brown)"} }}
                             />
                             <StyledTextField
@@ -180,8 +175,8 @@ function SignIn() {
                                 onChange={(event) => {setPassword(event.target.value)}}
                                 label="password"
                                 variant="outlined"
-                                error={error ? true : false}
-                                helperText={error ? error : " "}
+                                error={passwordError ? true : false}
+                                helperText={passwordError ? passwordError : " "}
                                 type={showPassword ? 'text' : 'password'}
                                 InputProps={hidePasswordAdornment}
                                 sx={{ "& .MuiFormHelperText-root": {backgroundColor: "var(--main-brown)"} }}
@@ -190,25 +185,20 @@ function SignIn() {
                                 type="submit"
                                 variant="contained"
                                 sx={{ backgroundColor: "#588157", color: "#DAD7CD" }}
-                            >Sign in</Button>
+                                aria-label="sign in button"
+                            >
+                                Sign in
+                            </Button>
                         </form>
                         <span onClick={() => {navigate("/reset-password");}} style={{ cursor: "pointer" }}>forgot your password?</span>
                         <Divider sx={{ width: "100%", '&::before, &::after': { borderColor: "#DAD7CD" } }}>or</Divider>
                         <GoogleLogin
                             onSuccess={credentialResponse => {
                                 const payload = {JWTToken: credentialResponse.credential};
-                                console.log(credentialResponse);
                                 async function sendJWTToken() {
-                                    const response = await fetch("http://127.0.0.1:8000/accounts/google-authentication", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                        },
-                                        body: JSON.stringify(payload)
-                                    });
-                                    const data = await response.json()
-                                    sessionStorage.setItem("access", data.access);
-                                    sessionStorage.setItem("refresh", data.refresh);
+                                    const response = await apiClient({endpoint: "/accounts/google-authentication", payload: payload});
+                                    const data = await response.json();
+                                    setUser(data);
                                     navigate("/overview");
                                 }
 
@@ -259,6 +249,7 @@ function SignIn() {
                         onClick={handleClickResendEmail}
                         variant="contained"
                         sx={{ backgroundColor: "#588157", color: "#DAD7CD" }}
+                        aria-label="resend-email-button"
                     >
                         Resend
                     </Button>

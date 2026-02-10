@@ -193,9 +193,9 @@ class ConfirmResetPassword(serializers.ModelSerializer):
         fields = ["password", "confirmPassword", "id", "token"]
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, data):
-        username = data.get("username")
-        password = data.get("password")
+    def validate(self, attr):
+        username = attr.get("username")
+        password = attr.get("password")
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
@@ -210,5 +210,5 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         #  if it passes your custom validations,
         # then pass it to django to validate again
         # and return {"access": ..., "refresh": ..}
-        data = super().validate(data)
+        data = super().validate(attr)
         return data

@@ -1,9 +1,9 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import {useState, useEffect, useRef, useMemo} from "react"
-import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
+import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
-import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
+import { authenticatedClientWithRetry } from "../../helpers/api.js"
 import { useNavigate } from "react-router-dom";
 // mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -57,7 +57,7 @@ function EPSGraph({ symbol, fetchVersion, setSymbol, period }) {
     useEffect(() => {
         async function getStatement() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/earnings", payload, () => isActive, navigate, setSymbol);
+            const response = await authenticatedClientWithRetry("/pages/earnings", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }

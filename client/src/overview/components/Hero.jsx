@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
 // helper
-import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
+import { authenticatedClientWithRetry } from "../../helpers/api.js"
 
 
 function Hero({ symbol, fetchVersion, setSymbol }) {
@@ -19,7 +19,7 @@ function Hero({ symbol, fetchVersion, setSymbol }) {
     useEffect(() => {
         async function getMostRecentPrice() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/current-price", payload, () => isActive, navigate, setSymbol);
+            const response = await authenticatedClientWithRetry("/pages/current-price", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }

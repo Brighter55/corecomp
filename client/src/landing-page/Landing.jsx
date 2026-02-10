@@ -6,12 +6,12 @@ import GraphsCarousel from "./components/GraphsCarousel.jsx"
 import FAQ from "./components/FAQ.jsx"
 import Steps from "./components/Steps.jsx"
 import Footer from "../shared/Footer.jsx"
+import { useNavigate } from "react-router-dom"
 // mui components
 import Container from '@mui/material/Container';
 import Divider from '@mui/material/Divider';
 import DoneIcon from '@mui/icons-material/Done';
 import { styled } from '@mui/material/styles';
-import Button from '@mui/material/Button';
 import Fab from '@mui/material/Fab';
 import IconButton from '@mui/material/IconButton';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
@@ -22,9 +22,8 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 function Landing() {
-
-
-    const [features, setFeatures] = useState([
+    const navigate = useNavigate();
+    const features = ([
         {
             id: 0,
             text: "Over 20 years of comprehensive financial data that provides a broad view of any company.",
@@ -42,15 +41,12 @@ function Landing() {
         },
     ]);
     const [currentPage, setCurrentPage] = useState(0);
-    const [slideDirection, setSlideDirection] = useState("left");
 
     function handleNextPage() {
-        setSlideDirection("left");
         setCurrentPage((currentPage) => currentPage + 1);
     }
 
     function handlePrevPage() {
-        setSlideDirection("right");
         setCurrentPage((currentPage) => currentPage - 1);
     }
 
@@ -174,7 +170,7 @@ function Landing() {
                                 / month
                             </Typography>
                             <StyledFab
-                                href="/sign-in"
+                                onClick={() => {navigate("/sign-up")}}
                                 variant="extended"
                                 sx={{ height: "3rem" }}
                             >

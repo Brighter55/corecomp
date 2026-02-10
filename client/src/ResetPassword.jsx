@@ -1,5 +1,6 @@
 import { useState } from "react"
 import LandingHeader from "./headers/LandingHeader.jsx"
+import { apiClient } from "./helpers/api.js"
 // mui components
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -44,26 +45,16 @@ function ResetPassword() {
         event.preventDefault();
         setEmailError("");
         const payload = {email: email};
-        try {
-            const response = await fetch("http://127.0.0.1:8000/accounts/reset-password", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            });
-            const data = await response.json();
-            console.log(data);
 
-            if (!response.ok) {
-                if (data.email) { // if email provided fails the test
-                    setEmailError(data.email);
-                }
+        const response = await apiClient({ endpoint: "/accounts/reset-password", payload: payload});
+        const data = await response.json();
+        console.log(data);
 
-                return;
+        if (!response.ok) {
+            if (data.email) { // if email provided fails the test
+                setEmailError(data.email);
             }
-        } catch (error) {
-            console.error("Error:", error);
+
             return;
         }
 

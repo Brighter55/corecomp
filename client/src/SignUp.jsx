@@ -2,6 +2,8 @@ import {useState} from "react"
 import {GoogleLogin} from "@react-oauth/google"
 import {useNavigate} from "react-router-dom"
 import LandingHeader from "./headers/LandingHeader.jsx"
+import { apiClient } from "./helpers/api.js"
+import { useAuth } from "./auth/AuthProvider.jsx"
 // styled components
 import StyledTextField from "./shared/StyledTextField.jsx";
 // mui components
@@ -58,6 +60,7 @@ const formStyle = {
 
 function SignUp() {
     const navigate = useNavigate();
+    const {setUser} = useAuth();
     // payload
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
@@ -78,7 +81,6 @@ function SignUp() {
         event.preventDefault();
     };
 
-
     async function handleSubmit(event) {
         event.preventDefault();
         setUsernameError("");
@@ -91,33 +93,26 @@ function SignUp() {
             password: password,
             confirmPassword: confirmPassword
         };
-        try {
-            const response = await fetch("http://127.0.0.1:8000/accounts/sign-up", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            });
-            const data = await response.json();
-            console.log(data);
-            if (!response.ok) {
-                if ("username" in data) {
-                    setUsernameError(data.username);
-                } if ("email" in data) {
-                    setEmailError(data.email);
-                } if ("password" in data) {
-                    setPasswordError(data.password);
-                } if ("confirmPassword" in data) {
-                    setConfirmPasswordError(data.confirmPassword);
-                } if ("non_field_errors" in data) {
-                    setPasswordError(data.non_field_errors);
-                    setConfirmPasswordError(data.non_field_errors);
-                }
+        const response = await apiClient({endpoint: "/accounts/sign-up", payload: payload});
+        const data = await response.json();
+        console.log(data);
+        if (!response.ok) {
+            if ("username" in data) {
+                setUsernameError(data.username);
+            } if ("email" in data) {
+                setEmailError(data.email);
+            } if ("password" in data) {
+                setPasswordError(data.password);
+            } if ("confirmPassword" in data) {
+                setConfirmPasswordError(data.confirmPassword);
+            } if ("non_field_errors" in data) {
+                setPasswordError(data.non_field_errors);
+                setConfirmPasswordError(data.non_field_errors);
             }
-        } catch (error) {
-            console.error("Error:", error);
+
+            return;
         }
+        // TODO: pop up saying account created successfully
     }
 
     const hidePasswordAdornment = {
@@ -184,6 +179,7 @@ function SignUp() {
                                 type="submit"
                                 variant="contained"
                                 sx={{ backgroundColor: "var(--main-fern)" }}
+                                aria-label="sign-up-button"
                             >Sign Up</Button>
                         </form>
                         <Divider sx={{ width: "100%" }}>or</Divider>
@@ -192,16 +188,12 @@ function SignUp() {
                                 const payload = {JWTToken: credentialResponse.credential};
                                 console.log(credentialResponse);
                                 async function sendJWTToken() {
-                                    const response = await fetch("http://127.0.0.1:8000/accounts/google-authentication", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                        },
-                                        body: JSON.stringify(payload)
-                                    });
-                                    const data = await response.json()
-                                    sessionStorage.setItem("access", data.access);
-                                    sessionStorage.setItem("refresh", data.refresh);
+                                    const response = await apiClient({endpoint: "/accounts/google-authentication", payload: payload});
+                                    if (!response.ok) {
+                                        return
+                                    }
+                                    const data = await response.json();
+                                    setUser(data);
                                     navigate("/overview");
                                 }
 

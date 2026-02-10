@@ -11,6 +11,7 @@
 html, body, #root {
   margin: 0;
   font-family: "Segoe Ui", Arial, sans-serif;
+  scroll-behavior: smooth;
 }
 
 body {

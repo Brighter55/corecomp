@@ -1,31 +1,32 @@
 import logo from "../assets/logoDarkMode.png"
+import { useNavigate } from "react-router-dom";
 // mui components
 import Stack from '@mui/material/Stack';
-import Link from '@mui/material/Link';
+import Typography from "@mui/material/Typography";
 
 function Brand({ variant }) {
-    let href;
+    const navigate = useNavigate();
+    let path;
     if (variant === "landing") {
-        href = "/"
+        path = "/"
     } else if (variant === "product") {
-        href = "/overview"
+        path = "/overview"
     }
 
 
     return (
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", cursor: "pointer" }} onClick={() => {navigate(path)}}>
             <img
                 src={logo}
                 alt="logo"
                 style={{ height: "3rem", width: "3rem", borderRadius: "10px" }}
             />
-            <Link href={href}
+            <Typography
                 variant="h4"
-                underline="none"
                 sx={{ fontWeight: "bold", color: "var(--main-dust-grey)" }}
             >
                 CoreComp
-            </Link>
+            </Typography>
         </Stack>
     )
 }

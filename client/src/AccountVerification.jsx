@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react"
 import { useParams } from 'react-router-dom';
 import LandingHeader from "./headers/LandingHeader.jsx"
+import { apiClient } from "./helpers/api.js";
 // mui components
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
@@ -27,21 +28,20 @@ const StyledStack = styled(Stack)(({ theme }) => ({
 }));
 
 function AccountVerification() {
-    const [successful, setSuccessful] = useState(false);
+    /*
+    set active => trial starts ...
+    already active => the account is already active
+    invalid user_id => user not found
+    invalid token => token is invalid or expired (resend email)
+    */
+    const [message, setMessage] = useState(null);
     const {token, user_id} = useParams();
     useEffect(() => {
         const payload = {token: token, user_id: user_id};
         async function verify() {
-            const response = await fetch("http://127.0.0.1:8000/accounts/verify-email", {
-                method: "POST",
-                headers: {"Content-Type": "application/json",},
-                body: JSON.stringify(payload),
-            });
-            if (response.ok) {
-                setSuccessful(true)
-            }
+            const response = await apiClient({endpoint: "/accounts/verify-email", payload: payload});
             const data = await response.json();
-            console.log(data);
+            setMessage(data.message);
         }
 
         verify();
@@ -49,38 +49,18 @@ function AccountVerification() {
 
     async function handleResendClicked() {
         const payload = {user_id: user_id};
-        const response = await fetch("http://127.0.0.1:8000/accounts/resend-verify-email", {
-            method: "POST",
-            headers: {"Content-Type": "application/json",},
-            body: JSON.stringify(payload),
-        });
+        const response = await apiClient({endpoint: "/accounts/resend-verify-email", payload: payload});
         const data = await response.json();
         console.log(data);
+        setMessage(data.message);
     }
 
     return (
         <Container maxWidth="lg" disableGutters>
             <LandingHeader />
             <StyledStack>
-                {successful ? (
-                    <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-                        Your account has been verified and your trial starts now!
-                    </Typography>
-                ) : (
-                    <Stack spacing={20}>
-                        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-                            The token has expired or is invalid, please click the button below to resend an email
-                        </Typography>
-                        <Button
-                            onClick={handleResendClicked}
-                            sx={{ backgroundColor: "#588157", color: "#DAD7CD", width: "30%", marginLeft: "auto !important" }}
-                            variant="contained"
-                        >
-                            resend
-                        </Button>
-                    </Stack>
-                )
-                }
+                <Typography>{message}</Typography>
+                {message === "Token is either invalid or expired" ? <Button onClick={handleResendClicked}>Resend email</Button> : <></>}
             </StyledStack>
         </Container>
     )

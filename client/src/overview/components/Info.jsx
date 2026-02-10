@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 import AnalystRatings from "./AnalystRatings.jsx"
 // helper
-import { fetchSymbolDataWithRetry } from "../../helpers/helper.js"
+import { authenticatedClientWithRetry } from "../../helpers/api.js"
 // mui
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -46,7 +46,7 @@ function Info({ symbol, fetchVersion, setSymbol }) {
     useEffect(() => {
         async function getData() {
             const payload = {symbol: symbol};
-            const response = await fetchSymbolDataWithRetry("http://127.0.0.1:8000/pages/info", payload, () => isActive, navigate, setSymbol);
+            const response = await authenticatedClientWithRetry("/pages/info", payload, () => isActive, navigate, setSymbol);
             if (!isActive) {
                 return;
             }
