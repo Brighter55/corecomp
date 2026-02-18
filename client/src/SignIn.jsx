@@ -198,6 +198,10 @@ function SignIn() {
                                 async function sendJWTToken() {
                                     const response = await apiClient({endpoint: "/accounts/google-authentication", payload: payload});
                                     const data = await response.json();
+                                    if (!response.ok) {
+                                        console.log(data);
+                                        return;
+                                    }
                                     setUser(data);
                                     navigate("/overview");
                                 }
