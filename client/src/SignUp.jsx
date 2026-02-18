@@ -186,13 +186,13 @@ function SignUp() {
                         <GoogleLogin
                             onSuccess={credentialResponse => {
                                 const payload = {JWTToken: credentialResponse.credential};
-                                console.log(credentialResponse);
                                 async function sendJWTToken() {
                                     const response = await apiClient({endpoint: "/accounts/google-authentication", payload: payload});
-                                    if (!response.ok) {
-                                        return
-                                    }
                                     const data = await response.json();
+                                    if (!response.ok) {
+                                        console.log(data);
+                                        return;
+                                    }
                                     setUser(data);
                                     navigate("/overview");
                                 }

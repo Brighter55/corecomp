@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 flow: 
     get tokens from cookie
     expired? => refresh it => gets new access and refresh => blacklist the old refresh
-    refresh expired or fail? =>  return None
+             =>  refresh expired or fail? =>  return None
 
     set_cookie the response from endpoint
 
@@ -22,6 +22,7 @@ def get_user_object(user_id):
     user = User.objects.get(id=user_id)
     return user
 
+# middleware - ONLY handles token refresh, doesn't set user
 class AutoRefreshJWTMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -30,36 +31,29 @@ class AutoRefreshJWTMiddleware:
         access = request.COOKIES.get("access_token")
         refresh = request.COOKIES.get("refresh_token")
 
-        user = None
-        try:
-            user_dict = jwt.decode(access, os.getenv("DJANGO_SECRET_KEY"), algorithms=["HS256"])
-            user = get_user_object(user_dict["user_id"])
-        except jwt.DecodeError:
-            if refresh:
+        if refresh:
+            try:
+                jwt.decode(access, os.getenv("DJANGO_SECRET_KEY"), algorithms=["HS256"])
+            except (jwt.ExpiredSignatureError, jwt.exceptions.DecodeError):
                 try:
-                    #renew the access
+                    # refreshing the access token
                     refresh_object = RefreshToken(refresh)
                     request.new_access_token = str(refresh_object.access_token)
+                    refresh_object.blacklist()
                     
-                    refresh_object.blacklist() # blacklist the old refresh
-
+                    # use the new access token to get the refresh token
                     user_dict = jwt.decode(request.new_access_token, os.getenv("DJANGO_SECRET_KEY"), algorithms=["HS256"])
                     user = get_user_object(user_dict["user_id"])
-
-                    #renew the refresh
+                    
                     new_refresh_object = RefreshToken.for_user(user)
                     request.new_refresh_token = str(new_refresh_object)
-
                 except Exception:
                     pass
-        
-        request._user = user
 
-        # Continue to view
+        # continue to view if access is valid
         response = self.get_response(request)
 
-        # After view is executed
-        # set_cookie refresh as well
+        # Set cookies if tokens were refreshed
         if hasattr(request, "new_access_token"):
             response.set_cookie(
                 key=settings.SIMPLE_JWT["AUTH_COOKIE"],

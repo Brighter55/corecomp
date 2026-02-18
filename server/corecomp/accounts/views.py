@@ -172,10 +172,19 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
     try:
         user_info = verify_google_token(jwt_token)
         email = user_info["email"]
-        user, created = User.objects.get_or_create(email=email, defaults={"username": email, "email": email, "is_active": True, "account_type": "google"})
-        if created:
+
+        user = None
+        if not User.objects.filter(email=email, account_type="google").exists():
+            if User.objects.filter(email=email).exists():
+                return Response({"message": "email is taken"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            user = User.objects.create(username=email, email=email, is_active=True, account_type="google")
             user.set_unusable_password()
             user.save()
+        # if didn't create user, get user
+        if user is None:
+            user = User.objects.get(email=email, account_type="google")
+
         # uses email to generate access and refresh tokens and return them to react
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
