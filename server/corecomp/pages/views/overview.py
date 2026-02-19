@@ -59,7 +59,6 @@ def current_price(request):
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def info(request):
-    """ prod.
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -68,10 +67,9 @@ def info(request):
         cached_data = cache.get(key)
         if cached_data:
             return Response(cached_data, status=status.HTTP_200_OK)
+        
+        data = financial_data_service.get_overview(symbol)
 
-        url = f'https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}'
-
-        data = fetchAlphaVantage(url)
         # if "data" is a Response object, then return the error
         if isinstance(data, Response):
             return data
@@ -129,66 +127,6 @@ def info(request):
         return Response(report, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    """
-    # valid case
-    report = {
-        "description": "International Business Machines Corporation (IBM) is a leading multinational technology company based in Armonk, New York, with a robust global presence in over 170 countries. Founded in 1911, IBM has consistently been at the forefront of technological innovation, focusing on areas such as artificial intelligence, quantum computing, and cloud computing services. The company is renowned for its strong commitment to research and development, holding the record for the most U.S. patents granted for 28 consecutive years, which underscores its role as a pioneer in the tech industry. With a rich history of impactful inventions including the ATM and relational database systems, IBM continues to adapt and evolve, providing advanced technological solutions that cater to the dynamic needs of multiple sectors in today's fast-paced digital economy.",
-        "exchange": "NYSE",
-        "country": "USA",
-        "sector": "TECHNOLOGY",
-        "industry": "INFORMATION TECHNOLOGY SERVICES",
-        "address": "ONE NEW ORCHARD ROAD, ARMONK, NY, UNITED STATES, 10504",
-        "website": "https://www.ibm.com",
-        "fiscalYearEnd": "December",
-        "marketCapitalization": "284365160000",
-        "ebitda": "15042000000",
-        "peRatio": "36.22",
-        "pegRatio": "2.082",
-        "bookValue": "29.85",
-        "dividendPerShare": "6.7",
-        "dividendYield": "0.0221",
-        "eps": "8.4",
-        "revenuePerShareTtm": "70.35",
-        "profitMargin": "0.121",
-        "operatingMarginTtm": "0.172",
-        "returnOnAssetsTtm": "0.0514",
-        "returnOnEquityTtm": "0.302",
-        "revenueTtm": "65401999000",
-        "grossProfitTtm": "37808001000",
-        "dilutedEpsTtm": "8.4",
-        "quarterlyEarningsGrowthYoy": "0.177",
-        "quarterlyRevenueGrowthYoy": "0.091",
-        "analystTargetPrice": "301.0",
-        "analystRatingStrongBuy": "1",
-        "analystRatingBuy": "8",
-        "analystRatingHold": "8",
-        "analystRatingSell": "2",
-        "analystRatingStrongSell": "2",
-        "priceToSalesRatioTtm": "4.348",
-        "priceToBookRatio": "10.19",
-        "evToRevenue": "5.14",
-        "evToEbitda": "20.73",
-        "beta": "0.698",
-        "fiftyTwoWeekHigh": "324.9",
-        "fiftyTwoWeekLow": "209.2",
-        "fiftyDayMovingAverage": "303.94",
-        "twoHundredDayMovingAverage": "273.37",
-        "sharesOutstanding": "934735000",
-        "dividendDate": "2025-12-10",
-        "exDividendDate": "2025-11-10"
-    }
-    return Response(report, status=status.HTTP_200_OK)
-    """
-    # invalid case 400
-    return Response({"symbol": ["symbol not in Symbol model"]}, status=status.HTTP_400_BAD_REQUEST)
-
-    # invalid case 503 rate limit
-    return Response(
-        {"error": "rate limit issue"},
-        status=status.HTTP_503_SERVICE_UNAVAILABLE,
-        headers={"Retry-After":  "10000"}
-    )
-    """
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def income_statement(request):

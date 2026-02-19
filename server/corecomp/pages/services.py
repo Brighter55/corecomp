@@ -16,10 +16,21 @@ class FinancialDataService:
         url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={api_key}'
         data = fetchAlphaVantage(url) # --> dict or Response object
         return data
+    
+    def get_overview(self, symbol):
+        url = f'https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}'
+        data = fetchAlphaVantage(url)
+        return data
         
 class MockFinancialDataService:
     def get_current_price(self, symbol):
         path = "pages/statement_samples/global_quote.json"
+        with open(path, 'r') as file:
+            data = json.load(file)
+        return data
+    
+    def get_overview(self, symbol):
+        path = "pages/statement_samples/overview.json"
         with open(path, 'r') as file:
             data = json.load(file)
         return data
