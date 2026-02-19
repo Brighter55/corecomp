@@ -14,11 +14,11 @@ from django_redis import get_redis_connection
 from accounts.permissions import IsSubscribed
 # serializer
 from pages.serializers import SymbolSerializer
-from django.core.serializers import serialize
 # model
 from django.db.models import Q
 from pages.models import Symbol
-
+# services
+from services import financial_data_service
 
 load_dotenv()
 User = get_user_model() # Get model listed in settings.py: AUTH_USER_MODEL = 'api.CustomUser'
@@ -28,7 +28,6 @@ api_key = os.getenv("ALPHAVANTAGE_API_KEY")
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def current_price(request):
-    """
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -38,13 +37,12 @@ def current_price(request):
         if cached_data:
             return Response(cached_data, status=status.HTTP_200_OK)
 
-        url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={api_key}'
-        data = fetchAlphaVantage(url)
+        data = financial_data_service.get_current_price(symbol)
 
         if isinstance(data, Response):
             return data
 
-        # check if alphavantage returns {} for invalid symbol or symbol with no data
+        # check if the data is empty
         if not data["Global Quote"]:
             return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -57,22 +55,7 @@ def current_price(request):
         cache.set(key, report, timeout=600)
         return Response(report, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    """
-
-
-    # valid case
-    return Response({"price": "302.47", "name": "International Business Machines Corp"}, status=status.HTTP_200_OK)
-    """
-    # invalid case 400
-    return Response({"symbol": ["symbol not in Symbol model"]}, status=status.HTTP_400_BAD_REQUEST)
-
-    # invalid case 503 rate limit
-    return Response(
-        {"error": "rate limit issue"},
-        status=status.HTTP_503_SERVICE_UNAVAILABLE,
-        headers={"Retry-After":  "10000"}
-    )
-    """
+    
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def info(request):
