@@ -9,7 +9,7 @@ from rest_framework import status
 url = reverse('current_price')
 
 # test for valid request
-@patch("pages.views.overview.fetchAlphaVantage")
+@patch("pages.services.fetchAlphaVantage")
 @pytest.mark.django_db
 def test_get_price(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(
@@ -58,7 +58,7 @@ def test_symbol_not_in_database(authorized_client):
     assert response.json()["symbol"][0] == "symbol not in Symbol model"
 
 # test for invalid case where Alpha Vantage returns error message about rate limit
-@patch("pages.views.overview.fetchAlphaVantage")
+@patch("pages.services.fetchAlphaVantage")
 @pytest.mark.django_db
 def test_exceeds_rate_limit(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(
@@ -79,7 +79,7 @@ def test_exceeds_rate_limit(mock_fetchAlphaVantage, authorized_client):
     assert response.json()["error"] == "rate limit issue"
 
 # test for invalid case where Alpha Vantage returns error message about invalid api call
-@patch("pages.views.overview.fetchAlphaVantage")
+@patch("pages.services.fetchAlphaVantage")
 @pytest.mark.django_db
 def test_invalid_api_call(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(
@@ -98,7 +98,7 @@ def test_invalid_api_call(mock_fetchAlphaVantage, authorized_client):
     assert response.json()["error"] == "invalid api call issue"
 
 # test for invalid case where the symbol exists in Symbol but not in Alpha Vantage or Alpha Vantage doesn't have data
-@patch("pages.views.overview.fetchAlphaVantage")
+@patch("pages.services.fetchAlphaVantage")
 @pytest.mark.django_db
 def test_symbol_not_in_alpha_vantage(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(

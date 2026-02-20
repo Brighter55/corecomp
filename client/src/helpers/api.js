@@ -1,8 +1,9 @@
+const backendBaseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
 
 // for SignIn and SignUp: send to retrieve tokens
 export async function apiClient({endpoint = null, payload = null} = {}) {
     if (payload) {
-        const response = await fetch(`http://localhost:8000${endpoint}`, {
+        const response = await fetch(`${backendBaseUrl}${endpoint}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -13,7 +14,7 @@ export async function apiClient({endpoint = null, payload = null} = {}) {
         return response
     }
     // for accounts/me
-    const response = await fetch(`http://localhost:8000${endpoint}`, {
+    const response = await fetch(`${backendBaseUrl}${endpoint}`, {
         method: "GET",
         credentials: "include",
     });
@@ -23,7 +24,7 @@ export async function apiClient({endpoint = null, payload = null} = {}) {
 // for protected endpoint
 export async function authenticatedClient({ endpoint = null, payload = null} = {}) {
     if (payload) {
-        const response = await fetch(`http://localhost:8000${endpoint}`, {
+        const response = await fetch(`${backendBaseUrl}${endpoint}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -35,7 +36,7 @@ export async function authenticatedClient({ endpoint = null, payload = null} = {
         return response
     }
 
-    const response = await fetch(`http://localhost:8000${endpoint}`, {
+    const response = await fetch(`${backendBaseUrl}${endpoint}`, {
         method: "GET",
         headers: {
             "X-CSRFToken": getCookie("csrftoken"),
@@ -46,7 +47,7 @@ export async function authenticatedClient({ endpoint = null, payload = null} = {
 }
 
 export async function authenticatedClientWithRetry(endpoint, payload, isActive, navigate, setSymbol) {
-    const response = await fetch(`http://localhost:8000${endpoint}`, {
+    const response = await fetch(`${backendBaseUrl}${endpoint}`, {
         method: "POST",
         credentials: "include",
         headers: {
