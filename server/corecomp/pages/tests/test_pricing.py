@@ -8,7 +8,7 @@ from rest_framework import status
 url = reverse('pricing')
 # test for valid request where the endpoint fetches
 @patch("pages.views.overview.transform_pricing")
-@patch("pages.views.overview.fetchAlphaVantage")
+@patch("pages.services.fetchAlphaVantage")
 @pytest.mark.django_db
 def test_valid_fetch(mock_fetchAlphaVantage, mock_transform_pricing, authorized_client):
     symbol = Symbol(
@@ -29,7 +29,7 @@ def test_valid_fetch(mock_fetchAlphaVantage, mock_transform_pricing, authorized_
 
 # test for valid request where the endpoint returns cached_data
 @patch("pages.views.overview.transform_pricing")
-@patch("pages.views.overview.fetchAlphaVantage")
+@patch("pages.services.fetchAlphaVantage")
 @pytest.mark.django_db
 def test_valid_cache(mock_fetchAlphaVantage, mock_transform_pricing, authorized_client):
     symbol = Symbol(
@@ -52,7 +52,7 @@ def test_valid_cache(mock_fetchAlphaVantage, mock_transform_pricing, authorized_
     assert mock_fetchAlphaVantage.call_count == 1
 
 # test for invalid case where Alpha Vantage returns error message about rate limit
-@patch("pages.views.overview.fetchAlphaVantage")
+@patch("pages.services.fetchAlphaVantage")
 @pytest.mark.django_db
 def test_exceeds_rate_limit(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(
@@ -74,7 +74,7 @@ def test_exceeds_rate_limit(mock_fetchAlphaVantage, authorized_client):
     assert response.json()["error"] == "rate limit issue"
 
 # test for invalid case where the symbol is invalid
-@patch("pages.views.overview.fetchAlphaVantage")
+@patch("pages.services.fetchAlphaVantage")
 @pytest.mark.django_db
 def test_invalid_symbol(mock_fetchAlphaVantage, authorized_client):
     symbol = Symbol(

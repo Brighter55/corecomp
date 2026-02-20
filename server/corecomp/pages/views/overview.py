@@ -130,7 +130,6 @@ def info(request):
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def income_statement(request):
-    """ prod.
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -147,8 +146,7 @@ def income_statement(request):
             if cached_data:
                 return Response(cached_data, status=status.HTTP_200_OK)
             
-            url = f"https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol={symbol}&apikey={api_key}"
-            data = fetchAlphaVantage(url)
+            data = financial_data_service.get_income_statement(symbol)
 
             if isinstance(data, Response):
                 return data
@@ -162,17 +160,10 @@ def income_statement(request):
 
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    """
-    path = "pages/statement_samples/income_statement.json"
-    with open(path, 'r') as file:
-        data = json.load(file)
-    data = annotate_profit_margin(data)
-    return Response(data, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def cash_flow(request):
-    """
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -189,8 +180,7 @@ def cash_flow(request):
             if cached_data:
                 return Response(cached_data, status=status.HTTP_200_OK)
             
-            url = f"https://www.alphavantage.co/query?function=CASH_FLOW&symbol={symbol}&apikey={api_key}"
-            data = fetchAlphaVantage(url)
+            data = financial_data_service.get_cash_flow(symbol)
 
             if isinstance(data, Response):
                 return data
@@ -204,18 +194,11 @@ def cash_flow(request):
 
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    """
-    path = "pages/statement_samples/cashflow.json"
-    with open(path, 'r') as file:
-        data = json.load(file)
-    data = annotate_free_cash_flow(data)
-    return Response(data, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def balance_sheet(request):
-    """
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -232,8 +215,7 @@ def balance_sheet(request):
             if cached_data:
                 return Response(cached_data, status=status.HTTP_200_OK)
             
-            url = f"https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol={symbol}&apikey={api_key}"
-            data = fetchAlphaVantage(url)
+            data = financial_data_service.get_balance_sheet(symbol)
 
             if isinstance(data, Response):
                 return data
@@ -245,17 +227,10 @@ def balance_sheet(request):
 
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    """
-    path = "pages/statement_samples/balance_sheet.json"
-    with open(path, 'r') as file:
-        data = json.load(file)
-    return Response(data, status=status.HTTP_200_OK)
-
 
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def earnings(request):
-    """
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -272,8 +247,7 @@ def earnings(request):
             if cached_data:
                 return Response(cached_data, status=status.HTTP_200_OK)
             
-            url = f"https://www.alphavantage.co/query?function=EARNINGS&symbol={symbol}&apikey={api_key}"
-            data = fetchAlphaVantage(url)
+            data = financial_data_service.get_earnings(symbol)
 
             if isinstance(data, Response):
                 return data
@@ -286,16 +260,9 @@ def earnings(request):
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    """
-    path = "pages/statement_samples/earnings.json"
-    with open(path, 'r') as file:
-        data = json.load(file)
-    return Response(data, status=status.HTTP_200_OK)
-
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def dividends(request):
-    """
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -312,8 +279,7 @@ def dividends(request):
             if cached_data:
                 return Response(cached_data, status=status.HTTP_200_OK)
             
-            url = f"https://www.alphavantage.co/query?function=DIVIDENDS&symbol={symbol}&apikey={api_key}"
-            data = fetchAlphaVantage(url)
+            data = financial_data_service.get_dividends(symbol)
 
             if isinstance(data, Response):
                 return data
@@ -326,16 +292,9 @@ def dividends(request):
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    """
-    path = "pages/statement_samples/dividends.json"
-    with open(path, 'r') as file:
-        data = json.load(file)
-    return Response(data, status=status.HTTP_200_OK)
-
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def pricing(request):
-    """
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -352,8 +311,7 @@ def pricing(request):
             if cached_data:
                 return Response(cached_data, status=status.HTTP_200_OK)
 
-            url = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol={symbol}&apikey={api_key}"
-            data = fetchAlphaVantage(url)
+            data = financial_data_service.get_pricing(symbol)
 
             if isinstance(data, Response): # Alpha Vantage returns invalid symbol error as "Error Message" for pricing endpoint
                 return data            
@@ -364,18 +322,10 @@ def pricing(request):
 
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    """
-    path = "pages/statement_samples/pricing.json"
-    with open(path, 'r') as file:
-        data = json.load(file)
-    data = transform_pricing(data)
-    return Response(data, status=status.HTTP_200_OK)
-
 
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
 def shares_outstanding(request):
-    """
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
         symbol = serializer.validated_data["symbol"]
@@ -392,8 +342,7 @@ def shares_outstanding(request):
             if cached_data:
                 return Response(cached_data, status=status.HTTP_200_OK)
 
-            url = f"https://www.alphavantage.co/query?function=SHARES_OUTSTANDING&symbol={symbol}&apikey={api_key}"
-            data = fetchAlphaVantage(url)
+            data = financial_data_service.get_shares_outstanding(symbol)
 
             if isinstance(data, Response): # Alpha Vantage returns invalid symbol error as "Error Message" for pricing endpoint
                 return data            
@@ -405,11 +354,6 @@ def shares_outstanding(request):
 
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    """
-    path = "pages/statement_samples/shares_outstanding.json"
-    with open(path, 'r') as file:
-        data = json.load(file)
-    return Response(data, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
