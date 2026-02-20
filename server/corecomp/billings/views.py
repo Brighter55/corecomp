@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 import os
 import stripe
 from .models import StripeEvent
-from .utils import checkout, get_checkout_status, create_portal, ts_to_dt, create_event
-
+from .utils import get_checkout_status, create_portal, ts_to_dt, create_event
+from services import payment_service
 
 # Create your views here.
 load_dotenv()
@@ -24,18 +24,7 @@ endpoint_secret = os.getenv("STRIPE_ENDPOINT_SECRET")
 def checkout_session(request):
     user = request.user
     try:
-        session = checkout(
-            mode="subscription",
-            line_items=[{"price": "price_1SN5QcLmRJ2Mkn9vd7R1eYYd", "quantity": 1}],
-            ui_mode="embedded",
-            return_url="http://localhost:5173/return/{CHECKOUT_SESSION_ID}",
-            subscription_data = {
-                "trial_period_days": 7,
-                "metadata": {
-                    "user_id": str(user.id),
-                },
-            }
-        )
+        session = payment_service.checkout(user=user)
     except stripe.StripeError as e:
         return Response(status=status.HTTP_502_BAD_GATEWAY)
     return Response({"client_secret": session.client_secret}, status=status.HTTP_200_OK)
@@ -61,10 +50,10 @@ def session_status(request):
 
     return Response({"status": session.status, "payment_status": session.payment_status}, status=status.HTTP_200_OK)
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def portal_session(request):
-    return_url = "http://localhost:5173/account"
+    return_url = f"{os.getenv('FRONTEND_BASE_URL')}/account"
     customer_id = request.user.customer_id
     if not customer_id:
         return Response(status=status.HTTP_403_FORBIDDEN)
@@ -99,11 +88,11 @@ def webhook(request):
         "customer.subscription.updated",
         "customer.subscription.deleted",
     ]
+    
     # check for idempotentcy
-    """
     if StripeEvent.objects.filter(event_id=event_object["id"]).exists():
         return Response({"detail": "reject because the event has been run before"}, status=status.HTTP_200_OK)
-    """
+
     if event_object["type"] not in handled_event_types:
         return Response(status=status.HTTP_200_OK)
 
@@ -120,8 +109,6 @@ def webhook(request):
     user.current_period_end = ts_to_dt(subscription["items"]["data"][0]["current_period_end"])
     user.save()
 
-
-    """
     StripeEvent.objects.create(event_id=event_object["id"], created_at=event_object["created"])
-    """
+
     return Response(status=status.HTTP_200_OK)

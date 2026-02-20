@@ -14,13 +14,13 @@ def test_create_portal(mock_stripe_create_portal, authenticated_user, authentica
     authenticated_user.customer_id = "valid customer id"
     authenticated_user.save()
     mock_stripe_create_portal.return_value = SimpleNamespace(url="stripe portal url")
-    response = authenticated_client.post(url)
+    response = authenticated_client.get(url)
     assert response.status_code == 200
 
 # test for invalid case where the user is not a stripe customer
 @pytest.mark.django_db
 def test_not_customer(authenticated_client):
-    response = authenticated_client.post(url)
+    response = authenticated_client.get(url)
     assert response.status_code == 403
 
 # test for invalid case where stripe fails to find customer
@@ -28,7 +28,7 @@ def test_not_customer(authenticated_client):
 def test_invalid_cus_id(authenticated_user, authenticated_client):
     authenticated_user.customer_id = "cus_NffrFwUfNV2Hib"
     authenticated_user.save()
-    response = authenticated_client.post(url)
+    response = authenticated_client.get(url)
     assert response.status_code == 400
 
 # test for invalid case where stripe fails
@@ -42,5 +42,5 @@ def test_stripe_fails(mock_create_portal, authenticated_user, authenticated_clie
         http_status=500,
         json_body={}
     )
-    response = authenticated_client.post(url)
+    response = authenticated_client.get(url)
     assert response.status_code == 502

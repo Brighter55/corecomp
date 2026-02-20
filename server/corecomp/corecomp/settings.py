@@ -104,6 +104,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'corecomp.wsgi.application'
 
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL")
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
