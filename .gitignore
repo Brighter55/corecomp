@@ -23,6 +23,9 @@ client/*.njsproj
 client/*.sln
 client/*.sw?
 
+# builds
+client/dist
+
 # samples
 server/corecomp/pages/statement_samples
 
