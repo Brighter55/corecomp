@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: corecomp-backend
+    command: >
+      sh -c "
+      python manage.py migrate &&
+      gunicorn corecomp.wsgi:application --bind 0.0.0.0:8000
+      "
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:15
+    container_name: corecomp-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: corecomp
+      POSTGRES_USER: corecomp
+      POSTGRES_PASSWORD: corecomp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: corecomp-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:

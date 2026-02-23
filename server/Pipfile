@@ -18,6 +18,7 @@ pytest-django = "*"
 redis = "*"
 django-redis = "*"
 pyjwt = "*"
+gunicorn = "*"
 
 [dev-packages]
 
