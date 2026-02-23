@@ -1,10 +1,12 @@
 import sampleReports from "../sample-data/sampleData.json"
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useState, useRef, useEffect } from "react"
-import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
+import { useState, useRef, useEffect, useMemo } from "react"
+import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 // borrows from overview page
 import GraphTitle from "../../overview/components/GraphTitle.jsx"
 import { explanation } from "../../overview/components/NetIncomeGraph.jsx"
+import CustomBar from "../../overview/components/CustomBar.jsx"
+import CustomActiveBar from "../../overview/components/CustomActiveBar.jsx"
 // mui components
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
@@ -12,12 +14,12 @@ import Box from '@mui/material/Box';
 
 function SampleIncomeGraph({ key }) {
     const [timeRange, setTimeRange] = useState("all");
-    const reports = filterReports(sampleReports.INCOME_STATEMENT, timeRange);
-    const percentChange = getPercentChange(reports, "netIncome");
-
-    // handle graph grows or shrinks when clicked
     const [graphClicked, setGraphClicked] = useState(false);
+
     const graphRef = useRef(null);
+
+    const statement = sampleReports;
+    console.log(statement);
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (graphRef.current && !graphRef.current.contains(event.target)) {
@@ -31,23 +33,21 @@ function SampleIncomeGraph({ key }) {
         };
     }, []);
 
-    function CustomBar(props) {
-        const barColor = (props.value >= 0 ? "#588157" : "#bc4749");
-        return <Rectangle {...props} fill={barColor}/>
-    }
+    const reports = useMemo(() => {
+        if (!statement) return [];
 
-    function CustomActiveBar(props) {
-        const activeBarColor = (props.value >= 0 ? "#A3B18A" : "#B35C5E");
-        return <Rectangle {...props} fill={activeBarColor} stroke="#DAD7CD"></Rectangle>
-    }
+        const filteredReports = filterReports(statement["annualReports"], timeRange, "fiscalDateEnding");
+        console.log(filteredReports);
+        return filteredReports;
+    }, [timeRange]);
 
-    function countDigits(value) {
-        if (value === 0) {
-            return 1;
+    const percentChange = useMemo(() => {
+        if (!reports.length) {
+            return null;
         }
-        return Math.floor(Math.log10(Math.abs(value))) + 1;
-    }
-
+        const percentChange = getPercentChange(reports, "netIncome");
+        return percentChange;
+    }, [reports]);
 
     return (
         <Stack
@@ -95,18 +95,10 @@ function SampleIncomeGraph({ key }) {
                         }}
                     >
                         <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                        <XAxis dataKey="date" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                        <YAxis tickFormatter={(value) => {
-                            if (countDigits(value) >= 10) {return `${(value / 1000000000).toFixed(2)}B`}
-                            if (countDigits(value) >= 7) {return `${(value / 1000000).toFixed(2)}M`}
-                            return value
-                        }} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]} />
-                        <Tooltip formatter={(value) => {
-                            if (countDigits(value) >= 10) {return `${value / 1000000000}B`}
-                            if (countDigits(value) >= 7) {return `${value / 1000000}M`}
-                            return value
-                        }}/>
-                        <Bar dataKey="netIncome" shape={<CustomBar></CustomBar>} activeBar={<CustomActiveBar></CustomActiveBar>} />
+                        <XAxis dataKey="fiscalDateEnding" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}} />
+                        <YAxis tickFormatter={(value) => formatToUnits(value)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]} />
+                        <Tooltip formatter={(value) => formatToUnits(value)} />
+                        <Bar name="Net Income" dataKey="netIncome" shape={<CustomBar></CustomBar>}  activeBar={<CustomActiveBar></CustomActiveBar>} />
                     </BarChart>
                 </ResponsiveContainer>
             </Box>
