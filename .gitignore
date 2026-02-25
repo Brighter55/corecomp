@@ -31,4 +31,6 @@ server/corecomp/pages/statement_samples
 
 # keys
 .env
+server/.env.production
 client/.env
+client/.env.production
