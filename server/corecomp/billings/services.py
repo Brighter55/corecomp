@@ -10,7 +10,7 @@ class PaymentService:
         # TODO: update when stripe is ready
         session = checkout(
             mode="subscription",
-            line_items=[{"price": "price_1SN5QcLmRJ2Mkn9vd7R1eYYd", "quantity": 1}],
+            line_items=[{"price": "price_1T4pepLmRJ2Mkn9vRqDXDN63", "quantity": 1}],
             ui_mode="embedded",
             return_url=f"{os.getenv('FRONTEND_BASE_URL')}/return/{{CHECKOUT_SESSION_ID}}",
             subscription_data = {
@@ -27,7 +27,7 @@ class MockPaymentService:
     def checkout(self, user):
         session = checkout(
             mode="subscription",
-            line_items=[{"price": "price_1SN5QcLmRJ2Mkn9vd7R1eYYd", "quantity": 1}],
+            line_items=[{"price": "price_1T4pjbLmRJ2Mkn9vVZD76JHU", "quantity": 1}],
             ui_mode="embedded",
             return_url=f"{os.getenv('FRONTEND_BASE_URL')}/return/{{CHECKOUT_SESSION_ID}}",
             subscription_data = {
