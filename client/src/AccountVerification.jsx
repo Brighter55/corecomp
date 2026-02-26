@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react"
 import { useParams } from 'react-router-dom';
 import LandingHeader from "./headers/LandingHeader.jsx"
-import { apiClient } from "./helpers/api.js";
+import { authenticatedClient } from "./helpers/api.js";
 // mui components
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
@@ -39,7 +39,7 @@ function AccountVerification() {
     useEffect(() => {
         const payload = {token: token, user_id: user_id};
         async function verify() {
-            const response = await apiClient({endpoint: "/accounts/verify-email", payload: payload});
+            const response = await authenticatedClient({endpoint: "/accounts/verify-email", payload: payload});
             const data = await response.json();
             setMessage(data.message);
         }
@@ -49,7 +49,7 @@ function AccountVerification() {
 
     async function handleResendClicked() {
         const payload = {user_id: user_id};
-        const response = await apiClient({endpoint: "/accounts/resend-verify-email", payload: payload});
+        const response = await authenticatedClient({endpoint: "/accounts/resend-verify-email", payload: payload});
         const data = await response.json();
         console.log(data);
         setMessage(data.message);

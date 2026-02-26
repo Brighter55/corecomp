@@ -2,7 +2,7 @@ import {useState} from "react"
 import {GoogleLogin} from "@react-oauth/google"
 import {useNavigate} from "react-router-dom"
 import LandingHeader from "./headers/LandingHeader.jsx"
-import { apiClient } from "./helpers/api.js"
+import { authenticatedClient } from "./helpers/api.js"
 import { useAuth } from "./auth/AuthProvider.jsx"
 // styled components
 import StyledTextField from "./shared/StyledTextField.jsx";
@@ -93,7 +93,7 @@ function SignUp() {
             password: password,
             confirmPassword: confirmPassword
         };
-        const response = await apiClient({endpoint: "/accounts/sign-up", payload: payload});
+        const response = await authenticatedClient({endpoint: "/accounts/sign-up", payload: payload});
         const data = await response.json();
         console.log(data);
         if (!response.ok) {
@@ -187,7 +187,7 @@ function SignUp() {
                             onSuccess={credentialResponse => {
                                 const payload = {JWTToken: credentialResponse.credential};
                                 async function sendJWTToken() {
-                                    const response = await apiClient({endpoint: "/accounts/google-authentication", payload: payload});
+                                    const response = await authenticatedClient({endpoint: "/accounts/google-authentication", payload: payload});
                                     const data = await response.json();
                                     if (!response.ok) {
                                         console.log(data);

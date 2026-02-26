@@ -1,6 +1,6 @@
 import { useState } from "react"
 import LandingHeader from "./headers/LandingHeader.jsx"
-import { apiClient } from "./helpers/api.js"
+import { authenticatedClient } from "./helpers/api.js"
 // mui components
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
@@ -46,7 +46,7 @@ function ResetPassword() {
         setEmailError("");
         const payload = {email: email};
 
-        const response = await apiClient({ endpoint: "/accounts/reset-password", payload: payload});
+        const response = await authenticatedClient({ endpoint: "/accounts/reset-password", payload: payload});
         const data = await response.json();
         console.log(data);
 

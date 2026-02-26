@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import LandingHeader from "./headers/LandingHeader.jsx"
-import { apiClient } from "./helpers/api.js"
+import { authenticatedClient } from "./helpers/api.js"
 // mui components
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
@@ -80,7 +80,7 @@ function ConfirmResetPassword() {
         setPasswordError("");
         const payload = {password: password, confirmPassword: confirmPassword, id: id, token: token};
         
-        const response = await apiClient({endpoint: "/accounts/confirm-reset-password", payload: payload});
+        const response = await authenticatedClient({endpoint: "/accounts/confirm-reset-password", payload: payload});
         const data = await response.json();
         console.log(data);
 

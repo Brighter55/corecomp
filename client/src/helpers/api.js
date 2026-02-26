@@ -1,26 +1,5 @@
 const backendBaseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
 
-// for SignIn and SignUp: send to retrieve tokens
-export async function apiClient({endpoint = null, payload = null} = {}) {
-    if (payload) {
-        const response = await fetch(`${backendBaseUrl}${endpoint}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify(payload),
-        });
-        return response
-    }
-    // for accounts/me
-    const response = await fetch(`${backendBaseUrl}${endpoint}`, {
-        method: "GET",
-        credentials: "include",
-    });
-    return response
-}
-
 // for protected endpoint
 export async function authenticatedClient({ endpoint = null, payload = null} = {}) {
     if (payload) {
@@ -38,9 +17,6 @@ export async function authenticatedClient({ endpoint = null, payload = null} = {
 
     const response = await fetch(`${backendBaseUrl}${endpoint}`, {
         method: "GET",
-        headers: {
-            "X-CSRFToken": getCookie("csrftoken"),
-        },
         credentials: "include",
     });
     return response

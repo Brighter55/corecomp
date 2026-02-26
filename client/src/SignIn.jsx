@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { GoogleLogin } from "@react-oauth/google"
 import LandingHeader from "./headers/LandingHeader.jsx"
 import StyledTextField from "./shared/StyledTextField.jsx";
-import {apiClient} from "./helpers/api.js"
+import {authenticatedClient} from "./helpers/api.js"
 import { useAuth } from "./auth/AuthProvider.jsx"
 // mui components
 import Button from '@mui/material/Button';
@@ -86,7 +86,7 @@ function SignIn() {
     
     async function handleClickResendEmail() {
         const payload = {username: username};
-        const response = await apiClient({endpoint: "/accounts/resend-verify-email", payload: payload});
+        const response = await authenticatedClient({endpoint: "/accounts/resend-verify-email", payload: payload});
         const data = await response.json();
         console.log(data);
         setOpen(false);
@@ -121,7 +121,7 @@ function SignIn() {
     async function handleSubmit(event) {
         event.preventDefault();
         const payload = {username: username, password: password};
-        const response = await apiClient({endpoint: "/accounts/sign-in", payload: payload});
+        const response = await authenticatedClient({endpoint: "/accounts/sign-in", payload: payload});
         const data = await response.json();
 
         /// error
@@ -196,7 +196,7 @@ function SignIn() {
                             onSuccess={credentialResponse => {
                                 const payload = {JWTToken: credentialResponse.credential};
                                 async function sendJWTToken() {
-                                    const response = await apiClient({endpoint: "/accounts/google-authentication", payload: payload});
+                                    const response = await authenticatedClient({endpoint: "/accounts/google-authentication", payload: payload});
                                     const data = await response.json();
                                     if (!response.ok) {
                                         console.log(data);
