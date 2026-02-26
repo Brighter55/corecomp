@@ -177,6 +177,8 @@ CORS_EXPOSE_HEADERS = [
     "Retry-After",
 ]
 
+CSRF_COOKIE_SAMESITE = os.getenv("CSRF_COOKIE_SAMESITE")
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE") == "True"
 
 CACHES = {
     "default": {
