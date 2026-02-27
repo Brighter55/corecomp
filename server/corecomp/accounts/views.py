@@ -233,9 +233,21 @@ def sign_out(request):
         token = RefreshToken(refresh_token)
         token.blacklist()
         response = Response({"success": "Refresh token has been blacklisted successfully"}, status=status.HTTP_200_OK)
-        response.delete_cookie("access_token")
-        response.delete_cookie("refresh_token")
-        response.delete_cookie("csrftoken")
+        response.delete_cookie(
+            key="access_token",
+            domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+            path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+        )
+        response.delete_cookie(
+            key="refresh_token",
+            domain=settings.SIMPLE_JWT["AUTH_COOKIE_DOMAIN"],
+            path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+        )
+        response.delete_cookie(
+            key="csrftoken",
+            domain=settings.CSRF_COOKIE_DOMAIN,
+            path="/",
+        )
         return response
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
