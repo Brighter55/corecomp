@@ -77,14 +77,14 @@ export function filterReports(reports, timeRange, dateField) {
 }
 
 export function getPercentChange(reports, value) {
-    // ((newValue - oldValue) / oldValue) * 100
+    // ((newValue - oldValue) / abs(oldValue)) * 100
     if (!reports.length) {
         return 0;
     }
 
     const newValue = parseFloat(reports[reports.length - 1][value]);
     const oldValue = parseFloat(reports[0][value]);
-    const percentChange = ((newValue - oldValue) / oldValue) * 100;
+    const percentChange = ( (newValue - oldValue) / Math.abs(oldValue) ) * 100;
     return parseFloat(percentChange.toFixed(2));
 }
 // receive string integer

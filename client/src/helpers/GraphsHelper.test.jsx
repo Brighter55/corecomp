@@ -218,6 +218,16 @@ const filteredReportsWithDecimalsDecreasingTrend = [
   { fiscalDateEnding: '2024-12-31', eps: "2.3" },
 ]
 
+const filteredReportsNegativeOldValue = [
+    { fiscalDateEnding: '2023-12-31', totalRevenue: "-93000" },
+    { fiscalDateEnding: '2024-12-31', totalRevenue: "50000" },
+];
+
+const decimalFilteredReportsNegativeOldValue = [
+    { fiscalDateEnding: '2023-12-31', totalRevenue: "-2.45" },
+    { fiscalDateEnding: '2024-12-31', totalRevenue: "5" },
+];
+
 describe("getPercentChange", () => {
     test("return correct percent change for YTD range", () => {
         expect(getPercentChange(filteredReports.slice(filteredReports.length - 1), "totalRevenue")).toBe(0.00);
@@ -231,6 +241,13 @@ describe("getPercentChange", () => {
     });
     test("return correct percent change for 1Y range", () => {
         expect(getPercentChange(filteredReportsDecreasingTrend.slice(filteredReportsDecreasingTrend.length - 2), "totalRevenue")).toBe(-7.69);
+    });
+    // old value is negative
+    test("return correct percent change when the old value is negative", () => {
+        expect(getPercentChange(filteredReportsNegativeOldValue, "totalRevenue")).toBe(153.76);
+    });
+    test("return correct percent change when the old value is negative decimal number", () => {
+        expect(getPercentChange(decimalFilteredReportsNegativeOldValue, "totalRevenue")).toBe(304.08);
     });
 
     // decimal case
