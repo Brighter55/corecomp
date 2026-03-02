@@ -82,6 +82,7 @@ function SignUp() {
     };
 
     async function handleSubmit(event) {
+        /***
         event.preventDefault();
         setUsernameError("");
         setEmailError("");
@@ -113,6 +114,7 @@ function SignUp() {
             return;
         }
         // TODO: pop up saying account created successfully
+        * */
     }
 
     const hidePasswordAdornment = {
