@@ -46,10 +46,10 @@ class Command(BaseCommand):
                 name = company["name"].strip()
                 symbol = company["symbol"].strip()
                 type = company["assetType"].strip()
-
-                record, created = Symbol.objects.update_or_create(symbol=symbol, defaults={"name": name, "type": type})
-                if created:
-                    total_addition += 1
+                if type.upper() == "STOCK":
+                    record, created = Symbol.objects.update_or_create(symbol=symbol, defaults={"name": name, "type": type})
+                    if created:
+                        total_addition += 1
 
         print(f"total deletion: {total_deletion}")
         print(f"total addition: {total_addition}")
