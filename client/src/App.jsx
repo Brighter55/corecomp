@@ -11,6 +11,7 @@ import CheckoutReturn from "./CheckoutReturn.jsx"
 import ResetPassword from "./ResetPassword.jsx"
 import ConfirmResetPassword from "./ConfirmResetPassword.jsx"
 import PrivacyPolicy from "./PrivacyPolicy.jsx"
+import TermsOfService from "./TermsOfService.jsx"
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/sign-up" element={<SignUp></SignUp>} />
         <Route path="/overview" element={<AuthenticatedRoute><AuthorizedRoute><OverviewPage /></AuthorizedRoute></AuthenticatedRoute>} />
         <Route path="/privacy-policy" element={<PrivacyPolicy></PrivacyPolicy>} />
+        <Route path="/tos" element={<TermsOfService></TermsOfService>} />
         <Route path="/account-verification/:token/:user_id" element={<AccountVerification></AccountVerification>} />
         <Route path="/account" element={<AuthenticatedRoute><Account /></AuthenticatedRoute>} />
         <Route path="/return/:checkout_session_id" element={<AuthenticatedRoute><CheckoutReturn/></AuthenticatedRoute>} />

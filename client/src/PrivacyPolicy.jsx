@@ -14,8 +14,8 @@ function PrivacyPolicy() {
                 <LandingHeader></LandingHeader>
                 <Stack spacing={3}>
                     <Stack spacing={2}>
-                        <Typography variant="h1" fontWeight="bold">Privacy Policy</Typography>
-                        <Typography variant="h4" color="grey">Last updated: 3/2/26</Typography>
+                        <Typography variant="h2" fontWeight="bold">Privacy Policy</Typography>
+                        <Typography variant="h5" color="grey">Last updated: 3/2/26</Typography>
                     </Stack>
                     <Typography variant="body1">This application collects basic user information to provide authentication and core features.</Typography>
                     <Divider sx={{ borderColor: "rgba(218, 215, 205, 0.5)" }}></Divider>

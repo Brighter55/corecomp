@@ -46,7 +46,7 @@ function Footer() {
                     <Stack spacing={1}>
                         <Typography variant="h6">Legal</Typography>
                         <Stack spacing={1}>
-                            <Typography onClick={() => {navigate("/privacy")}} sx={{ cursor: "pointer" }}>
+                            <Typography onClick={() => {navigate("/privacy-policy")}} sx={{ cursor: "pointer" }}>
                                 Privacy Policy
                             </Typography>
                             <Typography onClick={() => {navigate("/tos")}} sx={{ cursor: "pointer" }}>
