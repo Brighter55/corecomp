@@ -1,5 +1,4 @@
 import Brand from "./Brand.jsx"
-import { useNavigate } from "react-router-dom";
 // mui compoenents
 import Divider from '@mui/material/Divider';
 import { styled } from '@mui/material/styles';
@@ -22,8 +21,6 @@ const StyledImg = styled("img")({
 });
 
 function Footer() {
-    const navigate = useNavigate();
-
     return (
         <Stack spacing={3}>
             <Divider sx={{ borderColor: "rgba(218, 215, 205, 0.5)" }}></Divider>
@@ -46,12 +43,8 @@ function Footer() {
                     <Stack spacing={1}>
                         <Typography variant="h6">Legal</Typography>
                         <Stack spacing={1}>
-                            <Typography onClick={() => {navigate("/privacy-policy")}} sx={{ cursor: "pointer" }}>
-                                Privacy Policy
-                            </Typography>
-                            <Typography onClick={() => {navigate("/tos")}} sx={{ cursor: "pointer" }}>
-                                Terms of Service
-                            </Typography>
+                            <Link href="https://www.corecomp.cc/privacy-policy" color="inherit" cursor="pointer">Privacy Policy</Link>
+                            <Link href="https://www.corecomp.cc/tos" color="inherit" cursor="pointer">Terms of Service</Link>
                         </Stack>
                     </Stack>
                 </Stack>
