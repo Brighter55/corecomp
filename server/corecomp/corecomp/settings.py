@@ -168,10 +168,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_CREDENTIALS = True
 
+# expand the origins
+cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
 
-CORS_ALLOWED_ORIGINS = [
-    os.getenv("CORS_ALLOWED_ORIGINS"),
-]
+def expand_origins(origins_str):
+    origins = set()
+    for raw in origins_str.split(","):
+        o = raw.strip()
+        if not o:
+            continue
+        origins.add(o)
+        if "://www." in o:
+            origins.add(o.replace("://www.", "://"))
+        else:
+            scheme, domain = o.split("://", 1)
+            origins.add(f"{scheme}://www.{domain}")
+    return list(origins)
+#############
+
+CORS_ALLOWED_ORIGINS = expand_origins(cors_origins)
 
 CORS_EXPOSE_HEADERS = [
     "Retry-After",
