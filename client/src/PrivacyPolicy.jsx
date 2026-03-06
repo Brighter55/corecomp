@@ -38,7 +38,7 @@ function PrivacyPolicy() {
                     <Typography vatiant="body1">We take reasonable measures to protect user data, but no system is 100% secure.</Typography>
                     <Divider sx={{ borderColor: "rgba(218, 215, 205, 0.5)" }}></Divider>
                     <Typography variant="h5">Contact</Typography>
-                    <Typography vatiant="body1">If you have any concerns, contact us at <Link href="mailto: support@corecomp.com" color="var(--main-brown)" fontWeight="bold">support@corecomp.com</Link></Typography>
+                    <Typography vatiant="body1">If you have any concerns, contact us at <Link href="mailto: support@corecomp.cc" color="var(--main-brown)" fontWeight="bold">support@corecomp.cc</Link></Typography>
                 </Stack>
                 <Footer></Footer>
             </Stack>

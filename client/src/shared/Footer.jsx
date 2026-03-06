@@ -36,7 +36,7 @@ function Footer() {
                 <Stack direction="row" spacing={8}>
                     <Stack spacing={1}>
                         <Typography variant="h6">Support</Typography>
-                        <Link href="mailto: support@corecomp.com" color="inherit">
+                        <Link href="mailto: support@corecomp.cc" color="inherit">
                             Contact Us
                         </Link>
                     </Stack>
