@@ -20,7 +20,7 @@ from django.conf import settings
 from rest_framework.request import Request
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-
+from services import email_service
 
 
 load_dotenv()
@@ -100,15 +100,10 @@ def sign_up(request):
         # send email verification
         user = User.objects.get(username=username)
         token = default_token_generator.make_token(user)
-        link = f"http://localhost:5173/account-verification/{token}/{user.id}"
-        response = requests.post(
-            "https://api.mailgun.net/v3/sandboxcb8d9093dd704fa990c67dc9fb3b0e78.mailgun.org/messages",
-            auth=("api", os.getenv("MAILGUN_API_KEY")),
-            data={"from": "Corecomp <verify@corecomp.cc>",
-                "to": "Peter <sriphrakhunpiyawit@gmail.com>", # change to email in prod.
-                "subject": "Account Verification Email",
-            #   "html": get_html_message(link),
-                "text": f"You have successfully created account with us, click the link below to verify your account and activate your trial {link}"})
+        link = f"{os.getenv('FRONTEND_BASE_URL')}/account-verification/{token}/{user.id}"
+
+        response = email_service.send_email(email=email, subject="Email Verification", text=f"Click the link below to verify your email: {link}")
+
         return Response({"message": "User has been created!"}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -149,17 +144,10 @@ def resend_verify_email(request):
     if user.is_active == True:
         return Response({"message": "account is already active"}, status=status.HTTP_400_BAD_REQUEST)
     token = default_token_generator.make_token(user)
-    link = f"http://localhost:5173/account-verification/{token}/{user.id}"
-    response = requests.post(
-        "https://api.mailgun.net/v3/sandboxcb8d9093dd704fa990c67dc9fb3b0e78.mailgun.org/messages",
-        auth=("api", os.getenv("MAILGUN_API_KEY")),
-        data={
-            "from": "Corecomp <verify@corecomp.cc>",
-            "to": "Peter <sriphrakhunpiyawit@gmail.com>", # change to email in prod.
-            "subject": "Account Verification Email",
-        #   "html": get_html_message(link),
-            "text": f"You have successfully created account with us, click the link below to verify your account and activate your trial {link}"
-        })
+    link = f"{os.getenv('FRONTEND_BASE_URL')}/account-verification/{token}/{user.id}"
+
+    response = email_service.send_email(email=user.email, subject="Email Verification", text=f"Click the link below to verify your email: {link}")    
+    
     return Response({"message": "email has been resent"}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
@@ -263,17 +251,8 @@ def reset_password(request):
         token_generator = PasswordResetTokenGenerator()
         user_id = urlsafe_base64_encode(force_bytes(user.id))
         token = token_generator.make_token(user)
-        reset_password_url = f"http://localhost:5173/reset-password/{token}/{user_id}"
-        response = requests.post(
-            "https://api.mailgun.net/v3/sandboxcb8d9093dd704fa990c67dc9fb3b0e78.mailgun.org/messages",
-            auth=("api", os.getenv("MAILGUN_API_KEY")),
-            data={"from": "Corecomp <reset-password@corecomp.cc>",
-                "to": "Peter <sriphrakhunpiyawit@gmail.com>", # change to email in prod.
-                "subject": "Reset Password",
-            #   "html": get_html_message(link),
-                "text": f"Click the link below to reset your password {reset_password_url}"
-            }
-        )
+        reset_password_url = f"{os.getenv('FRONTEND_BASE_URL')}/reset-password/{token}/{user_id}"
+        response = email_service.send_email(email=email, subject="Reset Password", text=f"Click the link below to reset your password {reset_password_url}")
         return Response({"message": f"valid email is {email} and email has been sent"}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

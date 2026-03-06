@@ -3,7 +3,6 @@ from google.auth.transport import requests as google_requests
 import os
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 def verify_google_token(jwt_token):
