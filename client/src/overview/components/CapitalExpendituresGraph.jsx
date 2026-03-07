@@ -65,7 +65,6 @@ function CapitalExpendituresGraph({ symbol, fetchVersion, setSymbol, period }) {
                 return;
             }
             const data = await response.json();
-            console.log(data)
             setStatement(data);
         }
 
@@ -94,7 +93,7 @@ function CapitalExpendituresGraph({ symbol, fetchVersion, setSymbol, period }) {
         if (!statement) return [];
 
         const filteredReports = filterReports(statement[period === "annually" ? "annualReports" : "quarterlyReports"], timeRange, "fiscalDateEnding");
-        console.log("filteredReports: ", filteredReports);
+        console.log("CapitalExpendituresGraph: ", filteredReports);
         return filteredReports;
     }, [statement, timeRange, period]);
 

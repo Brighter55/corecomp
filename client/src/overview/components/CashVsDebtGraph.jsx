@@ -90,7 +90,6 @@ function CashVsDebtGraph({ symbol, fetchVersion, setSymbol, period }) {
                 return;
             }
             const data = await response.json();
-            console.log(data)
             setStatement(data);
         }
 
@@ -119,7 +118,7 @@ function CashVsDebtGraph({ symbol, fetchVersion, setSymbol, period }) {
         if (!statement) return [];
 
         const filteredReports = filterReports(statement[period === "annually" ? "annualReports" : "quarterlyReports"], timeRange, "fiscalDateEnding");
-        console.log("filteredReports: ", filteredReports);
+        console.log("CashVsDebtGraph: ", filteredReports);
         return filteredReports;
     }, [statement, timeRange, period]);
 
@@ -158,7 +157,7 @@ function CashVsDebtGraph({ symbol, fetchVersion, setSymbol, period }) {
                                 color: "var(--main-hunter-green)",
                             }}
                         >
-                            {cashPercentChange >= 0 ? `+${cashPercentChange}%` : `${cashPercentChange}%`}
+                            {isNaN(cashPercentChange) ? "N/A" : (cashPercentChange >= 0 ? `+${cashPercentChange}%` : `${cashPercentChange}%`)}
                         </Typography>
                         <Typography
                             variant="h6"
@@ -166,7 +165,7 @@ function CashVsDebtGraph({ symbol, fetchVersion, setSymbol, period }) {
                                 color: "var(--main-brick)",
                             }}
                         >
-                            {debtPercentChange >= 0 ? `+${debtPercentChange}%` : `${debtPercentChange}%`}
+                            {isNaN(debtPercentChange) ? "N/A" : (debtPercentChange >= 0 ? `+${debtPercentChange}%` : `${debtPercentChange}%`)}
                         </Typography>
                         <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} />
                     </Stack>

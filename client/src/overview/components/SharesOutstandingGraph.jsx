@@ -63,7 +63,6 @@ function SharesOutstandingGraph({ symbol, fetchVersion, setSymbol, period }) {
                 return;
             }
             const data = await response.json();
-            console.log(data)
             setStatement(data);
         }
 
@@ -92,7 +91,7 @@ function SharesOutstandingGraph({ symbol, fetchVersion, setSymbol, period }) {
         if (!statement) return [];
 
         const filteredReports = filterReports(statement["data"], timeRange, "date");
-        console.log("filteredReports: ", filteredReports);
+        console.log("SharesOutstandingGraph: ", filteredReports);
         return filteredReports;
     }, [statement, timeRange, period]);
 

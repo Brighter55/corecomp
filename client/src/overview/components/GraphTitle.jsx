@@ -21,10 +21,10 @@ function GraphTitle({ title, explanation, percentChange, timeRange, setTimeRange
             <Typography
                 variant="h6"
                 sx={{
-                    color: percentChange >= 0 ? "#3A5A40" : "#bc4749",
+                    color: (percentChange === null || isNaN(percentChange)) ? "#666" : (percentChange >= 0 ? "#3A5A40" : "#bc4749"),
                 }}
             >
-                {percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`}
+                {(percentChange === null || isNaN(percentChange)) ? "N/A" : (percentChange >= 0 ? `+${percentChange}%` : `${percentChange}%`)}
             </Typography>
             <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} />
         </Stack>

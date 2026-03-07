@@ -71,7 +71,7 @@ export function filterReports(reports, timeRange, dateField) {
             break;
         }
         default:
-            console.log("return all (default)");
+            // do nothing
     }
     return filteredReports.reverse();
 }

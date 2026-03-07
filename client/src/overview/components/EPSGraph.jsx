@@ -62,7 +62,6 @@ function EPSGraph({ symbol, fetchVersion, setSymbol, period }) {
                 return;
             }
             const data = await response.json();
-            console.log(data)
             setStatement(data);
         }
 
@@ -91,7 +90,7 @@ function EPSGraph({ symbol, fetchVersion, setSymbol, period }) {
         if (!statement) return [];
 
         const filteredReports = filterReports(statement[period === "annually" ? "annualEarnings" : "quarterlyEarnings"], timeRange, "fiscalDateEnding");
-        console.log("filteredReports: ", filteredReports);
+        console.log("EPSGraph: ", filteredReports);
         return filteredReports;
     }, [statement, timeRange, period]);
 

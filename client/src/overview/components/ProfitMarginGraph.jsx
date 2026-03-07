@@ -64,7 +64,6 @@ export default function ProfitMarginGraph({ symbol, fetchVersion, setSymbol, per
                 return;
             }
             const data = await response.json();
-            console.log(data)
             setStatement(data);
         }
 
@@ -93,7 +92,7 @@ export default function ProfitMarginGraph({ symbol, fetchVersion, setSymbol, per
         if (!statement) return [];
 
         const filteredReports = filterReports(statement[period === "annually" ? "annualReports" : "quarterlyReports"], timeRange, "fiscalDateEnding");
-        console.log("filteredReports: ", filteredReports);
+        console.log("ProfitMarginGraph: ", filteredReports);
         return filteredReports;
     }, [statement, timeRange, period]);
 

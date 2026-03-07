@@ -70,7 +70,6 @@ function PricingGraph({ symbol, fetchVersion, setSymbol, period }) {
                 return;
             }
             const data = await response.json();
-            console.log(data)
             setStatement(data);
         }
 
@@ -99,7 +98,7 @@ function PricingGraph({ symbol, fetchVersion, setSymbol, period }) {
         if (!statement) return [];
 
         const filteredReports = filterReports(statement, timeRange, "date");
-        console.log("filteredReports: ", filteredReports);
+        console.log("PricingGraph: ", filteredReports);
         return filteredReports;
     }, [statement, timeRange, period]);
 
