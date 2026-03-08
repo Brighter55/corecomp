@@ -194,4 +194,33 @@ describe("OperatingCashflowGraph", () => {
         expect(mockGetPercentChange).toHaveBeenCalledTimes(3);
     });
 
+    test("renders NoDataGraph if fetch returns 204", async () => {
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            status: 204,
+        });
+
+        render(
+            <MemoryRouter>
+                <OperatingCashflowGraph symbol="AAPL" fetchVersion={0} setSymbol={mockSetSymbol} period="annually"></OperatingCashflowGraph>
+            </MemoryRouter>
+        );
+        await waitFor(() => {
+            expect(mockFetch).toHaveBeenCalledWith(
+                "http://localhost:8000/pages/cash-flow",
+                expect.objectContaining({
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({symbol: "AAPL"}),
+                }),
+            );
+        });
+
+        expect(await screen.findByText(/No Data/i)).toBeInTheDocument();
+        }
+    )
+
 });
