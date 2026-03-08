@@ -152,7 +152,7 @@ def income_statement(request):
                 return data
             
             if not data:
-                return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(status=status.HTTP_204_NO_CONTENT)
             
             data = annotate_profit_margin(data)
             
@@ -186,7 +186,7 @@ def cash_flow(request):
                 return data
             
             if not data:
-                return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(status=status.HTTP_204_NO_CONTENT)
 
             data = annotate_free_cash_flow(data)
             
@@ -221,7 +221,7 @@ def balance_sheet(request):
                 return data
             
             if not data:
-                return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(status=status.HTTP_204_NO_CONTENT)
             
             cache.set(key, data, timeout=604800)
 
@@ -253,7 +253,7 @@ def earnings(request):
                 return data
             
             if not data:
-                return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(status=status.HTTP_204_NO_CONTENT)
             
             cache.set(key, data, timeout=604800)
 
@@ -285,7 +285,7 @@ def dividends(request):
                 return data
             
             if not data["data"]:
-                return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(status=status.HTTP_204_NO_CONTENT)
             
             cache.set(key, data, timeout=604800)
 
@@ -348,7 +348,7 @@ def shares_outstanding(request):
                 return data            
             
             if not data:
-                return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(status=status.HTTP_204_NO_CONTENT)
 
             cache.set(key, data, timeout=604800)
 
