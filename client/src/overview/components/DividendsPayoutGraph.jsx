@@ -62,7 +62,7 @@ function DividendsPayoutGraph({ symbol, fetchVersion, setSymbol, period }) {
                 return;
             }
 
-            if (Array.isArray(response) && response.length === 0) {
+            if (response.status === 204) {
                 setStatement([]);
                 return;
             }

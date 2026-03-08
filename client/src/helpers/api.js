@@ -33,10 +33,6 @@ export async function authenticatedClientWithRetry(endpoint, payload, isActive, 
         body: JSON.stringify(payload),
     });
 
-    if (response.status === 204) {
-        return [];
-    }
-
     if (!response.ok) {
         if (response.status === 403) { /*Unauthorized user, aka, don't have permission to use*/
             navigate("/account");
