@@ -53,7 +53,7 @@ export async function authenticatedClientWithRetry(endpoint, payload, isActive, 
         }
     }
     
-    return response
+    return response;
 }
 
 export function getCookie(name) {

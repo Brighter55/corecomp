@@ -3,6 +3,7 @@ import {useState, useEffect, useRef, useMemo} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
+import NoDataGraph from "./NoDataGraph.jsx"
 import { authenticatedClientWithRetry } from "../../helpers/api.js"
 import { useNavigate } from "react-router-dom";
 // mui
@@ -61,6 +62,10 @@ function EPSGraph({ symbol, fetchVersion, setSymbol, period }) {
             if (!isActive) {
                 return;
             }
+            if (response.status === 204) {
+                setStatement([]);
+                return;
+            }
             const data = await response.json();
             setStatement(data);
         }
@@ -88,6 +93,7 @@ function EPSGraph({ symbol, fetchVersion, setSymbol, period }) {
 
     const reports = useMemo(() => {
         if (!statement) return [];
+        if (Array.isArray(statement) && statement.length === 0) return [];
 
         const filteredReports = filterReports(statement[period === "annually" ? "annualEarnings" : "quarterlyEarnings"], timeRange, "fiscalDateEnding");
         console.log("EPSGraph: ", filteredReports);
@@ -95,8 +101,8 @@ function EPSGraph({ symbol, fetchVersion, setSymbol, period }) {
     }, [statement, timeRange, period]);
 
     const percentChange = useMemo(() => {
-        if (!reports.length) {
-            return null;
+        if (reports.length === 0) {
+            return NaN;
         }
         const percentChange = getPercentChange(reports, "reportedEPS");
         return percentChange;
@@ -143,80 +149,80 @@ function EPSGraph({ symbol, fetchVersion, setSymbol, period }) {
         return <circle cx={cx} cy={cy} stroke={stroke} payload={payload} value={value} fill={color} r={8} strokeWidth={1}></circle>
     }
 
-    if (statement) {
-        return (
-            period === "quarterly" ? (
-                <Box sx={{ flex: 1 }}>
-                    <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                        <GraphTitle
-                            title="Earning per Share"
-                            explanation={explanation}
-                            percentChange={percentChange}
-                            timeRange={timeRange}
-                            setTimeRange={setTimeRange}
-                        />
-                        <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
-                            <ResponsiveContainer>
-                                <LineChart
-                                data={reports}
-                                margin={{
-                                    top: 5,
-                                    right: 30,
-                                    left: 20,
-                                    bottom: 5,
-                                }}
-                                >
-                                <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                                <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                                <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
-                                <Tooltip content={<CustomTooltip></CustomTooltip>} />
-                                <Legend />
-                                <Line name="estimated EPS" type="monotone" dataKey="estimatedEPS" stroke="grey" strokeWidth={0} dot={{ fill: "grey", fillOpacity: 0.3, r: 5}} activeDot={{ r: 8, strokeWidth: 1}} legendType="circle"/>
-                                <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={<CustomDot></CustomDot>} activeDot={<CustomActiveDot></CustomActiveDot>} legendType="circle" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </Box>
-                    </GraphCard>
-                </Box>
-                )
-            : (
-                <Box sx={{ flex: 1 }}>
-                    <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                        <GraphTitle
-                            title="Earning per Share"
-                            explanation={explanation}
-                            percentChange={percentChange}
-                            timeRange={timeRange}
-                            setTimeRange={setTimeRange}
-                        />
-                        <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
-                            <ResponsiveContainer>
-                                <LineChart
-                                data={reports}
-                                margin={{
-                                    top: 5,
-                                    right: 30,
-                                    left: 20,
-                                    bottom: 5,
-                                }}
-                                >
-                                <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                                <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                                <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
-                                <Tooltip formatter={(value) => `$${value}`}/>
-                                <Legend />
-                                <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </Box>
-                    </GraphCard>
-                </Box>
-            )
-        )
+    if (statement === null) {
+        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>;        
+    }
+    if (Array.isArray(statement) && statement.length === 0) {
+        return <NoDataGraph />;
     }
 
     return (
-        <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>
+        period === "quarterly" ? (
+            <Box sx={{ flex: 1 }}>
+                <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                    <GraphTitle
+                        title="Earning per Share"
+                        explanation={explanation}
+                        percentChange={percentChange}
+                        timeRange={timeRange}
+                        setTimeRange={setTimeRange}
+                    />
+                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                        <ResponsiveContainer>
+                            <LineChart
+                            data={reports}
+                            margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                            }}
+                            >
+                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
+                            <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
+                            <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                            <Tooltip content={<CustomTooltip></CustomTooltip>} />
+                            <Legend />
+                            <Line name="estimated EPS" type="monotone" dataKey="estimatedEPS" stroke="grey" strokeWidth={0} dot={{ fill: "grey", fillOpacity: 0.3, r: 5}} activeDot={{ r: 8, strokeWidth: 1}} legendType="circle"/>
+                            <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={<CustomDot></CustomDot>} activeDot={<CustomActiveDot></CustomActiveDot>} legendType="circle" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </Box>
+                </GraphCard>
+            </Box>
+        ) : (
+            <Box sx={{ flex: 1 }}>
+                <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                    <GraphTitle
+                        title="Earning per Share"
+                        explanation={explanation}
+                        percentChange={percentChange}
+                        timeRange={timeRange}
+                        setTimeRange={setTimeRange}
+                    />
+                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                        <ResponsiveContainer>
+                            <LineChart
+                            data={reports}
+                            margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                            }}
+                            >
+                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
+                            <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
+                            <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                            <Tooltip formatter={(value) => `$${value}`}/>
+                            <Legend />
+                            <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </Box>
+                </GraphCard>
+            </Box>
+        )
     )
 }
 

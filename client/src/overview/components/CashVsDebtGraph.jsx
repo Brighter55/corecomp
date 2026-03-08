@@ -2,6 +2,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import {useState, useEffect, useRef, useMemo} from "react"
 import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 import GraphCard from "./GraphCard.jsx"
+import NoDataGraph from "./NoDataGraph.jsx"
 import { authenticatedClientWithRetry } from "../../helpers/api.js"
 import { useNavigate } from "react-router-dom";
 import Explanation from "./Explanation.jsx"
@@ -89,6 +90,10 @@ function CashVsDebtGraph({ symbol, fetchVersion, setSymbol, period }) {
             if (!isActive) {
                 return;
             }
+            if (response.status === 204) {
+                setStatement([]);
+                return;
+            }
             const data = await response.json();
             setStatement(data);
         }
@@ -116,6 +121,7 @@ function CashVsDebtGraph({ symbol, fetchVersion, setSymbol, period }) {
 
     const reports = useMemo(() => {
         if (!statement) return [];
+        if (Array.isArray(statement) && statement.length === 0) return [];
 
         const filteredReports = filterReports(statement[period === "annually" ? "annualReports" : "quarterlyReports"], timeRange, "fiscalDateEnding");
         console.log("CashVsDebtGraph: ", filteredReports);
@@ -123,82 +129,85 @@ function CashVsDebtGraph({ symbol, fetchVersion, setSymbol, period }) {
     }, [statement, timeRange, period]);
 
     const cashPercentChange = useMemo(() => {
-        if (!reports.length) {
-            return null;
+        if (reports.length === 0) {
+            return NaN;
         }
         const cashPercentChange = getPercentChange(reports, "cashAndCashEquivalentsAtCarryingValue");
         return cashPercentChange;
     }, [reports]);
 
     const debtPercentChange = useMemo(() => {
-        if (!reports.length) {
-            return null;
+        if (reports.length === 0) {
+            return NaN;
         }
         const debtPercentChange = getPercentChange(reports, "shortLongTermDebtTotal");
         return debtPercentChange;
     }, [reports]);
 
+    if (statement === null) {
+        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>;
+    }
+    if (Array.isArray(statement) && statement.length === 0) {
+        return <NoDataGraph />;
+    }
+
     return (
-        statement ? (
-            <Box sx={{ flex: 1 }}>
-                <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                    <Stack direction="row" sx={{ alignItems: "center" }}>
-                        <Stack
-                            direction="row"
-                            sx={{ alignItems: "center", flexGrow: 1, justifyContent: "center" }}
-                            spacing={1}
-                        >
-                            <Typography variant="h6" textAlign="center">Cash V Debt</Typography>
-                            <Explanation explanation={explanation} />
-                        </Stack>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                color: "var(--main-hunter-green)",
-                            }}
-                        >
-                            {isNaN(cashPercentChange) ? "N/A" : (cashPercentChange >= 0 ? `+${cashPercentChange}%` : `${cashPercentChange}%`)}
-                        </Typography>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                color: "var(--main-brick)",
-                            }}
-                        >
-                            {isNaN(debtPercentChange) ? "N/A" : (debtPercentChange >= 0 ? `+${debtPercentChange}%` : `${debtPercentChange}%`)}
-                        </Typography>
-                        <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} />
+        <Box sx={{ flex: 1 }}>
+            <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                <Stack direction="row" sx={{ alignItems: "center" }}>
+                    <Stack
+                        direction="row"
+                        sx={{ alignItems: "center", flexGrow: 1, justifyContent: "center" }}
+                        spacing={1}
+                    >
+                        <Typography variant="h6" textAlign="center">Cash V Debt</Typography>
+                        <Explanation explanation={explanation} />
                     </Stack>
-                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
-                        <ResponsiveContainer>
-                            <BarChart
-                                data={reports}
-                                margin={{
-                                top: 5,
-                                right: 30,
-                                left: 20,
-                                bottom: 5,
-                                }}
-                            >
-                                <CartesianGrid  strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                                <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                                <YAxis 
-                                    tickFormatter={(value) => formatToUnits(value)}
-                                    stroke="#344E41"
-                                    domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}
-                                />
-                                <Tooltip formatter={(value) => formatToUnits(value)}/>
-                                <Legend />
-                                <Bar name="cash" dataKey="cashAndCashEquivalentsAtCarryingValue" stackId="a" fill="#588157"  activeBar={{ fill: "#A3B18A", stroke: "#DAD7CD", strokeWidth: 2 }}/>
-                                <Bar name="debt" dataKey="shortLongTermDebtTotal" stackId="a" fill="#bc4749" activeBar={{ fill: "#B35C5E", stroke: "#DAD7CD", strokeWidth: 2 }}/>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </Box>
-                </GraphCard>
-            </Box>
-        ) : (
-            <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>
-        )
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            color: "var(--main-hunter-green)",
+                        }}
+                    >
+                        {isNaN(cashPercentChange) ? "N/A" : (cashPercentChange >= 0 ? `+${cashPercentChange}%` : `${cashPercentChange}%`)}
+                    </Typography>
+                    <Typography
+                        variant="h6"
+                        sx={{
+                            color: "var(--main-brick)",
+                        }}
+                    >
+                        {isNaN(debtPercentChange) ? "N/A" : (debtPercentChange >= 0 ? `+${debtPercentChange}%` : `${debtPercentChange}%`)}
+                    </Typography>
+                    <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} />
+                </Stack>
+                <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                    <ResponsiveContainer>
+                        <BarChart
+                            data={reports}
+                            margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
+                            }}
+                        >
+                            <CartesianGrid  strokeDasharray="" vertical={false} stroke="#A3B18A"/>
+                            <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
+                            <YAxis 
+                                tickFormatter={(value) => formatToUnits(value)}
+                                stroke="#344E41"
+                                domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}
+                            />
+                            <Tooltip formatter={(value) => formatToUnits(value)}/>
+                            <Legend />
+                            <Bar name="cash" dataKey="cashAndCashEquivalentsAtCarryingValue" stackId="a" fill="#588157"  activeBar={{ fill: "#A3B18A", stroke: "#DAD7CD", strokeWidth: 2 }}/>
+                            <Bar name="debt" dataKey="shortLongTermDebtTotal" stackId="a" fill="#bc4749" activeBar={{ fill: "#B35C5E", stroke: "#DAD7CD", strokeWidth: 2 }}/>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </Box>
+            </GraphCard>
+        </Box>
     )
 }
 

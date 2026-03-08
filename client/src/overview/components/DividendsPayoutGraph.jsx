@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo} from "react"
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import GraphCard from "./GraphCard.jsx"
 import GraphTitle from "./GraphTitle.jsx"
+import NoDataGraph from "./NoDataGraph.jsx"
 import { useNavigate } from "react-router-dom";
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import { authenticatedClientWithRetry } from "../../helpers/api.js"
@@ -60,6 +61,12 @@ function DividendsPayoutGraph({ symbol, fetchVersion, setSymbol, period }) {
             if (!isActive) {
                 return;
             }
+
+            if (response.status === 204) {
+                setStatement([]);
+                return;
+            }
+
             const data = await response.json();
             setStatement(data);
         }
@@ -87,6 +94,7 @@ function DividendsPayoutGraph({ symbol, fetchVersion, setSymbol, period }) {
 
     const reports = useMemo(() => {
         if (!statement) return [];
+        if (Array.isArray(statement) && statement.length === 0) return [];
 
         const filteredReports = filterReports(statement["data"], timeRange, "ex_dividend_date");
         console.log("filteredReports: ", filteredReports);
@@ -94,48 +102,52 @@ function DividendsPayoutGraph({ symbol, fetchVersion, setSymbol, period }) {
     }, [statement, timeRange, period]);
 
     const percentChange = useMemo(() => {
-        if (!reports.length) {
-            return null;
+        if (reports.length === 0) {
+            return NaN;
         }
         const percentChange = getPercentChange(reports, "amount");
         return percentChange;
     }, [reports]);
 
+
+    if (statement === null) {
+        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>;
+    }
+    if (Array.isArray(statement) && statement.length === 0) {
+        return <NoDataGraph />;
+    }
+
     return (
-        statement ? (
-            <Box sx={{ flex: 1 }}>
-                <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                    <GraphTitle
-                        title="Dividend Payouts"
-                        explanation={explanation}
-                        percentChange={percentChange}
-                        timeRange={timeRange}
-                        setTimeRange={setTimeRange}
-                    />
-                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
-                        <ResponsiveContainer>
-                            <BarChart
-                                data={reports}
-                                margin={{
-                                top: 5,
-                                right: 30,
-                                left: 20,
-                                bottom: 5,
-                                }}
-                            >
-                                <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A" />
-                                <XAxis dataKey="ex_dividend_date" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}}/>
-                                <YAxis stroke="#344E41" tickFormatter={(value) => `$${value}`}/>
-                                <Tooltip formatter={(value) => `$${value}`}/>
-                                <Bar dataKey="amount" fill="#588157" activeBar={<Rectangle fill="#A3B18A"/>}/>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </Box>
-                </GraphCard>
-            </Box>
-        ) : (
-            <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>
-        )
+        <Box sx={{ flex: 1 }}>
+            <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                <GraphTitle
+                    title="Dividend Payouts"
+                    explanation={explanation}
+                    percentChange={percentChange}
+                    timeRange={timeRange}
+                    setTimeRange={setTimeRange}
+                />
+                <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                    <ResponsiveContainer>
+                        <BarChart
+                            data={reports}
+                            margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
+                            }}
+                        >
+                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A" />
+                            <XAxis dataKey="ex_dividend_date" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}}/>
+                            <YAxis stroke="#344E41" tickFormatter={(value) => `$${value}`}/>
+                            <Tooltip formatter={(value) => `$${value}`}/>
+                            <Bar dataKey="amount" fill="#588157" activeBar={<Rectangle fill="#A3B18A"/>}/>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </Box>
+            </GraphCard>
+        </Box>
     )
 }
 

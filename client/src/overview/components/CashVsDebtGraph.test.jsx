@@ -194,4 +194,33 @@ describe("CashVsDebtGraph", () => {
         expect(mockGetPercentChange).toHaveBeenCalledTimes(6);
     });
 
+    test("renders NoDataGraph if fetch returns 204", async () => {
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            status: 204,
+        });
+
+        render(
+            <MemoryRouter>
+                <CashVsDebtGraph symbol="AAPL" fetchVersion={0} setSymbol={mockSetSymbol} period="annually"></CashVsDebtGraph>
+            </MemoryRouter>
+        );
+        await waitFor(() => {
+            expect(mockFetch).toHaveBeenCalledWith(
+                "http://localhost:8000/pages/balance-sheet",
+                expect.objectContaining({
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({symbol: "AAPL"}),
+                }),
+            );
+        });
+
+        expect(await screen.findByText(/No Data/i)).toBeInTheDocument();
+        }
+    )
+
 });
