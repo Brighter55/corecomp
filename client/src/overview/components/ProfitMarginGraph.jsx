@@ -1,5 +1,6 @@
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
+import NoDataGraph from "./NoDataGraph.jsx"
 import Box from '@mui/material/Box';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
@@ -63,6 +64,10 @@ export default function ProfitMarginGraph({ symbol, fetchVersion, setSymbol, per
             if (!isActive) {
                 return;
             }
+            if (response.status === 204) {
+                setStatement([]);
+                return;
+            }
             const data = await response.json();
             setStatement(data);
         }
@@ -90,6 +95,7 @@ export default function ProfitMarginGraph({ symbol, fetchVersion, setSymbol, per
 
     const reports = useMemo(() => {
         if (!statement) return [];
+        if (Array.isArray(statement) && statement.length === 0) return [];
 
         const filteredReports = filterReports(statement[period === "annually" ? "annualReports" : "quarterlyReports"], timeRange, "fiscalDateEnding");
         console.log("ProfitMarginGraph: ", filteredReports);
@@ -98,14 +104,20 @@ export default function ProfitMarginGraph({ symbol, fetchVersion, setSymbol, per
 
     const percentChange = useMemo(() => {
         if (!reports.length) {
-            return null;
+            return NaN;
         }
         const percentChange = getPercentChange(reports, "profitMarginPercent");
         return percentChange;
     }, [reports]);
 
+    if (statement === null) {
+        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>;        
+    }
+    if (Array.isArray(statement) && statement.length === 0) {
+        return <NoDataGraph />;
+    }
+
     return (
-        statement ? (
             <Box sx={{ flex: 1 }}>
                 <GraphCard ref={graphRef} graphClicked={graphClicked}>
                     <GraphTitle
@@ -141,8 +153,5 @@ export default function ProfitMarginGraph({ symbol, fetchVersion, setSymbol, per
                     </Box>
                 </GraphCard>
             </Box>
-        ) : (
-        <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>
-        )
     );
     }

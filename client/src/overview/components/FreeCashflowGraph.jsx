@@ -5,6 +5,7 @@ import {useState, useEffect, useRef, useMemo} from "react"
 import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
+import NoDataGraph from "./NoDataGraph.jsx"
 import { authenticatedClientWithRetry } from "../../helpers/api.js"
 import { useNavigate } from "react-router-dom";
 // mui
@@ -67,6 +68,10 @@ function FreeCashflowGraph({ symbol, fetchVersion, setSymbol, period }) {
             if (!isActive) {
                 return;
             }
+            if (response.status === 204) {
+                setStatement([]);
+                return;
+            }
             const data = await response.json();
             setStatement(data);
         }
@@ -94,6 +99,7 @@ function FreeCashflowGraph({ symbol, fetchVersion, setSymbol, period }) {
 
     const reports = useMemo(() => {
         if (!statement) return [];
+        if (Array.isArray(statement) && statement.length === 0) return [];
 
         const filteredReports = filterReports(statement[period === "annually" ? "annualReports" : "quarterlyReports"], timeRange, "fiscalDateEnding");
         console.log("FreeCashflowGraph: ", filteredReports);
@@ -102,14 +108,20 @@ function FreeCashflowGraph({ symbol, fetchVersion, setSymbol, period }) {
 
     const percentChange = useMemo(() => {
         if (!reports.length) {
-            return null;
+            return NaN;
         }
         const percentChange = getPercentChange(reports, "freeCashFlow");
         return percentChange;
     }, [reports]);
 
+    if (statement === null) {
+        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>;        
+    }
+    if (Array.isArray(statement) && statement.length === 0) {
+        return <NoDataGraph />;
+    }
+
     return (
-        statement ? (
             <Box sx={{ flex: 1 }}>
                 <GraphCard ref={graphRef} graphClicked={graphClicked}>
                     <GraphTitle
@@ -140,9 +152,6 @@ function FreeCashflowGraph({ symbol, fetchVersion, setSymbol, period }) {
                     </Box>
                 </GraphCard>
             </Box>
-        ) : (
-        <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>
-        )
     )
 }
 

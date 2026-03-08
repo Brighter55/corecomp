@@ -3,6 +3,7 @@ import {useState, useEffect, useRef, useMemo} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
+import NoDataGraph from "./NoDataGraph.jsx"
 import { useNavigate } from "react-router-dom";
 import { authenticatedClientWithRetry } from "../../helpers/api.js"
 // mui
@@ -69,6 +70,10 @@ function PricingGraph({ symbol, fetchVersion, setSymbol, period }) {
             if (!isActive) {
                 return;
             }
+            if (response.status === 204) {
+                setStatement([]);
+                return;
+            }
             const data = await response.json();
             setStatement(data);
         }
@@ -96,6 +101,7 @@ function PricingGraph({ symbol, fetchVersion, setSymbol, period }) {
 
     const reports = useMemo(() => {
         if (!statement) return [];
+        if (Array.isArray(statement) && statement.length === 0) return [];
 
         const filteredReports = filterReports(statement, timeRange, "date");
         console.log("PricingGraph: ", filteredReports);
@@ -103,52 +109,55 @@ function PricingGraph({ symbol, fetchVersion, setSymbol, period }) {
     }, [statement, timeRange, period]);
 
     const percentChange = useMemo(() => {
-        if (!reports.length) {
-            return null;
+        if (reports.length === 0) {
+            return NaN;
         }
         const percentChange = getPercentChange(reports, "adjustedClose");
         return percentChange;
     }, [reports]);
 
+    if (statement === null) {
+        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>;        
+    }
+    if (Array.isArray(statement) && statement.length === 0) {
+        return <NoDataGraph />;
+    }
+
     return (
-        statement ? (
-            <Box sx={{ flex: 1 }}>
-                <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                    <GraphTitle
-                        title="Adjusted Monthly Pricing"
-                        explanation={explanation}
-                        percentChange={percentChange}
-                        timeRange={timeRange}
-                        setTimeRange={setTimeRange}
-                    />
-                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
-                        <ResponsiveContainer>
-                            <LineChart
-                                data={reports}
-                                margin={{
-                                top: 5,
-                                right: 30,
-                                left: 20,
-                                bottom: 5,
-                                }}
-                            >
-                                <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                                <XAxis dataKey="date" stroke="#344E41"
-                                    tick={{fontSize: 12}} interval="equidistantPreserveStart"
-                                />
-                                <YAxis stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}
-                                    allowDecimals={false} tickFormatter={(value) => `$${value}`}
-                                />
-                                <Tooltip formatter={(value) => `$${value}`}/>
-                                <Line type="linear" dataKey="adjustedClose" stroke="#588157" dot={false} activeDot={false} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </Box>
-                </GraphCard>
-            </Box>
-        ) : (
-            <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>
-        )
+        <Box sx={{ flex: 1 }}>
+            <GraphCard ref={graphRef} graphClicked={graphClicked}>
+                <GraphTitle
+                    title="Adjusted Monthly Pricing"
+                    explanation={explanation}
+                    percentChange={percentChange}
+                    timeRange={timeRange}
+                    setTimeRange={setTimeRange}
+                />
+                <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                    <ResponsiveContainer>
+                        <LineChart
+                            data={reports}
+                            margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
+                            }}
+                        >
+                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
+                            <XAxis dataKey="date" stroke="#344E41"
+                                tick={{fontSize: 12}} interval="equidistantPreserveStart"
+                            />
+                            <YAxis stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}
+                                allowDecimals={false} tickFormatter={(value) => `$${value}`}
+                            />
+                            <Tooltip formatter={(value) => `$${value}`}/>
+                            <Line type="linear" dataKey="adjustedClose" stroke="#588157" dot={false} activeDot={false} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </Box>
+            </GraphCard>
+        </Box>
     )
 }
 
