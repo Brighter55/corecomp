@@ -31,7 +31,7 @@ def test_user_verify_again(api_client):
     }
     response = api_client.post(url, payload, format="json")
     assert response.status_code == 200
-    assert response.json()["success"] == "the account is already activated"
+    assert response.json()["message"] == "the account is already activated"
 
 # test for invalidate request
 @pytest.mark.django_db
