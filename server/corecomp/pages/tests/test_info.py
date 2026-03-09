@@ -10,9 +10,9 @@ import json
 url = reverse('info')
 
 # test for valid request
-@patch("pages.services.fetchAlphaVantage")
+@patch("pages.views.overview.financial_data_service.get_overview")
 @pytest.mark.django_db
-def test_info(mock_fetchAlphaVantage, authorized_client):
+def test_info(mock_get_overview, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
@@ -24,7 +24,7 @@ def test_info(mock_fetchAlphaVantage, authorized_client):
     with open(path, 'r') as file:
         return_value = json.load(file)
 
-    mock_fetchAlphaVantage.return_value = return_value
+    mock_get_overview.return_value = return_value
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.status_code == 200
@@ -83,16 +83,16 @@ def test_symbol_not_in_database(authorized_client):
     assert response.json()["symbol"][0] == "symbol not in Symbol model"
 
 # test for invalid case where Alpha Vantage returns error message about rate limit
-@patch("pages.services.fetchAlphaVantage")
+@patch("pages.views.overview.financial_data_service.get_overview")
 @pytest.mark.django_db
-def test_exceeds_rate_limit(mock_fetchAlphaVantage, authorized_client):
+def test_exceeds_rate_limit(mock_get_overview, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
         type="Stock"
     )
     symbol.save()
-    mock_fetchAlphaVantage.return_value = Response(
+    mock_get_overview.return_value = Response(
         {"error": "rate limit issue"},
         status=status.HTTP_503_SERVICE_UNAVAILABLE,
         headers={"Retry-After":  "60000"}
@@ -103,7 +103,7 @@ def test_exceeds_rate_limit(mock_fetchAlphaVantage, authorized_client):
     assert response.headers.get("Retry-After") == "60000"
     assert response.json()["error"] == "rate limit issue"
 
-    mock_fetchAlphaVantage.return_value = Response(
+    mock_get_overview.return_value = Response(
         {"error": "rate limit issue"},
         status=status.HTTP_503_SERVICE_UNAVAILABLE,
         headers={"Retry-After":  "60000"}
@@ -114,16 +114,16 @@ def test_exceeds_rate_limit(mock_fetchAlphaVantage, authorized_client):
     assert response.json()["error"] == "rate limit issue"
 
 # test for invalid case where Alpha Vantage returns error message about invalid api call
-@patch("pages.services.fetchAlphaVantage")
+@patch("pages.views.overview.financial_data_service.get_overview")
 @pytest.mark.django_db
-def test_invalid_api_call(mock_fetchAlphaVantage, authorized_client):
+def test_invalid_api_call(mock_get_overview, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
         type="Stock"
     )
     symbol.save()
-    mock_fetchAlphaVantage.return_value = Response(
+    mock_get_overview.return_value = Response(
         {"error": "invalid api call issue"},
         status=status.HTTP_500_INTERNAL_SERVER_ERROR
     )
@@ -133,16 +133,16 @@ def test_invalid_api_call(mock_fetchAlphaVantage, authorized_client):
     assert response.json()["error"] == "invalid api call issue"
 
 # test for invalid case where the symbol exists in Symbol but not in Alpha Vantage or Alpha Vantage doesn't have data
-@patch("pages.services.fetchAlphaVantage")
+@patch("pages.views.overview.financial_data_service.get_overview")
 @pytest.mark.django_db
-def test_symbol_not_in_alpha_vantage(mock_fetchAlphaVantage, authorized_client):
+def test_symbol_not_in_alpha_vantage(mock_get_overview, authorized_client):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
         type="Stock"
     )
     symbol.save()
-    mock_fetchAlphaVantage.return_value = {}
+    mock_get_overview.return_value = {}
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.status_code == 400

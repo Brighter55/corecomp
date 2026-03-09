@@ -35,15 +35,34 @@ def annotate_profit_margin(data):
     
     return data
 
+def safe_int(value):
+    # return None if value is "None"
+    if value is None or value.strip().lower() in ("none", ""):
+        return None
+    return int(value)
+
 def annotate_free_cash_flow(data):
     annual_reports = data["annualReports"]
     quarterly_reports = data["quarterlyReports"]
 
     # freeCashFlow = operatingCashFlow - CapitalExpenditures
     for report in annual_reports:
-        report["freeCashFlow"] = int(report["operatingCashflow"]) - int(report["capitalExpenditures"])
+        operating = safe_int(report.get("operatingCashflow"))
+        capex = safe_int(report.get("capitalExpenditures"))
+
+        if operating is None or capex is None:
+            report["freeCashFlow"] = None
+        else:
+            report["freeCashFlow"] = operating - capex
+
     for report in quarterly_reports:
-        report["freeCashFlow"] = int(report["operatingCashflow"]) - int(report["capitalExpenditures"])
+        operating = safe_int(report.get("operatingCashflow"))
+        capex = safe_int(report.get("capitalExpenditures"))
+
+        if operating is None or capex is None:
+            report["freeCashFlow"] = None
+        else:
+            report["freeCashFlow"] = operating - capex
     
     return data
 
