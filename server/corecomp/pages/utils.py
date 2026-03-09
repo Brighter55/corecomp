@@ -22,24 +22,36 @@ def fetchAlphaVantage(url):
 
     return data
 
+def safe_int(value):
+    # return None if value is "None"
+    if value is None or value.strip().lower() in ("none", ""):
+        return None
+    return int(value)
+
 def annotate_profit_margin(data):
     annual_reports = data["annualReports"]
     quarterly_reports = data["quarterlyReports"]
     
     # profitMarginPercent = (net income / revenue) * 100
     for report in annual_reports:
-        report["profitMarginPercent"] = round((int(report["netIncome"]) / int(report["totalRevenue"])) * 100, 2)
+        net_income = safe_int(report["netIncome"])
+        total_revenue = safe_int(report["totalRevenue"])
+        
+        if net_income is None or total_revenue is None:
+            report["profitMarginPercent"] = None
+        else:
+            report["profitMarginPercent"] = round((net_income / total_revenue) * 100, 2)
     
     for report in quarterly_reports:
-        report["profitMarginPercent"] = round((int(report["netIncome"]) / int(report["totalRevenue"])) * 100, 2)
+        net_income = safe_int(report["netIncome"])
+        total_revenue = safe_int(report["totalRevenue"])
+
+        if net_income is None or total_revenue is None:
+            report["profitMarginPercent"] = None
+        else:
+            report["profitMarginPercent"] = round((net_income / total_revenue) * 100, 2)
     
     return data
-
-def safe_int(value):
-    # return None if value is "None"
-    if value is None or value.strip().lower() in ("none", ""):
-        return None
-    return int(value)
 
 def annotate_free_cash_flow(data):
     annual_reports = data["annualReports"]
