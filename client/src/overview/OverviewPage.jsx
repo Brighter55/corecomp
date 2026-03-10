@@ -7,6 +7,8 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import IconButton from "@mui/material/IconButton";
 // components
 import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
@@ -39,6 +41,9 @@ function OverviewPage() {
         return (
             <Container maxWidth="lg">
                 <ProductHeader></ProductHeader>
+                <IconButton sx={{ color: "var(--main-grey)" }} onClick={() => {setSymbol("")}}>
+                    <ArrowBackIcon/>
+                </IconButton>
                 <Stack spacing={5} sx={{ alignItems: "center" }}>
                     <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
                     <Info symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Info>

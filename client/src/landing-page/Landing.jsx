@@ -142,7 +142,7 @@ function Landing() {
                 </section>
                 <section id="pricing">
                     <Stack spacing={2} sx={{ alignItems: "center" }}>
-                        <Typography variant="h2">Only $3 a Month</Typography>
+                        <Typography variant="h2">No cost (Alpha Test)</Typography>
                         <Typography
                             textAlign="center"
                             variant="body1"
@@ -166,7 +166,7 @@ function Landing() {
                         >
                             <Typography variant="h5">Monthly</Typography>
                             <Typography variant="body1">
-                                <Typography variant="h2" component="span" sx={{ fontWeight: "normal" }}>$3</Typography>
+                                <Typography variant="h2" component="span" sx={{ fontWeight: "normal" }}>$0</Typography>
                                 / month
                             </Typography>
                             <StyledFab
