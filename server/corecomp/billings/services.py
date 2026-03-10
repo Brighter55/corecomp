@@ -18,6 +18,9 @@ class PaymentService:
                 "metadata": {
                     "user_id": str(user.id),
                 },
+            },
+            custom_text={
+                "submit": {"message": "This is a test phase, do not use your real cards, instead, get test cards at https://docs.stripe.com/testing"},
             }
         )
         return session
@@ -35,6 +38,9 @@ class MockPaymentService:
                 "metadata": {
                     "user_id": str(user.id),
                 },
+            },
+            custom_text={
+                "submit": {"message": "This is a test phase, do not use your real cards, instead, get test cards at https://docs.stripe.com/testing"},
             }
         )
         return session
