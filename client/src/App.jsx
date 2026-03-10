@@ -12,6 +12,7 @@ import ResetPassword from "./ResetPassword.jsx"
 import ConfirmResetPassword from "./ConfirmResetPassword.jsx"
 import PrivacyPolicy from "./PrivacyPolicy.jsx"
 import TermsOfService from "./TermsOfService.jsx"
+import Upcoming from "./Upcoming.jsx"
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/return/:checkout_session_id" element={<AuthenticatedRoute><CheckoutReturn/></AuthenticatedRoute>} />
         <Route path="/reset-password" element={<ResetPassword></ResetPassword>} />
         <Route path="/reset-password/:token/:id" element={<ConfirmResetPassword />} />
+        <Route path="/upcoming" element={<Upcoming />} />
       </Routes>
     </BrowserRouter>
   )

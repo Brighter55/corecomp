@@ -10,13 +10,14 @@ load_dotenv()
 # stripe
 stripe.api_key = os.getenv("STRIPE_API_KEY")
 
-def checkout(mode, line_items, ui_mode, return_url, subscription_data):
+def checkout(mode, line_items, ui_mode, return_url, subscription_data, custom_text):
     session = stripe.checkout.Session.create(
         mode=mode,
         line_items=line_items,
         ui_mode=ui_mode,
         return_url=return_url,
-        subscription_data = subscription_data
+        subscription_data = subscription_data,
+        custom_text=custom_text,
     )
     return session
 

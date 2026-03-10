@@ -17,9 +17,6 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 
 
-const sections = ["features", "pricing"];
-
-
 function LandingHeader() {
     const navigate = useNavigate();
 
@@ -82,16 +79,30 @@ function LandingHeader() {
                                     ".MuiMenuItem-root": {color: "white"},
                                 }}
                             >
-                                {sections.map((section) => (
-                                    <MenuItem key={section} onClick={handleCloseNavMenu}>
-                                        <Link
-                                            href={`/#${section}`}
-                                            color="inherit"
-                                        >
-                                            {section}
-                                        </Link>
-                                    </MenuItem>
-                                ))}
+                                <MenuItem onClick={handleCloseNavMenu}>
+                                    <Link
+                                        href="/#features"
+                                        color="inherit"
+                                    >
+                                        features
+                                    </Link>
+                                </MenuItem>
+                                <MenuItem onClick={handleCloseNavMenu}>
+                                    <Link
+                                        href="/#pricing"
+                                        color="inherit"
+                                    >
+                                        pricing
+                                    </Link>
+                                </MenuItem>
+                                <MenuItem onClick={handleCloseNavMenu}>
+                                    <Link
+                                        href="/upcoming"
+                                        color="inherit"
+                                    >
+                                        upcoming
+                                    </Link>
+                                </MenuItem>
                                 <MenuItem onClick={() => {handleItemClicked("/sign-in")}}>
                                     sign in
                                 </MenuItem>
@@ -108,16 +119,27 @@ function LandingHeader() {
                                 justifyContent: "center"
                             }}
                         >
-                            {sections.map((section) => (
-                                <Button
-                                    href={`/#${section}`}
-                                    key={section}
-                                    onClick={handleCloseNavMenu}
-                                    sx={{ color: "grey", display: 'block', "&:hover": {color: "var(--main-dust-grey)"} }}
-                                >
-                                    {section}
-                                </Button>
-                            ))}
+                            <Button
+                                href="/#features"
+                                onClick={handleCloseNavMenu}
+                                sx={{ color: "grey", display: 'block', "&:hover": {color: "var(--main-dust-grey)"} }}
+                            >
+                                features
+                            </Button>
+                            <Button
+                                href="/#pricing"
+                                onClick={handleCloseNavMenu}
+                                sx={{ color: "grey", display: 'block', "&:hover": {color: "var(--main-dust-grey)"} }}
+                            >
+                                pricing
+                            </Button>
+                            <Button
+                                href="/upcoming"
+                                onClick={handleCloseNavMenu}
+                                sx={{ color: "grey", display: 'block', "&:hover": {color: "var(--main-dust-grey)"} }}
+                            >
+                                upcoming
+                            </Button>
                         </Stack>
                         <Stack direction="row" sx={{ display: {xs: "none", md: "flex"}}} >
                             <Button
