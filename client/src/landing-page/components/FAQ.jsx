@@ -91,7 +91,7 @@ export default function ControlledAccordions() {
         </AccordionSummary>
         <StyledAccordionDetails>
           <Typography variant="body1">
-            If you encounter any problems, contact our support at support@corecomp.com
+            If you encounter any problems, contact our support at support@corecomp.cc
           </Typography>
         </StyledAccordionDetails>
       </StyledAccordion>
