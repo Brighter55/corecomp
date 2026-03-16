@@ -36,6 +36,7 @@ vi.mock("./index.js", () => ({
   EPSGraph: () => <div>EPSGraph</div>,
   PricingGraph: () => <div>PricingGraph</div>,
   ProfitMarginGraph: () => <div>ProfitMarginGraph</div>,
+  ROEGraph: () => <div>ROEGraph</div>,
 }));
 
 describe("OverviewPage", () => {

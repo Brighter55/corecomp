@@ -11,3 +11,4 @@ export { default as  SharesOutstandingGraph } from "./components/SharesOutstandi
 export { default as  EPSGraph } from "./components/EPSGraph.jsx"
 export { default as  PricingGraph } from "./components/PricingGraph.jsx"
 export { default as  ProfitMarginGraph } from "./components/ProfitMarginGraph.jsx"
+export { default as  ROEGraph } from "./components/ROEGraph.jsx"

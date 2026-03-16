@@ -14,6 +14,7 @@ from django_redis import get_redis_connection
 from accounts.permissions import IsSubscribed
 # serializer
 from pages.serializers import SymbolSerializer
+from pages.serializers import CompositeGraphSerializer
 # model
 from django.db.models import Q
 from pages.models import Symbol
@@ -354,6 +355,52 @@ def shares_outstanding(request):
 
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
+@permission_classes([IsSubscribed])
+def composite(request):
+    symbol_serializer = SymbolSerializer(data=request.data)
+    composite_graph_serializer = CompositeGraphSerializer(data=request.data)
+
+    if not symbol_serializer.is_valid():
+        return Response(symbol_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not composite_graph_serializer.is_valid():
+        return Response(composite_graph_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    COMPOSITE_GRAPH_HANDLERS = {
+        "ROEPercentage": financial_data_service.get_roe_percentage,
+    }
+ 
+    symbol = symbol_serializer.validated_data["symbol"]
+    graph = composite_graph_serializer.validated_data["graph"]
+
+    # check if there is cache
+    key = f"{graph}_{symbol}"
+    cached_data = cache.get(key)
+    if cached_data:
+        return Response(cached_data, status=status.HTTP_200_OK)
+
+    redis = get_redis_connection("default")
+    lock = redis.lock(f"lock:{key}", timeout=10)
+    with lock:
+        cached_data = cache.get(key)
+        if cached_data:
+            return Response(cached_data, status=status.HTTP_200_OK)
+
+        handler = COMPOSITE_GRAPH_HANDLERS.get(graph)
+        data = handler(symbol=symbol)
+
+        if isinstance(data, Response):
+            return data            
+        
+        if not data.get("annualReports") or not data.get("quarterlyReports"):
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        cache.set(key, data, timeout=604800)
+
+    return Response(data, status=status.HTTP_200_OK)
+
 
 @api_view(["POST"])
 @permission_classes([IsSubscribed])

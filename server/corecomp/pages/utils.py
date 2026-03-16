@@ -86,3 +86,64 @@ def transform_pricing(data):
 
     return transformed_data
 
+def compute_roe(income_statement, balance_sheet):
+
+    # Create lookup dictionaries for balance sheet equity by date
+    bs_annual = {report["fiscalDateEnding"]: report for report in balance_sheet.get("annualReports", [])}
+    bs_quarterly = {report["fiscalDateEnding"]: report for report in balance_sheet.get("quarterlyReports", [])}
+    
+    annual_roe = []
+    quarterly_roe = []
+    
+    # Process annual reports
+    annual_reports = income_statement.get("annualReports", [])
+    for i, income_report in enumerate(annual_reports):
+        current_date = income_report["fiscalDateEnding"]
+        current_equity = safe_int(bs_annual.get(current_date, {}).get("totalShareholderEquity"))
+        
+        # Get previous year's equity
+        if i + 1 < len(annual_reports):
+            previous_date = annual_reports[i + 1]["fiscalDateEnding"]
+            previous_equity = safe_int(bs_annual.get(previous_date, {}).get("totalShareholderEquity"))
+        else:
+            previous_equity = None
+        
+        net_income = safe_int(income_report["netIncome"])
+        
+        if net_income is not None and current_equity is not None and previous_equity is not None:
+            avg_equity = (previous_equity + current_equity) / 2
+            roe = (net_income / avg_equity) * 100
+            annual_roe.append({
+                "fiscalDateEnding": current_date,
+                "ROEPercentage": round(roe, 2)
+            })
+    
+    # Process quarterly reports
+    quarterly_reports = income_statement.get("quarterlyReports", [])
+    for i, income_report in enumerate(quarterly_reports):
+        current_date = income_report["fiscalDateEnding"]
+        current_equity = safe_int(bs_quarterly.get(current_date, {}).get("totalShareholderEquity"))
+        
+        # Get previous quarter's equity
+        if i + 1 < len(quarterly_reports):
+            previous_date = quarterly_reports[i + 1]["fiscalDateEnding"]
+            previous_equity = safe_int(bs_quarterly.get(previous_date, {}).get("totalShareholderEquity"))
+        else:
+            previous_equity = None
+        
+        net_income = safe_int(income_report["netIncome"])
+        
+        if net_income is not None and current_equity is not None and previous_equity is not None:
+            avg_equity = (previous_equity + current_equity) / 2
+            roe = (net_income / avg_equity) * 100
+            quarterly_roe.append({
+                "fiscalDateEnding": current_date,
+                "ROEPercentage": round(roe, 2)
+            })
+    
+    return {
+        "annualReports": annual_roe,
+        "quarterlyReports": quarterly_roe
+    }
+
+

@@ -1,0 +1,129 @@
+from pages.utils import compute_roe
+
+def test_compute_roe():
+    income_statement = {
+        "annualReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "netIncome": "100"
+            },
+            {
+                "fiscalDateEnding": "2023-12-31",
+                "netIncome": "-90"
+            },
+            {
+                "fiscalDateEnding": "2022-12-31",
+                "netIncome": "80"
+            },
+            {
+                "fiscalDateEnding": "2021-12-31",
+                "netIncome": "70"
+            }
+        ],
+        "quarterlyReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "netIncome": "28"
+            },
+            {
+                "fiscalDateEnding": "2024-09-30",
+                "netIncome": "-24"
+            },
+            {
+                "fiscalDateEnding": "2024-06-30",
+                "netIncome": "25"
+            },
+            {
+                "fiscalDateEnding": "2024-03-30",
+                "netIncome": "20"
+            }
+        ]
+    }
+    
+    balance_sheet = {
+        "annualReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "totalShareholderEquity": "500"
+            },
+            {
+                "fiscalDateEnding": "2023-12-31",
+                "totalShareholderEquity": "450"
+            },
+            {
+                "fiscalDateEnding": "2022-12-31",
+                "totalShareholderEquity": "-400"
+            },
+            {
+                "fiscalDateEnding": "2021-12-31",
+                "totalShareholderEquity": "350"
+            }
+        ],
+        "quarterlyReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "totalShareholderEquity": "510"
+            },
+            {
+                "fiscalDateEnding": "2024-09-30",
+                "totalShareholderEquity": "500"
+            },
+            {
+                "fiscalDateEnding": "2024-06-30",
+                "totalShareholderEquity": "-490"
+            },
+            {
+                "fiscalDateEnding": "2024-03-30",
+                "totalShareholderEquity": "480"
+            }
+        ]
+    }
+    
+    result = {
+        "annualReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "ROEPercentage": 21.05
+            },
+            {
+                "fiscalDateEnding": "2023-12-31",
+                "ROEPercentage": -360
+            },
+            {
+                "fiscalDateEnding": "2022-12-31",
+                "ROEPercentage": -320
+            }
+        ],
+        "quarterlyReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "ROEPercentage": 5.54
+            },
+            {
+                "fiscalDateEnding": "2024-09-30",
+                "ROEPercentage": -480
+            },
+            {
+                "fiscalDateEnding": "2024-06-30",
+                "ROEPercentage": -500
+            }
+        ],
+    }
+
+    data = compute_roe(income_statement, balance_sheet)
+    assert data == result
+
+def test_empty_data():
+    income_statement= {}
+    
+    balance_sheet = {}
+    
+    result = {
+        "annualReports": [],
+        "quarterlyReports": [],
+    }
+
+    data = compute_roe(income_statement, balance_sheet)
+    assert data == result
+
+
