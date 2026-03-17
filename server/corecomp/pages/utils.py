@@ -187,13 +187,22 @@ def compute_pe(pricing, earnings):
     
     annual_pe = []
     quarterly_pe = []
+
+    pricing_months = set(pricing_by_year_month.keys())
+
+    def in_pricing_range(fiscal_date_str):
+        try:
+            year_month = datetime.strptime(fiscal_date_str, "%Y-%m-%d").strftime("%Y-%m")
+            return year_month in pricing_months
+        except ValueError:
+            return False
     
     # Process annual earnings
-    annual_earnings = earnings.get("annualEarnings", [])
+    annual_earnings = [r for r in earnings.get("annualEarnings", []) if in_pricing_range(r["fiscalDateEnding"])]
     for report in annual_earnings:
         fiscal_date = report["fiscalDateEnding"]
         eps = safe_float(report.get("reportedEPS"))
-        
+        # let the report has None value if the earning has None data
         if eps is None:
             annual_pe.append({
                 "fiscalDateEnding": fiscal_date,
@@ -205,6 +214,7 @@ def compute_pe(pricing, earnings):
             date_obj = datetime.strptime(fiscal_date, "%Y-%m-%d")
             year_month = date_obj.strftime("%Y-%m")
             
+            # only appends to pe_ratio if year_month from earnings statement matches year_month in pricing statement
             if year_month in pricing_by_year_month:
                 price = pricing_by_year_month[year_month]
                 pe_ratio = price / eps
@@ -226,11 +236,11 @@ def compute_pe(pricing, earnings):
     # Process quarterly earnings using TTM (trailing twelve months = sum of last 4 quarters)
     quarterly_earnings = earnings.get("quarterlyEarnings", [])
     
-    # Alpha Vantage returns most recent first — reverse to chronological for the rolling window
+    # reverse data to prepare for rolling window procedure
     chronological = list(reversed(quarterly_earnings))
     ttm_window = deque(maxlen=4)
     
-    # Build TTM EPS keyed by fiscalDateEnding so we can iterate in original order later
+    # build ttm earnings statement
     ttm_by_date = {}
     for report in chronological:
         eps = safe_float(report.get("reportedEPS"))
@@ -243,7 +253,7 @@ def compute_pe(pricing, earnings):
                 ttm_by_date[report["fiscalDateEnding"]] = sum(ttm_window)
             else:
                 ttm_by_date[report["fiscalDateEnding"]] = None
-    
+    # build quarterly_pe
     for report in quarterly_earnings:
         fiscal_date = report["fiscalDateEnding"]
 
@@ -271,10 +281,7 @@ def compute_pe(pricing, earnings):
                     "PERatio": round(pe_ratio, 2)
                 })
             else:
-                quarterly_pe.append({
-                    "fiscalDateEnding": fiscal_date,
-                    "PERatio": None
-                })
+                continue
         except (ValueError, ZeroDivisionError):
             quarterly_pe.append({
                 "fiscalDateEnding": fiscal_date,

@@ -141,11 +141,9 @@ export default function PERatioGraph({ symbol, fetchVersion, setSymbol, period }
                                 <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
                                 <XAxis dataKey="fiscalDateEnding" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}} />
                                 <YAxis
-                                    tickFormatter={(value) => `${value}%`}
                                     stroke="#344E41"
                                 />
                                 <Tooltip
-                                    formatter={(value) => `${value}%`}
                                 />
                                 <Bar name="PE Ratio" dataKey="PERatio" shape={<CustomBar></CustomBar>} activeBar={<CustomActiveBar></CustomActiveBar>}/>
                             </BarChart>

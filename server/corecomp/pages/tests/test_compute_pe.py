@@ -1,109 +1,90 @@
 from pages.utils import compute_pe
 
-def test_compute_pe():
-    pricing = {
-        "Meta Data": {
-            "1. Information": "Monthly Adjusted Prices and Volumes",
-            "2. Symbol": "IBM",
-            "3. Last Refreshed": "2026-01-16",
-            "4. Time Zone": "US/Eastern"
+pricing = {
+    "Meta Data": {
+        "1. Information": "Monthly Adjusted Prices and Volumes",
+        "2. Symbol": "IBM",
+        "3. Last Refreshed": "2026-01-16",
+        "4. Time Zone": "US/Eastern"
+    },
+    "Monthly Adjusted Time Series": {
+        "2026-01-16": {
+            "5. adjusted close": "300.0000",
         },
-        "Monthly Adjusted Time Series": {
-            "2026-01-16": {
-                "1. open": "297.5600",
-                "2. high": "312.8100",
-                "3. low": "289.0000",
-                "4. close": "305.6700",
-                "5. adjusted close": "305.6700",
-                "6. volume": "45209571",
-                "7. dividend amount": "0.0000"
-            },
-            "2025-12-31": {
-            "1. open": "306.5050",
-            "2. high": "315.3454",
-            "3. low": "295.7000",
-            "4. close": "296.2100",
-            "5. adjusted close": "296.2100",
-            "6. volume": "78385471",
-            "7. dividend amount": "0.0000"
-            },
-            "2025-09-30": {
-            "1. open": "240.9000",
-            "2. high": "288.8500",
-            "3. low": "238.2500",
-            "4. close": "282.1600",
-            "5. adjusted close": "280.6349",
-            "6. volume": "110277863",
-            "7. dividend amount": "0.0000"
-            },
-            "2024-12-31": {
-            "1. open": "240.9000",
-            "2. high": "288.8500",
-            "3. low": "238.2500",
-            "4. close": "270.0000",
-            "5. adjusted close": "270.6349",
-            "6. volume": "110277863",
-            "7. dividend amount": "0.0000"
-            },
-        }
+        "2025-12-31": {
+        "5. adjusted close": "250.0000",
+        },
+        "2025-09-30": {
+        "5. adjusted close": "200.0000",
+        },
+        "2025-06-30": {
+        "5. adjusted close": "150.0000",
+        },
+        "2025-03-30": {
+        "5. adjusted close": "100.0000",
+        },
+        "2024-12-31": {
+        "5. adjusted close": "50.0000",
+        },
     }
-    
+}
+
+def test_compute_pe():
     earnings = {
         "symbol": "IBM",
         "annualEarnings": [
             {
                 "fiscalDateEnding": "2025-12-31",
-                "reportedEPS": "6.57"
+                "reportedEPS": "20.00"
             },
             {
                 "fiscalDateEnding": "2024-12-31",
-                "reportedEPS": "6.00"
+                "reportedEPS": "10.00"
             },
         ],
         "quarterlyEarnings": [
             {
                 "fiscalDateEnding": "2025-12-31",
-                "reportedEPS": "7.00"
+                "reportedEPS": "5.00"
             },
             {
                 "fiscalDateEnding": "2025-09-30",
-                "reportedEPS": "6.57"
+                "reportedEPS": "4.00"
             },
             {
                 "fiscalDateEnding": "2025-06-30",
-                "reportedEPS": "6.00"
+                "reportedEPS": "3.00"
             },
             {
                 "fiscalDateEnding": "2025-03-30",
-                "reportedEPS": "5.50"
+                "reportedEPS": "2.00"
             },
             {
                 "fiscalDateEnding": "2024-12-30",
-                "reportedEPS": "5.00"
+                "reportedEPS": "1.00"
             },
         ]
     }
 
-    
     result = {
         "annualReports": [
             {
                 "fiscalDateEnding": "2025-12-31",
-                "PERatio": 45.09
+                "PERatio": 12.5
             },
             {
                 "fiscalDateEnding": "2024-12-31",
-                "PERatio": 45.11
+                "PERatio": 5.0
             },
         ],
         "quarterlyReports": [
             {
                 "fiscalDateEnding": "2025-12-31",
-                "PERatio": 11.82
+                "PERatio": 17.86
             },
             {
                 "fiscalDateEnding": "2025-09-30",
-                "PERatio": 12.16
+                "PERatio": 20.0
             },
         ],
     }
@@ -113,35 +94,6 @@ def test_compute_pe():
 
 def test_missing_data_and_skip_reports_not_in_window():
     # test for when the report has "None" in reportedEPS
-    pricing = {
-        "Meta Data": {
-            "1. Information": "Monthly Adjusted Prices and Volumes",
-            "2. Symbol": "IBM",
-            "3. Last Refreshed": "2026-01-16",
-            "4. Time Zone": "US/Eastern"
-        },
-        "Monthly Adjusted Time Series": {
-            "2025-12-31": {
-                "1. open": "306.5050",
-                "2. high": "315.3454",
-                "3. low": "295.7000",
-                "4. close": "296.2100",
-                "5. adjusted close": "296.2100",
-                "6. volume": "78385471",
-                "7. dividend amount": "0.0000"
-            },
-            "2025-09-30": {
-                "1. open": "240.9000",
-                "2. high": "288.8500",
-                "3. low": "238.2500",
-                "4. close": "282.1600",
-                "5. adjusted close": "280.6349",
-                "6. volume": "110277863",
-                "7. dividend amount": "0.0000"
-            },
-        }
-    }
-    
     earnings = {
         "symbol": "IBM",
         "annualEarnings": [
@@ -191,34 +143,6 @@ def test_missing_data_and_skip_reports_not_in_window():
 
 def test_report_has_value_none():
     # test for when the report has "None" in reportedEPS
-    pricing = {
-        "Meta Data": {
-            "1. Information": "Monthly Adjusted Prices and Volumes",
-            "2. Symbol": "IBM",
-            "3. Last Refreshed": "2026-01-16",
-            "4. Time Zone": "US/Eastern"
-        },
-        "Monthly Adjusted Time Series": {
-            "2025-12-31": {
-                "1. open": "306.5050",
-                "2. high": "315.3454",
-                "3. low": "295.7000",
-                "4. close": "296.2100",
-                "5. adjusted close": "296.2100",
-                "6. volume": "78385471",
-                "7. dividend amount": "0.0000"
-            },
-            "2025-09-30": {
-                "1. open": "240.9000",
-                "2. high": "288.8500",
-                "3. low": "238.2500",
-                "4. close": "282.1600",
-                "5. adjusted close": "280.6349",
-                "6. volume": "110277863",
-                "7. dividend amount": "0.0000"
-            },
-        }
-    }
     
     earnings = {
         "symbol": "IBM",
@@ -235,19 +159,19 @@ def test_report_has_value_none():
             },
             {
                 "fiscalDateEnding": "2025-09-30",
-                "reportedEPS": "6.57"
+                "reportedEPS": "4.00"
             },
             {
                 "fiscalDateEnding": "2025-06-30",
-                "reportedEPS": "6.00"
+                "reportedEPS": "3.00"
             },
             {
                 "fiscalDateEnding": "2025-03-30",
-                "reportedEPS": "5.50"
+                "reportedEPS": "2.00"
             },
             {
                 "fiscalDateEnding": "2024-12-30",
-                "reportedEPS": "5.00"
+                "reportedEPS": "1.00"
             },
         ]
     }
@@ -266,13 +190,83 @@ def test_report_has_value_none():
             },
             {
                 "fiscalDateEnding": "2025-09-30",
-                "PERatio": 12.16
+                "PERatio": 20.0
             },
         ],
     }
 
     data = compute_pe(pricing, earnings)
     assert data == result
+
+def test_alignment():
+    # Test that earnings records with dates outside the pricing data range are filtered out
+    local_pricing = {
+        "Meta Data": {
+            "1. Information": "Monthly Adjusted Prices and Volumes",
+            "2. Symbol": "TEST",
+            "3. Last Refreshed": "2026-01-16",
+            "4. Time Zone": "US/Eastern"
+        },
+        "Monthly Adjusted Time Series": {
+            "2026-01-16": {
+                "5. adjusted close": "300.0000",
+            },
+            "2025-12-31": {
+                "5. adjusted close": "250.0000",
+            },
+        }
+    }
+    
+    earnings = {
+        "symbol": "TEST",
+        "annualEarnings": [
+            {
+                "fiscalDateEnding": "2025-12-31",
+                "reportedEPS": "5.00"
+            },
+            {
+                "fiscalDateEnding": "2024-12-31",  # filtered out
+                "reportedEPS": "4.00"
+            },
+            {
+                "fiscalDateEnding": "2023-12-31",  # filtered out
+                "reportedEPS": "3.00"
+            },
+        ],
+        "quarterlyEarnings": [
+            {
+                "fiscalDateEnding": "2025-12-31",
+                "reportedEPS": "1.30"
+            },
+            {
+                "fiscalDateEnding": "2025-09-30",  # filtered out
+                "reportedEPS": "0.90"
+            },
+            {
+                "fiscalDateEnding": "2025-06-30",  # filtered out
+                "reportedEPS": "0.80"
+            },
+            {
+                "fiscalDateEnding": "2025-03-30",  # filtered out
+                "reportedEPS": "0.70"
+            },
+            {
+                "fiscalDateEnding": "2024-12-30",   # filtered out
+                "reportedEPS": "0.60"
+            },
+        ]
+    }
+
+    result = compute_pe(local_pricing, earnings)
+    
+    assert len(result["annualReports"]) == 1
+    assert result["annualReports"][0]["fiscalDateEnding"] == "2025-12-31"
+    assert result["annualReports"][0]["PERatio"] == 50.0
+    
+    assert len(result["quarterlyReports"]) == 1
+    assert result["quarterlyReports"][0]["fiscalDateEnding"] == "2025-12-31"
+    assert result["quarterlyReports"][0]["PERatio"] == 67.57
+
 def test_empty_data():
     pricing = {}
     
