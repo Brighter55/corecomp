@@ -28,6 +28,12 @@ def safe_int(value):
         return None
     return int(value)
 
+def safe_float(value):
+    # return None if value is "None"
+    if value is None or value.strip().lower() in ("none", ""):
+        return None
+    return float(value)
+
 def annotate_profit_margin(data):
     annual_reports = data["annualReports"]
     quarterly_reports = data["quarterlyReports"]
@@ -106,17 +112,23 @@ def compute_roe(income_statement, balance_sheet):
             previous_date = annual_reports[i + 1]["fiscalDateEnding"]
             previous_equity = safe_int(bs_annual.get(previous_date, {}).get("totalShareholderEquity"))
         else:
-            previous_equity = None
+            continue
         
         net_income = safe_int(income_report["netIncome"])
-        
-        if net_income is not None and current_equity is not None and previous_equity is not None:
-            avg_equity = (previous_equity + current_equity) / 2
-            roe = (net_income / avg_equity) * 100
+
+        if net_income is None or current_equity is None or previous_equity is None:
             annual_roe.append({
                 "fiscalDateEnding": current_date,
-                "ROEPercentage": round(roe, 2)
+                "ROEPercentage": None
             })
+            continue
+
+        avg_equity = (previous_equity + current_equity) / 2
+        roe = (net_income / avg_equity) * 100
+        annual_roe.append({
+            "fiscalDateEnding": current_date,
+            "ROEPercentage": round(roe, 2)
+        })
     
     # Process quarterly reports
     quarterly_reports = income_statement.get("quarterlyReports", [])
@@ -129,21 +141,149 @@ def compute_roe(income_statement, balance_sheet):
             previous_date = quarterly_reports[i + 1]["fiscalDateEnding"]
             previous_equity = safe_int(bs_quarterly.get(previous_date, {}).get("totalShareholderEquity"))
         else:
-            previous_equity = None
+            continue
         
         net_income = safe_int(income_report["netIncome"])
         
-        if net_income is not None and current_equity is not None and previous_equity is not None:
-            avg_equity = (previous_equity + current_equity) / 2
-            roe = (net_income / avg_equity) * 100
+        if net_income is None or current_equity is None or previous_equity is None:
             quarterly_roe.append({
                 "fiscalDateEnding": current_date,
-                "ROEPercentage": round(roe, 2)
+                "ROEPercentage": None
             })
+            continue
+
+        avg_equity = (previous_equity + current_equity) / 2
+        roe = (net_income / avg_equity) * 100
+        quarterly_roe.append({
+            "fiscalDateEnding": current_date,
+            "ROEPercentage": round(roe, 2)
+        })
     
     return {
         "annualReports": annual_roe,
         "quarterlyReports": quarterly_roe
+    }
+
+def compute_pe(pricing, earnings):
+    # must return a dict of annualReports and quarterlyReports. each report must be a list of dict containing fiscalDateEnding and PERatio
+    
+    from datetime import datetime
+    from collections import deque
+    
+    # Build a lookup for pricing data by year-month
+    pricing_data = pricing.get("Monthly Adjusted Time Series", {})
+    pricing_by_year_month = {}
+    
+    for date_str in pricing_data:
+        try:
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            year_month = date_obj.strftime("%Y-%m")
+            price = safe_float(pricing_data[date_str]["5. adjusted close"])
+            
+            if year_month not in pricing_by_year_month:
+                pricing_by_year_month[year_month] = price
+        except (ValueError, KeyError):
+            continue
+    
+    annual_pe = []
+    quarterly_pe = []
+    
+    # Process annual earnings
+    annual_earnings = earnings.get("annualEarnings", [])
+    for report in annual_earnings:
+        fiscal_date = report["fiscalDateEnding"]
+        eps = safe_float(report.get("reportedEPS"))
+        
+        if eps is None:
+            annual_pe.append({
+                "fiscalDateEnding": fiscal_date,
+                "PERatio": None
+            })
+            continue
+        
+        try:
+            date_obj = datetime.strptime(fiscal_date, "%Y-%m-%d")
+            year_month = date_obj.strftime("%Y-%m")
+            
+            if year_month in pricing_by_year_month:
+                price = pricing_by_year_month[year_month]
+                pe_ratio = price / eps
+                annual_pe.append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PERatio": round(pe_ratio, 2)
+                })
+            else:
+                annual_pe.append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PERatio": None
+                })
+        except (ValueError, ZeroDivisionError):
+            annual_pe.append({
+                "fiscalDateEnding": fiscal_date,
+                "PERatio": None
+            })
+    
+    # Process quarterly earnings using TTM (trailing twelve months = sum of last 4 quarters)
+    quarterly_earnings = earnings.get("quarterlyEarnings", [])
+    
+    # Alpha Vantage returns most recent first — reverse to chronological for the rolling window
+    chronological = list(reversed(quarterly_earnings))
+    ttm_window = deque(maxlen=4)
+    
+    # Build TTM EPS keyed by fiscalDateEnding so we can iterate in original order later
+    ttm_by_date = {}
+    for report in chronological:
+        eps = safe_float(report.get("reportedEPS"))
+        # Use 0 for None so the window keeps rolling, but flag if any quarter in window was None
+        ttm_window.append(eps if eps is not None else 0) # will only append eps or 0
+        
+        if len(ttm_window) == 4: # [0,0,4, 5]
+            # Only produce a TTM value if all 4 quarters had valid EPS
+            if all(safe_float(q.get("reportedEPS")) is not None for q in chronological[chronological.index(report) - 3: chronological.index(report) + 1]):
+                ttm_by_date[report["fiscalDateEnding"]] = sum(ttm_window)
+            else:
+                ttm_by_date[report["fiscalDateEnding"]] = None
+    
+    for report in quarterly_earnings:
+        fiscal_date = report["fiscalDateEnding"]
+
+        if fiscal_date not in ttm_by_date:
+            continue
+
+        ttm_eps = ttm_by_date[fiscal_date]
+        
+        if ttm_eps is None:
+            quarterly_pe.append({
+                "fiscalDateEnding": fiscal_date,
+                "PERatio": None
+            })
+            continue
+        
+        try:
+            date_obj = datetime.strptime(fiscal_date, "%Y-%m-%d")
+            year_month = date_obj.strftime("%Y-%m")
+            
+            if year_month in pricing_by_year_month:
+                price = pricing_by_year_month[year_month]
+                pe_ratio = price / ttm_eps
+                quarterly_pe.append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PERatio": round(pe_ratio, 2)
+                })
+            else:
+                quarterly_pe.append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PERatio": None
+                })
+        except (ValueError, ZeroDivisionError):
+            quarterly_pe.append({
+                "fiscalDateEnding": fiscal_date,
+                "PERatio": None
+            })
+    
+    return {
+        "annualReports": annual_pe,
+        "quarterlyReports": quarterly_pe
     }
 
 

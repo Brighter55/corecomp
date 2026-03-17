@@ -87,11 +87,11 @@ def test_compute_roe():
             },
             {
                 "fiscalDateEnding": "2023-12-31",
-                "ROEPercentage": -360
+                "ROEPercentage": -360.0
             },
             {
                 "fiscalDateEnding": "2022-12-31",
-                "ROEPercentage": -320
+                "ROEPercentage": -320.0
             }
         ],
         "quarterlyReports": [
@@ -101,12 +101,102 @@ def test_compute_roe():
             },
             {
                 "fiscalDateEnding": "2024-09-30",
-                "ROEPercentage": -480
+                "ROEPercentage": -480.0
             },
             {
                 "fiscalDateEnding": "2024-06-30",
-                "ROEPercentage": -500
+                "ROEPercentage": -500.0
             }
+        ],
+    }
+
+    data = compute_roe(income_statement, balance_sheet)
+    assert data == result
+
+def test_missing_data():
+    # test for when the report has "None" in netIncome or totalShareholderEquity
+    income_statement = {
+        "annualReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "netIncome": "None"
+            },
+            {
+                "fiscalDateEnding": "2023-12-31",
+                "netIncome": "100"
+            },
+            {
+                "fiscalDateEnding": "2022-12-31",
+                "netIncome": "50"
+            },
+        ],
+        "quarterlyReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "netIncome": "None"
+            },
+            {
+                "fiscalDateEnding": "2024-09-30",
+                "netIncome": "25"
+            },
+            {
+                "fiscalDateEnding": "2024-06-30",
+                "netIncome": "15"
+            },
+        ]
+    }
+    
+    balance_sheet = {
+        "annualReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "totalShareholderEquity": "500"
+            },
+            {
+                "fiscalDateEnding": "2023-12-31",
+                "totalShareholderEquity": "None"
+            },
+            {
+                "fiscalDateEnding": "2022-12-31",
+                "totalShareholderEquity": "400"
+            },
+        ],
+        "quarterlyReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "totalShareholderEquity": "510"
+            },
+            {
+                "fiscalDateEnding": "2024-09-30",
+                "totalShareholderEquity": "None"
+            },
+            {
+                "fiscalDateEnding": "2024-06-30",
+                "totalShareholderEquity": "490"
+            },
+        ]
+    }
+    
+    result = {
+        "annualReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "ROEPercentage": None
+            },
+            {
+                "fiscalDateEnding": "2023-12-31",
+                "ROEPercentage": None
+            },
+        ],
+        "quarterlyReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "ROEPercentage": None
+            },
+            {
+                "fiscalDateEnding": "2024-09-30",
+                "ROEPercentage": None
+            },
         ],
     }
 

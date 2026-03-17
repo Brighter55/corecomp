@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import status
-from pages.utils import fetchAlphaVantage, compute_roe
+from pages.utils import fetchAlphaVantage, compute_roe, compute_pe
 from dotenv import load_dotenv
 import os
 import json
@@ -66,6 +66,17 @@ class FinancialDataService:
             return balance_sheet
 
         return compute_roe(income_statement, balance_sheet) 
+    
+    def get_pe_ratio(self, symbol):
+        pricing = self.get_pricing(symbol)
+        earnings = self.get_earnings(symbol)
+
+        if isinstance(pricing, Response):
+            return pricing
+        if isinstance(earnings, Response):
+            return earnings
+        
+        return compute_pe(pricing, earnings)
            
 class MockFinancialDataService:
     def get_current_price(self, symbol):
@@ -131,7 +142,18 @@ class MockFinancialDataService:
         if isinstance(balance_sheet, Response):
             return balance_sheet
 
-        return compute_roe(income_statement, balance_sheet) 
+        return compute_roe(income_statement, balance_sheet)
+    
+    def get_pe_ratio(self, symbol):
+        pricing = self.get_pricing(symbol)
+        earnings = self.get_earnings(symbol)
+
+        if isinstance(pricing, Response):
+            return pricing
+        if isinstance(earnings, Response):
+            return earnings
+        
+        return compute_pe(pricing, earnings)
     
     def get_rate_limit_error(self):
         # invalid case 503 rate limit

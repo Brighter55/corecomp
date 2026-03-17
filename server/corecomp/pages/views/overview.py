@@ -370,6 +370,7 @@ def composite(request):
     
     COMPOSITE_GRAPH_HANDLERS = {
         "ROEPercentage": financial_data_service.get_roe_percentage,
+        "PERatio": financial_data_service.get_pe_ratio,
     }
  
     symbol = symbol_serializer.validated_data["symbol"]

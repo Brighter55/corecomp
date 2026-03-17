@@ -18,7 +18,8 @@ class CompositeGraphSerializer(serializers.Serializer):
     graph = serializers.CharField(max_length=100, required=True, allow_blank=False)
     
     ALLOWED_GRAPHS = [
-        "ROEPercentage"
+        "ROEPercentage",
+        "PERatio",
     ]
     
     def validate_graph(self, value):
