@@ -37,7 +37,9 @@ vi.mock("./index.js", () => ({
   PricingGraph: () => <div>PricingGraph</div>,
   ProfitMarginGraph: () => <div>ProfitMarginGraph</div>,
   ROEGraph: () => <div>ROEGraph</div>,
-  PERatioGraph: () => <div>PERatioGraph</div>
+  PERatioGraph: () => <div>PERatioGraph</div>,
+  EbitGraph: () => <div>EBIT</div>,
+  EbitdaGraph: () => <div>EBITDA</div>,
 }));
 
 describe("OverviewPage", () => {
