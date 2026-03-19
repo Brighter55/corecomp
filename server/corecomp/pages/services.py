@@ -55,28 +55,6 @@ class FinancialDataService:
         url = f"https://www.alphavantage.co/query?function=SHARES_OUTSTANDING&symbol={symbol}&apikey={api_key}"
         data = fetchAlphaVantage(url)
         return data
-    
-    def get_roe_percentage(self, symbol):
-        income_statement = self.get_income_statement(symbol)
-        balance_sheet = self.get_balance_sheet(symbol)
-
-        if isinstance(income_statement, Response):
-            return income_statement
-        if isinstance(balance_sheet, Response):
-            return balance_sheet
-
-        return compute_roe(income_statement, balance_sheet) 
-    
-    def get_pe_ratio(self, symbol):
-        pricing = self.get_pricing(symbol)
-        earnings = self.get_earnings(symbol)
-
-        if isinstance(pricing, Response):
-            return pricing
-        if isinstance(earnings, Response):
-            return earnings
-        
-        return compute_pe(pricing, earnings)
            
 class MockFinancialDataService:
     def get_current_price(self, symbol):
@@ -132,28 +110,6 @@ class MockFinancialDataService:
         with open(path, 'r') as file:
             data = json.load(file)
         return data
-    
-    def get_roe_percentage(self, symbol):
-        income_statement = self.get_income_statement(symbol)
-        balance_sheet = self.get_balance_sheet(symbol)
-
-        if isinstance(income_statement, Response):
-            return income_statement
-        if isinstance(balance_sheet, Response):
-            return balance_sheet
-
-        return compute_roe(income_statement, balance_sheet)
-    
-    def get_pe_ratio(self, symbol):
-        pricing = self.get_pricing(symbol)
-        earnings = self.get_earnings(symbol)
-
-        if isinstance(pricing, Response):
-            return pricing
-        if isinstance(earnings, Response):
-            return earnings
-        
-        return compute_pe(pricing, earnings)
     
     def get_rate_limit_error(self):
         # invalid case 503 rate limit

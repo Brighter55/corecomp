@@ -7,7 +7,14 @@ import json
 from dotenv import load_dotenv
 import os
 import requests
-from pages.utils import fetchAlphaVantage, annotate_profit_margin, annotate_free_cash_flow, transform_pricing
+from pages.utils import (
+    annotate_profit_margin,
+    annotate_free_cash_flow,
+    transform_pricing,
+    compute_roe,
+    compute_pe,
+    compute_pb
+)
 from django.core.cache import cache
 from django_redis import get_redis_connection
 # permission
@@ -223,7 +230,7 @@ def balance_sheet(request):
             
             if not data:
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            
+
             cache.set(key, data, timeout=604800)
 
         return Response(data, status=status.HTTP_200_OK)
@@ -319,7 +326,7 @@ def pricing(request):
             
             data = transform_pricing(data)
 
-            cache.set(key, data, timeout=604800)
+            cache.set(key, data, timeout=86400)
 
         return Response(data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -364,44 +371,78 @@ def composite(request):
 
     if not symbol_serializer.is_valid():
         return Response(symbol_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     if not composite_graph_serializer.is_valid():
         return Response(composite_graph_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    COMPOSITE_GRAPH_HANDLERS = {
-        "ROEPercentage": financial_data_service.get_roe_percentage,
-        "PERatio": financial_data_service.get_pe_ratio,
-    }
- 
+
     symbol = symbol_serializer.validated_data["symbol"]
     graph = composite_graph_serializer.validated_data["graph"]
 
-    # check if there is cache
-    key = f"{graph}_{symbol}"
-    cached_data = cache.get(key)
-    if cached_data:
-        return Response(cached_data, status=status.HTTP_200_OK)
+    composite_key = f"{graph}_{symbol}"
+    cached_composite = cache.get(composite_key)
+    if cached_composite:
+        return Response(cached_composite, status=status.HTTP_200_OK)
 
     redis = get_redis_connection("default")
-    lock = redis.lock(f"lock:{key}", timeout=10)
-    with lock:
-        cached_data = cache.get(key)
-        if cached_data:
-            return Response(cached_data, status=status.HTTP_200_OK)
+    composite_lock = redis.lock(f"lock:{composite_key}", timeout=10)
+    with composite_lock:
+        cached_composite = cache.get(composite_key)
+        if cached_composite:
+            return Response(cached_composite, status=status.HTTP_200_OK)
 
-        handler = COMPOSITE_GRAPH_HANDLERS.get(graph)
-        data = handler(symbol=symbol)
+        GRAPH_STATEMENTS = {
+            "ROEPercentage": ["income_statement", "balance_sheet"],
+            "PERatio": ["pricing", "earnings"],
+            "PBRatio": ["pricing", "balance_sheet"],
+        }
 
-        if isinstance(data, Response):
-            return data            
-        
+        statements_needed = GRAPH_STATEMENTS.get(graph)
+
+        statements = {}
+
+        for statement in statements_needed:
+            statement_key = f"{statement}_{symbol}"
+            cached_statement = cache.get(statement_key)
+            if cached_statement is None:
+                statement_lock = redis.lock(f"lock:{statement_key}", timeout=10)
+                with statement_lock:
+                    cached_statement = cache.get(statement_key)
+                    if cached_statement is None:
+                        fetcher = getattr(financial_data_service, f"get_{statement}", None)
+
+                        fetched = fetcher(symbol)
+                        if isinstance(fetched, Response):
+                            return fetched
+
+                        if not fetched:
+                            return Response(status=status.HTTP_204_NO_CONTENT)
+
+                        if statement == "income_statement":
+                            fetched = annotate_profit_margin(fetched)
+                        elif statement == "pricing":
+                            fetched = transform_pricing(fetched)
+                        
+                        if statement == "pricing":
+                            cache.set(statement_key, fetched, timeout=86400)
+                        else:
+                            cache.set(statement_key, fetched, timeout=604800)
+
+                        cached_statement = fetched
+
+            statements[statement] = cached_statement
+
+        if graph == "ROEPercentage":
+            data = compute_roe(income_statement=statements["income_statement"], balance_sheet=statements["balance_sheet"])
+        elif graph == "PERatio":
+            data = compute_pe(statements["pricing"], statements["earnings"])
+        elif graph == "PBRatio":
+            data = compute_pb(statements["pricing"], statements["balance_sheet"])
+
         if not data.get("annualReports") or not data.get("quarterlyReports"):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        cache.set(key, data, timeout=604800)
-
-    return Response(data, status=status.HTTP_200_OK)
-
+        cache.set(composite_key, data, timeout=604800)
+        return Response(data, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([IsSubscribed])

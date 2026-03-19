@@ -94,6 +94,21 @@ def transform_pricing(data):
 
 def compute_roe(income_statement, balance_sheet):
 
+    def _equity_value_or_missing(lookup, fiscal_date):
+        """
+        A helper function to check if the 
+        Returns (is_missing_date, parsed_equity_or_none).
+
+        - Missing date/key => (True, None) and should be treated as statement misalignment.
+        - Present date but value is "None"/empty => (False, None) and should produce ROEPercentage=None.
+        """
+        if fiscal_date not in lookup:
+            return True, None
+        report = lookup[fiscal_date]
+        if "totalShareholderEquity" not in report:
+            return True, None
+        return False, safe_int(report.get("totalShareholderEquity"))
+
     # Create lookup dictionaries for balance sheet equity by date
     bs_annual = {report["fiscalDateEnding"]: report for report in balance_sheet.get("annualReports", [])}
     bs_quarterly = {report["fiscalDateEnding"]: report for report in balance_sheet.get("quarterlyReports", [])}
@@ -105,17 +120,21 @@ def compute_roe(income_statement, balance_sheet):
     annual_reports = income_statement.get("annualReports", [])
     for i, income_report in enumerate(annual_reports):
         current_date = income_report["fiscalDateEnding"]
-        current_equity = safe_int(bs_annual.get(current_date, {}).get("totalShareholderEquity"))
-        
-        # Get previous year's equity
-        if i + 1 < len(annual_reports):
-            previous_date = annual_reports[i + 1]["fiscalDateEnding"]
-            previous_equity = safe_int(bs_annual.get(previous_date, {}).get("totalShareholderEquity"))
-        else:
+
+        if i + 1 >= len(annual_reports):
             continue
-        
+        previous_date = annual_reports[i + 1]["fiscalDateEnding"]
+
+        current_missing, current_equity = _equity_value_or_missing(bs_annual, current_date)
+        previous_missing, previous_equity = _equity_value_or_missing(bs_annual, previous_date)
+
+        # If statements are misaligned (missing the date on the balance sheet), skip entirely.
+        if current_missing or previous_missing:
+            continue
+
         net_income = safe_int(income_report["netIncome"])
 
+        # If any required input is explicitly missing (present but "None"), keep the datapoint as None.
         if net_income is None or current_equity is None or previous_equity is None:
             annual_roe.append({
                 "fiscalDateEnding": current_date,
@@ -134,17 +153,19 @@ def compute_roe(income_statement, balance_sheet):
     quarterly_reports = income_statement.get("quarterlyReports", [])
     for i, income_report in enumerate(quarterly_reports):
         current_date = income_report["fiscalDateEnding"]
-        current_equity = safe_int(bs_quarterly.get(current_date, {}).get("totalShareholderEquity"))
-        
-        # Get previous quarter's equity
-        if i + 1 < len(quarterly_reports):
-            previous_date = quarterly_reports[i + 1]["fiscalDateEnding"]
-            previous_equity = safe_int(bs_quarterly.get(previous_date, {}).get("totalShareholderEquity"))
-        else:
+
+        if i + 1 >= len(quarterly_reports):
             continue
-        
+        previous_date = quarterly_reports[i + 1]["fiscalDateEnding"]
+
+        current_missing, current_equity = _equity_value_or_missing(bs_quarterly, current_date)
+        previous_missing, previous_equity = _equity_value_or_missing(bs_quarterly, previous_date)
+
+        if current_missing or previous_missing:
+            continue
+
         net_income = safe_int(income_report["netIncome"])
-        
+
         if net_income is None or current_equity is None or previous_equity is None:
             quarterly_roe.append({
                 "fiscalDateEnding": current_date,
@@ -293,4 +314,5 @@ def compute_pe(pricing, earnings):
         "quarterlyReports": quarterly_pe
     }
 
-
+def compute_pb(pricing, balance_sheet):
+    pass

@@ -20,6 +20,7 @@ class CompositeGraphSerializer(serializers.Serializer):
     ALLOWED_GRAPHS = [
         "ROEPercentage",
         "PERatio",
+        "PBRatio",
     ]
     
     def validate_graph(self, value):
