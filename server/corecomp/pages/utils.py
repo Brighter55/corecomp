@@ -55,7 +55,7 @@ def annotate_profit_margin(data):
         if net_income is None or total_revenue is None:
             report["profitMarginPercent"] = None
         else:
-            report["profitMarginPercent"] = round((net_income / total_revenue) * 100, 2)
+            report["profitMarginPercent"] = str(round((net_income / total_revenue) * 100, 2))
     
     for report in quarterly_reports:
         net_income = safe_int(report["netIncome"])
@@ -64,7 +64,7 @@ def annotate_profit_margin(data):
         if net_income is None or total_revenue is None:
             report["profitMarginPercent"] = None
         else:
-            report["profitMarginPercent"] = round((net_income / total_revenue) * 100, 2)
+            report["profitMarginPercent"] = str(round((net_income / total_revenue) * 100, 2))
     
     return data
 
@@ -80,7 +80,7 @@ def annotate_free_cash_flow(data):
         if operating is None or capex is None:
             report["freeCashFlow"] = None
         else:
-            report["freeCashFlow"] = operating - capex
+            report["freeCashFlow"] = str(operating - capex)
 
     for report in quarterly_reports:
         operating = safe_int(report.get("operatingCashflow"))
@@ -89,7 +89,7 @@ def annotate_free_cash_flow(data):
         if operating is None or capex is None:
             report["freeCashFlow"] = None
         else:
-            report["freeCashFlow"] = operating - capex
+            report["freeCashFlow"] = str(operating - capex)
     
     return data
 
@@ -97,7 +97,7 @@ def transform_pricing(data):
     records = data["Monthly Adjusted Time Series"]
     transformed_data = []
     for date in records:
-        transformed_data.append({"date": date, "adjustedClose": round(float(records[date]["5. adjusted close"]), 2)})
+        transformed_data.append({"date": date, "adjustedClose": str(round(float(records[date]["5. adjusted close"]), 2))})
 
     return transformed_data
 
@@ -155,7 +155,7 @@ def compute_roe(income_statement, balance_sheet):
         roe = (net_income / avg_equity) * 100
         annual_roe.append({
             "fiscalDateEnding": current_date,
-            "ROEPercentage": round(roe, 2)
+            "ROEPercentage": str(round(roe, 2))
         })
     
     # Process quarterly reports
@@ -186,7 +186,7 @@ def compute_roe(income_statement, balance_sheet):
         roe = (net_income / avg_equity) * 100
         quarterly_roe.append({
             "fiscalDateEnding": current_date,
-            "ROEPercentage": round(roe, 2)
+            "ROEPercentage": str(round(roe, 2))
         })
     
     return {
@@ -236,7 +236,7 @@ def compute_pe(pricing, earnings):
         else:
             result["annualReports"].append({
                 "fiscalDateEnding": fiscal_date,
-                "PERatio": round(price / eps, 2),
+                "PERatio": str(round(price / eps, 2)),
             })
 
     quarterly_earnings = earnings.get("quarterlyEarnings", [])
@@ -268,7 +268,7 @@ def compute_pe(pricing, earnings):
 
         result["quarterlyReports"].append({
             "fiscalDateEnding": fiscal_date,
-            "PERatio": round(price / ttm_eps, 2),
+            "PERatio": str(round(price / ttm_eps, 2)),
         })
 
     return result
@@ -280,10 +280,6 @@ def compute_pb(pricing, balance_sheet):
     }
 
     def _month_key(date_str):
-        if not isinstance(date_str, str):
-            return None
-        if len(date_str) < 7:
-            return None
         key = date_str[:7]
         if len(key) != 7 or key[4] != "-":
             return None
@@ -338,7 +334,7 @@ def compute_pb(pricing, balance_sheet):
 
             result[bucket_name].append({
                 "fiscalDateEnding": fiscal_date,
-                "PBRatio": round(price / bvps, 2),
+                "PBRatio": str(round(price / bvps, 2)),
             })
 
     _append_pb(balance_sheet.get("annualReports", []), "annualReports")

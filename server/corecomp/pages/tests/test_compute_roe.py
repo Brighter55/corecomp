@@ -83,29 +83,29 @@ def test_compute_roe():
         "annualReports": [
             {
                 "fiscalDateEnding": "2024-12-31",
-                "ROEPercentage": 21.05
+                "ROEPercentage": "21.05"
             },
             {
                 "fiscalDateEnding": "2023-12-31",
-                "ROEPercentage": -360.0
+                "ROEPercentage": "-360.0"
             },
             {
                 "fiscalDateEnding": "2022-12-31",
-                "ROEPercentage": -320.0
+                "ROEPercentage": "-320.0"
             }
         ],
         "quarterlyReports": [
             {
                 "fiscalDateEnding": "2024-12-31",
-                "ROEPercentage": 5.54
+                "ROEPercentage": "5.54"
             },
             {
                 "fiscalDateEnding": "2024-09-30",
-                "ROEPercentage": -480.0
+                "ROEPercentage": "-480.0"
             },
             {
                 "fiscalDateEnding": "2024-06-30",
-                "ROEPercentage": -500.0
+                "ROEPercentage": "-500.0"
             }
         ],
     }
@@ -279,21 +279,21 @@ def test_misaligned_data_income_statement_behind():
         "annualReports": [
             {
                 "fiscalDateEnding": "2023-12-31",
-                "ROEPercentage": 21.05
+                "ROEPercentage": "21.05"
             },
             {
                 "fiscalDateEnding": "2022-12-31",
-                "ROEPercentage": 18.82
+                "ROEPercentage": "18.82"
             },
         ],
         "quarterlyReports": [
             {
                 "fiscalDateEnding": "2024-09-30",
-                "ROEPercentage": 4.95
+                "ROEPercentage": "4.95"
             },
             {
                 "fiscalDateEnding": "2024-06-30",
-                "ROEPercentage": 4.04
+                "ROEPercentage": "4.04"
             }
         ],
     }
@@ -377,21 +377,21 @@ def test_misaligned_data_balance_sheet_behind():
         "annualReports": [
             {
                 "fiscalDateEnding": "2023-12-31",
-                "ROEPercentage": 21.05
+                "ROEPercentage": "21.05"
             },
             {
                 "fiscalDateEnding": "2022-12-31",
-                "ROEPercentage": 18.82
+                "ROEPercentage": "18.82"
             },
         ],
         "quarterlyReports": [
             {
                 "fiscalDateEnding": "2024-09-30",
-                "ROEPercentage": 4.95
+                "ROEPercentage": "4.95"
             },
             {
                 "fiscalDateEnding": "2024-06-30",
-                "ROEPercentage": 4.04
+                "ROEPercentage": "4.04"
             }
         ],
     }

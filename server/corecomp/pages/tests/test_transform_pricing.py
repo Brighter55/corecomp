@@ -25,8 +25,8 @@ def test_transform_pricing():
         }
     }
     transformed_data = [
-        {"date": "2026-01-16", "adjustedClose": 305.67},
-        {"date": "2025-12-31", "adjustedClose": 296.21},
+        {"date": "2026-01-16", "adjustedClose": "305.67"},
+        {"date": "2025-12-31", "adjustedClose": "296.21"},
     ]
 
     data = transform_pricing(data)

@@ -34,31 +34,31 @@ def test_compute_pb():
 	}
 
 	pricing = [
-		{"date": "2024-12-20", "adjustedClose": 245.58},
-		{"date": "2024-09-30", "adjustedClose": 230.00},
-		{"date": "2024-06-15", "adjustedClose": 220.00},
-		{"date": "2023-12-15", "adjustedClose": 200.00},
+		{"date": "2024-12-20", "adjustedClose": "245.58"},
+		{"date": "2024-09-30", "adjustedClose": "230.00"},
+		{"date": "2024-06-15", "adjustedClose": "220.00"},
+		{"date": "2023-12-15", "adjustedClose": "200.00"},
 	]
 
 	result = {
 		"annualReports": [
 			{
 				"fiscalDateEnding": "2024-12-31",
-				"PBRatio": 61.40,
+				"PBRatio": "61.4",
 			},
 			{
 				"fiscalDateEnding": "2023-12-31",
-				"PBRatio": 50.0,
+				"PBRatio": "50.0",
 			},
 		],
 		"quarterlyReports": [
 			{
 				"fiscalDateEnding": "2024-09-30",
-				"PBRatio": 115.0,
+				"PBRatio": "115.0",
 			},
 			{
 				"fiscalDateEnding": "2024-06-30",
-				"PBRatio": 110.0,
+				"PBRatio": "110.0",
 			},
 		],
 	}
@@ -68,7 +68,7 @@ def test_compute_pb():
 
 
 def test_missing_data():
-	pricing = [{"date": "2024-12-31", "adjustedClose": 245.58}]
+	pricing = [{"date": "2024-12-31", "adjustedClose": "245.58"}]
 
 	# Case 1: totalAssets is missing
 	balance_sheet_missing_total_assets = {
@@ -193,8 +193,8 @@ def test_alignment():
 	}
 
 	pricing = [
-		{"date": "2026-01-16", "adjustedClose": 300.00},
-		{"date": "2025-12-31", "adjustedClose": 280.00},
+		{"date": "2026-01-16", "adjustedClose": "300.00"},
+		{"date": "2025-12-31", "adjustedClose": "280.00"},
 	]
 
 	result = {

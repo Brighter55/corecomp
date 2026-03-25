@@ -1,12 +1,12 @@
 from pages.utils import compute_pe
 
 pricing = [
-    {"date": "2026-01-16", "adjustedClose": 300.0},
-    {"date": "2025-12-31", "adjustedClose": 250.0},
-    {"date": "2025-09-30", "adjustedClose": 200.0},
-    {"date": "2025-06-30", "adjustedClose": 150.0},
-    {"date": "2025-03-30", "adjustedClose": 100.0},
-    {"date": "2024-12-31", "adjustedClose": 50.0},
+    {"date": "2026-01-16", "adjustedClose": "300.0"},
+    {"date": "2025-12-31", "adjustedClose": "250.0"},
+    {"date": "2025-09-30", "adjustedClose": "200.0"},
+    {"date": "2025-06-30", "adjustedClose": "150.0"},
+    {"date": "2025-03-30", "adjustedClose": "100.0"},
+    {"date": "2024-12-31", "adjustedClose": "50.0"},
 ]
 
 def test_compute_pe():
@@ -50,21 +50,21 @@ def test_compute_pe():
         "annualReports": [
             {
                 "fiscalDateEnding": "2025-12-31",
-                "PERatio": 12.5
+                "PERatio": "12.5"
             },
             {
                 "fiscalDateEnding": "2024-12-31",
-                "PERatio": 5.0
+                "PERatio": "5.0"
             },
         ],
         "quarterlyReports": [
             {
                 "fiscalDateEnding": "2025-12-31",
-                "PERatio": 17.86
+                "PERatio": "17.86"
             },
             {
                 "fiscalDateEnding": "2025-09-30",
-                "PERatio": 20.0
+                "PERatio": "20.0"
             },
         ],
     }
@@ -170,7 +170,7 @@ def test_report_has_value_none():
             },
             {
                 "fiscalDateEnding": "2025-09-30",
-                "PERatio": 20.0
+                "PERatio": "20.0"
             },
         ],
     }
@@ -181,8 +181,8 @@ def test_report_has_value_none():
 def test_alignment():
     # Test that earnings records with dates outside the pricing data range are filtered out
     local_pricing = [
-        {"date": "2026-01-16", "adjustedClose": 300.0},
-        {"date": "2025-12-31", "adjustedClose": 250.0},
+        {"date": "2026-01-16", "adjustedClose": "300.0"},
+        {"date": "2025-12-31", "adjustedClose": "250.0"},
     ]
     
     earnings = {
@@ -229,13 +229,13 @@ def test_alignment():
         "annualReports": [
             {
                 "fiscalDateEnding": "2025-12-31",
-                "PERatio": 50.0,
+                "PERatio": "50.0",
             },
         ],
         "quarterlyReports": [
             {
                 "fiscalDateEnding": "2025-12-31",
-                "PERatio": 67.57,
+                "PERatio": "67.57",
             },
         ],
     }
