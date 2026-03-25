@@ -1,33 +1,13 @@
 from pages.utils import compute_pe
 
-pricing = {
-    "Meta Data": {
-        "1. Information": "Monthly Adjusted Prices and Volumes",
-        "2. Symbol": "IBM",
-        "3. Last Refreshed": "2026-01-16",
-        "4. Time Zone": "US/Eastern"
-    },
-    "Monthly Adjusted Time Series": {
-        "2026-01-16": {
-            "5. adjusted close": "300.0000",
-        },
-        "2025-12-31": {
-        "5. adjusted close": "250.0000",
-        },
-        "2025-09-30": {
-        "5. adjusted close": "200.0000",
-        },
-        "2025-06-30": {
-        "5. adjusted close": "150.0000",
-        },
-        "2025-03-30": {
-        "5. adjusted close": "100.0000",
-        },
-        "2024-12-31": {
-        "5. adjusted close": "50.0000",
-        },
-    }
-}
+pricing = [
+    {"date": "2026-01-16", "adjustedClose": 300.0},
+    {"date": "2025-12-31", "adjustedClose": 250.0},
+    {"date": "2025-09-30", "adjustedClose": 200.0},
+    {"date": "2025-06-30", "adjustedClose": 150.0},
+    {"date": "2025-03-30", "adjustedClose": 100.0},
+    {"date": "2024-12-31", "adjustedClose": 50.0},
+]
 
 def test_compute_pe():
     earnings = {
@@ -200,22 +180,10 @@ def test_report_has_value_none():
 
 def test_alignment():
     # Test that earnings records with dates outside the pricing data range are filtered out
-    local_pricing = {
-        "Meta Data": {
-            "1. Information": "Monthly Adjusted Prices and Volumes",
-            "2. Symbol": "TEST",
-            "3. Last Refreshed": "2026-01-16",
-            "4. Time Zone": "US/Eastern"
-        },
-        "Monthly Adjusted Time Series": {
-            "2026-01-16": {
-                "5. adjusted close": "300.0000",
-            },
-            "2025-12-31": {
-                "5. adjusted close": "250.0000",
-            },
-        }
-    }
+    local_pricing = [
+        {"date": "2026-01-16", "adjustedClose": 300.0},
+        {"date": "2025-12-31", "adjustedClose": 250.0},
+    ]
     
     earnings = {
         "symbol": "TEST",
@@ -257,15 +225,24 @@ def test_alignment():
         ]
     }
 
-    result = compute_pe(local_pricing, earnings)
+    result = {
+        "annualReports": [
+            {
+                "fiscalDateEnding": "2025-12-31",
+                "PERatio": 50.0,
+            },
+        ],
+        "quarterlyReports": [
+            {
+                "fiscalDateEnding": "2025-12-31",
+                "PERatio": 67.57,
+            },
+        ],
+    }
     
-    assert len(result["annualReports"]) == 1
-    assert result["annualReports"][0]["fiscalDateEnding"] == "2025-12-31"
-    assert result["annualReports"][0]["PERatio"] == 50.0
-    
-    assert len(result["quarterlyReports"]) == 1
-    assert result["quarterlyReports"][0]["fiscalDateEnding"] == "2025-12-31"
-    assert result["quarterlyReports"][0]["PERatio"] == 67.57
+    data = compute_pe(local_pricing, earnings)
+
+    assert data == result
 
 def test_empty_data():
     pricing = {}

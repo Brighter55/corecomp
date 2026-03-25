@@ -24,15 +24,24 @@ def fetchAlphaVantage(url):
 
 def safe_int(value):
     # return None if value is "None"
-    if value is None or value.strip().lower() in ("none", ""):
+    if value is None:
         return None
+
+    if value.strip().lower() in ("none", ""):
+        return None
+    
     return int(value)
 
 def safe_float(value):
     # return None if value is "None"
-    if value is None or value.strip().lower() in ("none", ""):
+    if value is None:
         return None
+    
+    if value.strip().lower() in ("none", ""):
+        return None
+    
     return float(value)
+
 
 def annotate_profit_margin(data):
     annual_reports = data["annualReports"]
@@ -187,132 +196,86 @@ def compute_roe(income_statement, balance_sheet):
 
 def compute_pe(pricing, earnings):
     # must return a dict of annualReports and quarterlyReports. each report must be a list of dict containing fiscalDateEnding and PERatio
-    
-    from datetime import datetime
-    from collections import deque
-    
-    # Build a lookup for pricing data by year-month
-    pricing_data = pricing.get("Monthly Adjusted Time Series", {})
-    pricing_by_year_month = {}
-    
-    for date_str in pricing_data:
-        try:
-            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-            year_month = date_obj.strftime("%Y-%m")
-            price = safe_float(pricing_data[date_str]["5. adjusted close"])
-            
-            if year_month not in pricing_by_year_month:
-                pricing_by_year_month[year_month] = price
-        except (ValueError, KeyError):
-            continue
-    
-    annual_pe = []
-    quarterly_pe = []
-
-    pricing_months = set(pricing_by_year_month.keys())
-
-    def in_pricing_range(fiscal_date_str):
-        try:
-            year_month = datetime.strptime(fiscal_date_str, "%Y-%m-%d").strftime("%Y-%m")
-            return year_month in pricing_months
-        except ValueError:
-            return False
-    
-    # Process annual earnings
-    annual_earnings = [r for r in earnings.get("annualEarnings", []) if in_pricing_range(r["fiscalDateEnding"])]
-    for report in annual_earnings:
-        fiscal_date = report["fiscalDateEnding"]
-        eps = safe_float(report.get("reportedEPS"))
-        # let the report has None value if the earning has None data
-        if eps is None:
-            annual_pe.append({
-                "fiscalDateEnding": fiscal_date,
-                "PERatio": None
-            })
-            continue
-        
-        try:
-            date_obj = datetime.strptime(fiscal_date, "%Y-%m-%d")
-            year_month = date_obj.strftime("%Y-%m")
-            
-            # only appends to pe_ratio if year_month from earnings statement matches year_month in pricing statement
-            if year_month in pricing_by_year_month:
-                price = pricing_by_year_month[year_month]
-                pe_ratio = price / eps
-                annual_pe.append({
-                    "fiscalDateEnding": fiscal_date,
-                    "PERatio": round(pe_ratio, 2)
-                })
-            else:
-                annual_pe.append({
-                    "fiscalDateEnding": fiscal_date,
-                    "PERatio": None
-                })
-        except (ValueError, ZeroDivisionError):
-            annual_pe.append({
-                "fiscalDateEnding": fiscal_date,
-                "PERatio": None
-            })
-    
-    # Process quarterly earnings using TTM (trailing twelve months = sum of last 4 quarters)
-    quarterly_earnings = earnings.get("quarterlyEarnings", [])
-    
-    # reverse data to prepare for rolling window procedure
-    chronological = list(reversed(quarterly_earnings))
-    ttm_window = deque(maxlen=4)
-    
-    # build ttm earnings statement
-    ttm_by_date = {}
-    for report in chronological:
-        eps = safe_float(report.get("reportedEPS"))
-        # Use 0 for None so the window keeps rolling, but flag if any quarter in window was None
-        ttm_window.append(eps if eps is not None else 0) # will only append eps or 0
-        
-        if len(ttm_window) == 4: # [0,0,4, 5]
-            # Only produce a TTM value if all 4 quarters had valid EPS
-            if all(safe_float(q.get("reportedEPS")) is not None for q in chronological[chronological.index(report) - 3: chronological.index(report) + 1]):
-                ttm_by_date[report["fiscalDateEnding"]] = sum(ttm_window)
-            else:
-                ttm_by_date[report["fiscalDateEnding"]] = None
-    # build quarterly_pe
-    for report in quarterly_earnings:
-        fiscal_date = report["fiscalDateEnding"]
-
-        if fiscal_date not in ttm_by_date:
-            continue
-
-        ttm_eps = ttm_by_date[fiscal_date]
-        
-        if ttm_eps is None:
-            quarterly_pe.append({
-                "fiscalDateEnding": fiscal_date,
-                "PERatio": None
-            })
-            continue
-        
-        try:
-            date_obj = datetime.strptime(fiscal_date, "%Y-%m-%d")
-            year_month = date_obj.strftime("%Y-%m")
-            
-            if year_month in pricing_by_year_month:
-                price = pricing_by_year_month[year_month]
-                pe_ratio = price / ttm_eps
-                quarterly_pe.append({
-                    "fiscalDateEnding": fiscal_date,
-                    "PERatio": round(pe_ratio, 2)
-                })
-            else:
-                continue
-        except (ValueError, ZeroDivisionError):
-            quarterly_pe.append({
-                "fiscalDateEnding": fiscal_date,
-                "PERatio": None
-            })
-    
-    return {
-        "annualReports": annual_pe,
-        "quarterlyReports": quarterly_pe
+    result = {
+        "annualReports": [],
+        "quarterlyReports": [],
     }
+
+    def _month_key(date_str):
+        if not isinstance(date_str, str):
+            return None
+        if len(date_str) < 7:
+            return None
+        key = date_str[:7]
+        if len(key) != 7 or key[4] != "-":
+            return None
+        return key
+
+    pricing_by_month = {}
+    for point in pricing:
+        date_str = point.get("date")
+        close = safe_float(point.get("adjustedClose"))
+        month = _month_key(date_str)
+        if month is None or close is None:
+            continue
+        pricing_by_month[month] = close
+
+    if not pricing_by_month:
+        return result
+
+    annual_earnings = earnings.get("annualEarnings", [])
+    for report in annual_earnings:
+        fiscal_date = report.get("fiscalDateEnding")
+        price = pricing_by_month.get(_month_key(fiscal_date))
+
+        if price is None:
+            continue
+
+        eps = safe_float(report.get("reportedEPS"))
+        if eps is None or eps == 0:
+            result["annualReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PERatio": None,
+            })
+        else:
+            result["annualReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PERatio": round(price / eps, 2),
+            })
+
+    quarterly_earnings = earnings.get("quarterlyEarnings", [])
+    for i in range(len(quarterly_earnings) - 3):
+        current_report = quarterly_earnings[i]
+        fiscal_date = current_report.get("fiscalDateEnding")
+        price = pricing_by_month.get(_month_key(fiscal_date))
+
+        if price is None:
+            continue
+
+        ttm_reports = quarterly_earnings[i:i + 4]
+        ttm_eps_values = [safe_float(report.get("reportedEPS")) for report in ttm_reports]
+
+        if any(eps is None for eps in ttm_eps_values):
+            result["quarterlyReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PERatio": None,
+            })
+            continue
+
+        ttm_eps = sum(ttm_eps_values)
+        if ttm_eps == 0:
+            result["quarterlyReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PERatio": None,
+            })
+            continue
+
+        result["quarterlyReports"].append({
+            "fiscalDateEnding": fiscal_date,
+            "PERatio": round(price / ttm_eps, 2),
+        })
+
+    return result
 
 def compute_pb(pricing, balance_sheet):
     pass
