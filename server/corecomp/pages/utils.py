@@ -202,10 +202,6 @@ def compute_pe(pricing, earnings):
     }
 
     def _month_key(date_str):
-        if not isinstance(date_str, str):
-            return None
-        if len(date_str) < 7:
-            return None
         key = date_str[:7]
         if len(key) != 7 or key[4] != "-":
             return None
