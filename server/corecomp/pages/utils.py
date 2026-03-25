@@ -278,4 +278,74 @@ def compute_pe(pricing, earnings):
     return result
 
 def compute_pb(pricing, balance_sheet):
-    pass
+    result = {
+        "annualReports": [],
+        "quarterlyReports": [],
+    }
+
+    def _month_key(date_str):
+        if not isinstance(date_str, str):
+            return None
+        if len(date_str) < 7:
+            return None
+        key = date_str[:7]
+        if len(key) != 7 or key[4] != "-":
+            return None
+        return key
+
+    pricing_by_month = {}
+    for point in pricing:
+        date_str = point.get("date")
+        month = _month_key(date_str)
+        close_raw = point.get("adjustedClose")
+
+        if month is None or close_raw is None:
+            continue
+
+        try:
+            close = float(close_raw)
+        except (TypeError, ValueError):
+            continue
+
+        pricing_by_month[month] = close
+
+    if not pricing_by_month:
+        return result
+
+    def _append_pb(reports, bucket_name):
+        for report in reports:
+            fiscal_date = report.get("fiscalDateEnding")
+            price = pricing_by_month.get(_month_key(fiscal_date))
+
+            # Pricing is passive and may be misaligned; skip when no monthly match exists.
+            if price is None:
+                continue
+
+            total_assets = safe_int(report.get("totalAssets"))
+            total_liabilities = safe_int(report.get("totalLiabilities"))
+            shares_outstanding = safe_int(report.get("commonStockSharesOutstanding"))
+
+            if total_assets is None or total_liabilities is None or shares_outstanding is None or shares_outstanding == 0:
+                result[bucket_name].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PBRatio": None,
+                })
+                continue
+
+            bvps = (total_assets - total_liabilities) / shares_outstanding
+            if bvps == 0:
+                result[bucket_name].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PBRatio": None,
+                })
+                continue
+
+            result[bucket_name].append({
+                "fiscalDateEnding": fiscal_date,
+                "PBRatio": round(price / bvps, 2),
+            })
+
+    _append_pb(balance_sheet.get("annualReports", []), "annualReports")
+    _append_pb(balance_sheet.get("quarterlyReports", []), "quarterlyReports")
+
+    return result
