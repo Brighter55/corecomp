@@ -40,6 +40,7 @@ vi.mock("./index.js", () => ({
   PERatioGraph: () => <div>PERatioGraph</div>,
   EbitGraph: () => <div>EBIT</div>,
   EbitdaGraph: () => <div>EBITDA</div>,
+  PBRatioGraph: () => <div>PBRatioGraph</div>,
 }));
 
 describe("OverviewPage", () => {

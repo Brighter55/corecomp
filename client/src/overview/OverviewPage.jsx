@@ -13,7 +13,7 @@ import IconButton from "@mui/material/IconButton";
 import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
     SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph, ROEGraph,
-    PERatioGraph, EbitdaGraph, EbitGraph
+    PERatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph
 } from "./index.js"
 
 
@@ -67,6 +67,7 @@ function OverviewPage() {
                         <EPSGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></EPSGraph>
                         <ROEGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
                         <PERatioGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}/>
+                        <PBRatioGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}/>
                     </GraphsContainer>
                 </Stack>
             </Container>

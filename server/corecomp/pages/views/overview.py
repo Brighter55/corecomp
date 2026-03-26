@@ -1,12 +1,9 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.contrib.auth import get_user_model
-import json
 from dotenv import load_dotenv
 import os
-import requests
 from pages.utils import (
     annotate_profit_margin,
     annotate_free_cash_flow,
