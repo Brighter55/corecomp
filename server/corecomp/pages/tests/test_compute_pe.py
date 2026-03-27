@@ -1,12 +1,12 @@
 from pages.utils import compute_pe
 
 pricing = [
-    {"date": "2026-01-16", "close": "300.0"},
-    {"date": "2025-12-31", "close": "250.0"},
-    {"date": "2025-09-30", "close": "200.0"},
-    {"date": "2025-06-30", "close": "150.0"},
-    {"date": "2025-03-30", "close": "100.0"},
-    {"date": "2024-12-31", "close": "50.0"},
+    {"date": "2026-01-16", "adjustedClose": "300.0"},
+    {"date": "2025-12-31", "adjustedClose": "250.0"},
+    {"date": "2025-09-30", "adjustedClose": "200.0"},
+    {"date": "2025-06-30", "adjustedClose": "150.0"},
+    {"date": "2025-03-30", "adjustedClose": "100.0"},
+    {"date": "2024-12-31", "adjustedClose": "50.0"},
 ]
 
 def test_compute_pe():
@@ -181,8 +181,8 @@ def test_report_has_value_none():
 def test_alignment():
     # Test that earnings records with dates outside the pricing data range are filtered out
     local_pricing = [
-        {"date": "2026-01-16", "close": "300.0"},
-        {"date": "2025-12-31", "close": "250.0"},
+        {"date": "2026-01-16", "adjustedClose": "300.0"},
+        {"date": "2025-12-31", "adjustedClose": "250.0"},
     ]
     
     earnings = {

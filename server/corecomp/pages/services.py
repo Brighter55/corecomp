@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import status
-from pages.utils import fetchAlphaVantage, compute_roe, compute_pe
+from pages.utils import fetchAlphaVantage
 from dotenv import load_dotenv
 import os
 import json
