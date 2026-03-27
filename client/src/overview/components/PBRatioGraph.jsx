@@ -2,8 +2,7 @@ import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
 import Box from '@mui/material/Box';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import {useState, useEffect, useRef, useMemo} from "react"
@@ -28,22 +27,29 @@ const explanation = (
 	  >
 		  P/B Ratio = Market Price per Share / Book Value per Share
 	  </Typography>
+	  	  <Typography
+		  variant="explanationText"
+		  sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
+	  >
+		  Book Value per Share = (Total Assets - Total Liabilities) / Shares Outstanding
+	  </Typography>
 	  <Typography variant="explanationTopic">Interpretation</Typography>
-	  <Stack direction="row" spacing={1}>
-		  <TrendingUpIcon
-			  sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-		  />
+	  <Stack direction="column" spacing={1}>
 		  <Typography variant="explanationText">
-			  A rising P/B ratio often suggests that investors are increasingly optimistic about the company's growth prospects and asset quality. They are willing to pay a higher premium for the company's net assets.
+			  	P/B less than 1: Potential indicator of an undervalued stock or a company experiencing financial distress.
 		  </Typography>
-	  </Stack>
-	  <Stack direction="row" spacing={1}>
-		  <TrendingDownIcon
-			  sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-		  />
 		  <Typography variant="explanationText">
-				A downward trend in a Price-to-Book (P/B) ratio graph generally indicates that a company's stock price is falling relative to its book value, or that shareholders' equity is growing faster than the stock price. This contraction signifies that investors are paying less for each dollar of net assets, often making the stock "cheaper" or better value for asset-based investing.
+				P/B greater than 1: Generally suggests the stock is trading at a premium to its net assets, often reflecting high growth expectations, valuable intangibles, or high returns on assets.
 		  </Typography>
+		  <Typography variant="explanationText">
+				P/B = 1: The market price is valued exactly in line with the company's accounting net worth.
+		  </Typography>
+		  <Stack direction="row" spacing={1}>
+			  <TipsAndUpdatesIcon sx={{ color: "#D4A373", mt: 0.5, flexShrink: 0 }} />
+			  <Typography variant="explanationText">
+					It is best used when comparing companies within the same sector (e.g., banking or manufacturing), as industries with low physical assets like tech may have high P/B ratios.
+			  </Typography>
+		  </Stack>
 	  </Stack>
   </Stack>
 )

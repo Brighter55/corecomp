@@ -60,7 +60,10 @@ def _balance_sheet_payload():
 def _pricing_payload():
     return {
         "Monthly Adjusted Time Series": {
-            "2023-12-29": {"5. adjusted close": "150.00"}
+            "2023-12-29": {
+                "4. close": "150.00",
+                "5. adjusted close": "150.00",
+                }
         }
     }
 
