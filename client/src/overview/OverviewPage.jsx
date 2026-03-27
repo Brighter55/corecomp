@@ -12,7 +12,8 @@ import IconButton from "@mui/material/IconButton";
 // components
 import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
-    SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph
+    SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph, ROEGraph,
+    PERatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph
 } from "./index.js"
 
 
@@ -57,11 +58,16 @@ function OverviewPage() {
                         <ProfitMarginGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></ProfitMarginGraph>
                         <TotalRevenueGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
                         <NetIncomeGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></NetIncomeGraph>
+                        <EbitGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}/>
+                        <EbitdaGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}/>
                         <OperatingCashflowGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></OperatingCashflowGraph>
                         <CapitalExpendituresGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></CapitalExpendituresGraph>
                         <FreeCashflowGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
                         <CashVsDebtGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></CashVsDebtGraph>
                         <EPSGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></EPSGraph>
+                        <ROEGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
+                        <PERatioGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}/>
+                        <PBRatioGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}/>
                     </GraphsContainer>
                 </Stack>
             </Container>

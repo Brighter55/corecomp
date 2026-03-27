@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import status
-from pages.utils import fetchAlphaVantage
+from pages.utils import fetchAlphaVantage, compute_roe, compute_pe
 from dotenv import load_dotenv
 import os
 import json
@@ -55,7 +55,7 @@ class FinancialDataService:
         url = f"https://www.alphavantage.co/query?function=SHARES_OUTSTANDING&symbol={symbol}&apikey={api_key}"
         data = fetchAlphaVantage(url)
         return data
-        
+           
 class MockFinancialDataService:
     def get_current_price(self, symbol):
         path = "pages/statement_samples/global_quote.json"
