@@ -101,7 +101,6 @@ def transform_pricing(data):
             {
             "date": date,
             "adjustedClose": str(round(float(records[date]["5. adjusted close"]), 2)),
-            "close": str(round(float(records[date]["4. close"]), 2)),
             }
         )
 
@@ -216,7 +215,7 @@ def compute_pe(pricing, earnings):
     pricing_by_month = {}
     for point in pricing:
         date_str = point.get("date")
-        close = safe_float(point.get("close"))
+        close = safe_float(point.get("adjustedClose"))
         month = _month_key(date_str)
         if month is None or close is None:
             continue
@@ -295,7 +294,7 @@ def compute_pb(pricing, balance_sheet):
     for point in pricing:
         date_str = point.get("date")
         month = _month_key(date_str)
-        close_raw = point.get("close")
+        close_raw = point.get("adjustedClose")
 
         if month is None or close_raw is None:
             continue
