@@ -181,8 +181,8 @@ def test_report_has_value_none():
 def test_alignment():
     # Test that earnings records with dates outside the pricing data range are filtered out
     local_pricing = [
-        {"date": "2026-01-16", "close": "300.0"},
-        {"date": "2025-12-31", "close": "250.0"},
+        {"date": "2026-01-16", "adjustedClose": "300.0"},
+        {"date": "2025-12-31", "adjustedClose": "250.0"},
     ]
     
     earnings = {
