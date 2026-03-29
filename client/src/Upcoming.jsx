@@ -12,11 +12,12 @@ function Upcoming() {
                 <LandingHeader></LandingHeader>
                 <Stack spacing={3}>
                     <Stack spacing={2}>
-                        <Typography variant="h5" fontWeight="bold">Upcoming Version: 0.3.0 (???)</Typography>
-                        <Typography variant="body1"> - more features</Typography>
+                        <Typography variant="h5" fontWeight="bold">Current Version: 0.3.0 (03/29/2026)</Typography>
+                        <Typography variant="body1"> - Beta coefficient diagram</Typography>
+                        <Typography variant="body1"> - refactor codebase for performance purpose</Typography>
                     </Stack>
                     <Stack spacing={2}>
-                        <Typography variant="h5" fontWeight="bold">Current Version: 0.2.0 (3/26/2026)</Typography>
+                        <Typography variant="h5" fontWeight="bold">Version: 0.2.0 (03/26/2026)</Typography>
                         <Stack spacing={1}>
                             <Typography variant="body1"> - EBIT graph</Typography>
                             <Typography variant="body1"> - EBITDA graph</Typography>
@@ -26,7 +27,7 @@ function Upcoming() {
                         </Stack>
                     </Stack>
                     <Stack spacing={2}>
-                        <Typography variant="h5" fontWeight="bold">Version: 0.1.0 (3/9/2026)</Typography>
+                        <Typography variant="h5" fontWeight="bold">Version: 0.1.0 (03/9/2026)</Typography>
                         <Typography variant="body1"> - first deployment</Typography>
                     </Stack>
                 </Stack>
