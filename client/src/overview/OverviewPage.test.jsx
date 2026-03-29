@@ -1,25 +1,34 @@
-import OverviewPage from "./OverviewPage.jsx"
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import OverviewPage from "./OverviewPage.jsx";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
+const { mockAuthenticatedClientWithRetry } = vi.hoisted(() => ({
+  mockAuthenticatedClientWithRetry: vi.fn(),
+}));
+
+vi.mock("../helpers/api.js", async () => {
+  const actual = await vi.importActual("../helpers/api.js");
+  return {
+    ...actual,
+    authenticatedClientWithRetry: mockAuthenticatedClientWithRetry,
+  };
+});
 
 vi.mock("../headers/product-header/ProductHeader.jsx", () => ({
-  default: () => <div data-testid="product-header">Product Header</div>
+  default: () => <div data-testid="product-header">Product Header</div>,
 }));
 
 vi.mock("../shared/SymbolSearch.jsx", () => ({
   default: ({ handleSearchSubmit }) => (
-    <input 
+    <input
       data-testid="symbol-search"
       onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          handleSearchSubmit(e, 'AAPL');
+        if (e.key === "Enter") {
+          handleSearchSubmit(e, "AAPL");
         }
       }}
     />
-  )
+  ),
 }));
 
 vi.mock("./index.js", () => ({
@@ -44,37 +53,61 @@ vi.mock("./index.js", () => ({
 }));
 
 describe("OverviewPage", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockAuthenticatedClientWithRetry.mockResolvedValue({
+      status: 200,
+      json: async () => ({ annualReports: [], quarterlyReports: [] }),
+    });
+  });
+
+  test("loads up properly", () => {
+    render(
+      <MemoryRouter>
+        <OverviewPage />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("Enter stock symbol and get started now!")).toBeInTheDocument();
+  });
+
+  test("handles search submit, renders statement sections, and issues section fetches", async () => {
+    render(
+      <MemoryRouter>
+        <OverviewPage />
+      </MemoryRouter>
+    );
+
+    fireEvent.keyDown(screen.getByTestId("symbol-search"), { key: "Enter" });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("hero")).toBeInTheDocument();
     });
 
-    test("loads up properly", () => {
-        render(
-            <MemoryRouter>
-                <OverviewPage />
-            </MemoryRouter>
-        );
+    expect(screen.getByTestId("info")).toBeInTheDocument();
+    expect(screen.getByText("Pricing Statement")).toBeInTheDocument();
+    expect(screen.getByText("Dividend Statement")).toBeInTheDocument();
+    expect(screen.getByText("Earnings Statement")).toBeInTheDocument();
+    expect(screen.getByText("Income Statement")).toBeInTheDocument();
+    expect(screen.getByText("Cash Flow Statement")).toBeInTheDocument();
+    expect(screen.getByText("Balance Sheet Statement")).toBeInTheDocument();
+    expect(screen.getByText("Ratios Statement")).toBeInTheDocument();
 
-        expect(screen.getByText("Enter stock symbol and get started now!")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(9);
     });
 
-    test("handles search submit and displays graphs", async () => {
-        render(
-            <MemoryRouter>
-                <OverviewPage />
-            </MemoryRouter>
-        );
-
-        const searchInput = screen.getByTestId("symbol-search");
-        
-        fireEvent.keyDown(searchInput, { key: 'Enter' });
-
-        await waitFor(() => {
-            expect(screen.getByTestId("hero")).toBeInTheDocument();
-        });
-
-        expect(screen.queryByText("Enter stock symbol and get started now!")).not.toBeInTheDocument();
-        
-        expect(screen.getByTestId("info")).toBeInTheDocument();
-    });
+    const calledEndpoints = mockAuthenticatedClientWithRetry.mock.calls.map((call) => call[0]);
+    expect(calledEndpoints).toEqual(
+      expect.arrayContaining([
+        "/pages/pricing",
+        "/pages/dividends",
+        "/pages/earnings",
+        "/pages/income-statement",
+        "/pages/cash-flow",
+        "/pages/balance-sheet",
+        "/pages/composite",
+      ])
+    );
+  });
 });

@@ -3,8 +3,6 @@ import {useState, useEffect, useRef, useMemo} from "react"
 import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
-import { authenticatedClientWithRetry } from "../../helpers/api.js"
-import { useNavigate } from "react-router-dom";
 import Explanation from "./Explanation.jsx"
 import TimeRanges from "./TimeRanges.jsx"
 // mui
@@ -75,36 +73,11 @@ const explanation = (
 )
 
 
-function CashVsDebtGraph({ symbol, fetchVersion, setSymbol, period }) {
-    const navigate = useNavigate();
-    const [statement, setStatement] = useState(null);
+function CashVsDebtGraph({ statement, period }) {
     const [timeRange, setTimeRange] = useState("all");
     const [graphClicked, setGraphClicked] = useState(false);
 
     const graphRef = useRef(null);
-
-    useEffect(() => {
-        async function getStatement() {
-            const payload = {symbol: symbol};
-            const response = await authenticatedClientWithRetry("/pages/balance-sheet", payload, () => isActive, navigate, setSymbol);
-            if (!isActive) {
-                return;
-            }
-            if (response.status === 204) {
-                setStatement([]);
-                return;
-            }
-            const data = await response.json();
-            setStatement(data);
-        }
-
-        let isActive = true;
-        getStatement();
-
-        return  () => {
-            isActive = false;
-        };
-    }, [symbol, fetchVersion]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {

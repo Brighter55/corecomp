@@ -1,7 +1,9 @@
-import {useState} from "react"
+import {useEffect, useState} from "react"
+import { useNavigate } from "react-router-dom";
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
 import PeriodSwitch from "./components/PeriodSwitch.jsx"
 import SymbolSearch from "../shared/SymbolSearch.jsx"
+import { authenticatedClientWithRetry } from "../helpers/api.js"
 // mui components
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -25,9 +27,19 @@ const GraphsContainer = styled(Stack)({
 });
 
 function OverviewPage() {
+    const navigate = useNavigate();
     const [symbol, setSymbol] = useState("");
     const [period, setPeriod] = useState("annually");
     const [fetchVersion, setFetchVersion] = useState(0);
+    const [pricingStatement, setPricingStatement] = useState(null);
+    const [dividendsStatement, setDividendsStatement] = useState(null);
+    const [earningsStatement, setEarningsStatement] = useState(null);
+    const [incomeStatement, setIncomeStatement] = useState(null);
+    const [cashFlowStatement, setCashFlowStatement] = useState(null);
+    const [balanceSheetStatement, setBalanceSheetStatement] = useState(null);
+    const [roeStatement, setRoeStatement] = useState(null);
+    const [peStatement, setPeStatement] = useState(null);
+    const [pbStatement, setPbStatement] = useState(null);
 
 
     function handleSearchSubmit(event, symbolFromChild) {
@@ -37,6 +49,258 @@ function OverviewPage() {
         console.log("sent", symbol);
         setFetchVersion(v => v + 1);
     }
+
+    useEffect(() => {
+        if (!symbol) {
+            setPricingStatement(null);
+            return;
+        }
+
+        async function getPricingStatement() {
+            const payload = {symbol: symbol};
+            const response = await authenticatedClientWithRetry("/pages/pricing", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setPricingStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setPricingStatement(data);
+        }
+
+        let isActive = true;
+        getPricingStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
+            setDividendsStatement(null);
+            return;
+        }
+
+        async function getDividendsStatement() {
+            const payload = {symbol: symbol};
+            const response = await authenticatedClientWithRetry("/pages/dividends", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setDividendsStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setDividendsStatement(data);
+        }
+
+        let isActive = true;
+        getDividendsStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
+            setEarningsStatement(null);
+            return;
+        }
+
+        async function getEarningsStatement() {
+            const payload = {symbol: symbol};
+            const response = await authenticatedClientWithRetry("/pages/earnings", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setEarningsStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setEarningsStatement(data);
+        }
+
+        let isActive = true;
+        getEarningsStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
+            setIncomeStatement(null);
+            return;
+        }
+
+        async function getIncomeStatement() {
+            const payload = {symbol: symbol};
+            const response = await authenticatedClientWithRetry("/pages/income-statement", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setIncomeStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setIncomeStatement(data);
+        }
+
+        let isActive = true;
+        getIncomeStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
+            setCashFlowStatement(null);
+            return;
+        }
+
+        async function getCashFlowStatement() {
+            const payload = {symbol: symbol};
+            const response = await authenticatedClientWithRetry("/pages/cash-flow", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setCashFlowStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setCashFlowStatement(data);
+        }
+
+        let isActive = true;
+        getCashFlowStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
+            setBalanceSheetStatement(null);
+            return;
+        }
+
+        async function getBalanceSheetStatement() {
+            const payload = {symbol: symbol};
+            const response = await authenticatedClientWithRetry("/pages/balance-sheet", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setBalanceSheetStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setBalanceSheetStatement(data);
+        }
+
+        let isActive = true;
+        getBalanceSheetStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
+            setRoeStatement(null);
+            return;
+        }
+
+        async function getRoeStatement() {
+            const payload = {symbol: symbol, graph: "ROEPercentage"};
+            const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setRoeStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setRoeStatement(data);
+        }
+
+        let isActive = true;
+        getRoeStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
+            setPeStatement(null);
+            return;
+        }
+
+        async function getPeStatement() {
+            const payload = {symbol: symbol, graph: "PERatio"};
+            const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setPeStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setPeStatement(data);
+        }
+
+        let isActive = true;
+        getPeStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
+            setPbStatement(null);
+            return;
+        }
+
+        async function getPbStatement() {
+            const payload = {symbol: symbol, graph: "PBRatio"};
+            const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setPbStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setPbStatement(data);
+        }
+
+        let isActive = true;
+        getPbStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
 
     if (symbol) {
         return (
@@ -48,27 +312,58 @@ function OverviewPage() {
                 <Stack spacing={5} sx={{ alignItems: "center" }}>
                     <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
                     <Info symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Info>
-                    <GraphsContainer direction={{ xs: "column", md: "row" }}>
-                        <DividendsPayoutGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></DividendsPayoutGraph>
-                        <PricingGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
-                        <SharesOutstandingGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></SharesOutstandingGraph>
-                    </GraphsContainer>
+                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
+                        <Typography variant="h4">Pricing Statement</Typography>
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <PricingGraph statement={pricingStatement} period={period} />
+                        </GraphsContainer>
+                    </Stack>
+                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
+                        <Typography variant="h4">Dividend Statement</Typography>
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <DividendsPayoutGraph statement={dividendsStatement} period={period}></DividendsPayoutGraph>
+                        </GraphsContainer>
+                    </Stack>
                     <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
-                    <GraphsContainer direction={{ xs: "column", md: "row" }}>
-                        <ProfitMarginGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></ProfitMarginGraph>
-                        <TotalRevenueGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
-                        <NetIncomeGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></NetIncomeGraph>
-                        <EbitGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}/>
-                        <EbitdaGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}/>
-                        <OperatingCashflowGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></OperatingCashflowGraph>
-                        <CapitalExpendituresGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></CapitalExpendituresGraph>
-                        <FreeCashflowGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
-                        <CashVsDebtGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></CashVsDebtGraph>
-                        <EPSGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}></EPSGraph>
-                        <ROEGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period} />
-                        <PERatioGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}/>
-                        <PBRatioGraph symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol} period={period}/>
-                    </GraphsContainer>
+                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
+                        <Typography variant="h4">Earnings Statement</Typography>
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <EPSGraph statement={earningsStatement} period={period}></EPSGraph>
+                        </GraphsContainer>
+                    </Stack>
+                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
+                        <Typography variant="h4">Income Statement</Typography>
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <ProfitMarginGraph statement={incomeStatement} period={period}></ProfitMarginGraph>
+                            <TotalRevenueGraph statement={incomeStatement} period={period} />
+                            <NetIncomeGraph statement={incomeStatement} period={period}></NetIncomeGraph>
+                            <EbitGraph statement={incomeStatement} period={period}/>
+                            <EbitdaGraph statement={incomeStatement} period={period}/>
+                        </GraphsContainer>
+                    </Stack>
+                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
+                        <Typography variant="h4">Cash Flow Statement</Typography>
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <OperatingCashflowGraph statement={cashFlowStatement} period={period}></OperatingCashflowGraph>
+                            <CapitalExpendituresGraph statement={cashFlowStatement} period={period}></CapitalExpendituresGraph>
+                            <FreeCashflowGraph statement={cashFlowStatement} period={period} />
+                        </GraphsContainer>
+                    </Stack>
+                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
+                        <Typography variant="h4">Balance Sheet Statement</Typography>
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <CashVsDebtGraph statement={balanceSheetStatement} period={period}></CashVsDebtGraph>
+                            <SharesOutstandingGraph statement={balanceSheetStatement} period={period}></SharesOutstandingGraph>
+                        </GraphsContainer>
+                    </Stack>
+                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
+                        <Typography variant="h4">Ratios Statement</Typography>
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <ROEGraph statement={roeStatement} period={period} />
+                            <PERatioGraph statement={peStatement} period={period}/>
+                            <PBRatioGraph statement={pbStatement} period={period}/>
+                        </GraphsContainer>
+                    </Stack>
                 </Stack>
             </Container>
         )

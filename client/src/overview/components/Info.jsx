@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 import AnalystRatings from "./AnalystRatings.jsx"
+import BetaChart from "./BetaChart.jsx"
 // helper
 import { authenticatedClientWithRetry } from "../../helpers/api.js"
 // mui
@@ -307,6 +308,12 @@ function Info({ symbol, fetchVersion, setSymbol }) {
                         analystRatingSell={companyData.analystRatingSell}
                         analystRatingStrongSell={companyData.analystRatingStrongSell}
                     />
+                :
+                    <Skeleton variant="rounded" height={200} />
+                }
+
+                {companyData ? 
+                    <BetaChart beta={companyData.beta}/>
                 :
                     <Skeleton variant="rounded" height={200} />
                 }

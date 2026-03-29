@@ -330,38 +330,6 @@ def pricing(request):
 
 @api_view(["POST"])
 @permission_classes([IsSubscribed])
-def shares_outstanding(request):
-    serializer = SymbolSerializer(data=request.data)
-    if serializer.is_valid():
-        symbol = serializer.validated_data["symbol"]
-        redis = get_redis_connection("default")
-
-        key = f"shares_outstanding_{symbol}"
-        cached_data = cache.get(key)
-        if cached_data:
-            return Response(cached_data, status=status.HTTP_200_OK)
-        
-        lock = redis.lock(f"lock:{key}", timeout=10)
-        with lock:
-            cached_data = cache.get(key)
-            if cached_data:
-                return Response(cached_data, status=status.HTTP_200_OK)
-
-            data = financial_data_service.get_shares_outstanding(symbol)
-
-            if isinstance(data, Response): # Alpha Vantage returns invalid symbol error as "Error Message" for pricing endpoint
-                return data            
-            
-            if not data:
-                return Response(status=status.HTTP_204_NO_CONTENT)
-
-            cache.set(key, data, timeout=604800)
-
-        return Response(data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(["POST"])
-@permission_classes([IsSubscribed])
 def composite(request):
     symbol_serializer = SymbolSerializer(data=request.data)
     composite_graph_serializer = CompositeGraphSerializer(data=request.data)

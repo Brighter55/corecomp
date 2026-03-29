@@ -6,8 +6,6 @@ import {filterReports, getPercentChange, formatToUnits} from "../../helpers/Grap
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
-import { authenticatedClientWithRetry } from "../../helpers/api.js"
-import { useNavigate } from "react-router-dom";
 // mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
@@ -48,36 +46,11 @@ const explanation = (
 )
 
 
-function SharesOutstandingGraph({ symbol, fetchVersion, setSymbol, period }) {
-    const navigate = useNavigate();
-    const [statement, setStatement] = useState(null);
+function SharesOutstandingGraph({ statement, period }) {
     const [timeRange, setTimeRange] = useState("all");
     const [graphClicked, setGraphClicked] = useState(false);
 
     const graphRef = useRef(null);
-
-    useEffect(() => {
-        async function getStatement() {
-            const payload = {symbol: symbol};
-            const response = await authenticatedClientWithRetry("/pages/shares-outstanding", payload, () => isActive, navigate, setSymbol);
-            if (!isActive) {
-                return;
-            }
-            if (response.status === 204) {
-                setStatement([]);
-                return;
-            }
-            const data = await response.json();
-            setStatement(data);
-        }
-
-        let isActive = true;
-        getStatement();
-
-        return  () => {
-            isActive = false;
-        };
-    }, [symbol, fetchVersion]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -96,7 +69,8 @@ function SharesOutstandingGraph({ symbol, fetchVersion, setSymbol, period }) {
         if (!statement) return [];
         if (Array.isArray(statement) && statement.length === 0) return [];
 
-        const filteredReports = filterReports(statement["data"], timeRange, "date");
+        const reportsByPeriod = statement[period === "annually" ? "annualReports" : "quarterlyReports"];
+        const filteredReports = filterReports(reportsByPeriod, timeRange, "fiscalDateEnding");
         console.log("SharesOutstandingGraph: ", filteredReports);
         return filteredReports;
     }, [statement, timeRange, period]);
@@ -105,7 +79,7 @@ function SharesOutstandingGraph({ symbol, fetchVersion, setSymbol, period }) {
         if (!reports.length) {
             return NaN;
         }
-        const percentChange = getPercentChange(reports, "shares_outstanding_basic");
+        const percentChange = getPercentChange(reports, "commonStockSharesOutstanding");
         return percentChange;
     }, [reports]);
 
@@ -138,10 +112,10 @@ function SharesOutstandingGraph({ symbol, fetchVersion, setSymbol, period }) {
                                 }}
                             >
                                 <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                                <XAxis dataKey="date" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}} />
+                                <XAxis dataKey="fiscalDateEnding" interval="equidistantPreserveStart" stroke="#344E41" tick={{fontSize: 12}} />
                                 <YAxis tickFormatter={(value) => formatToUnits(value)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]} />
                                 <Tooltip formatter={(value) => formatToUnits(value)} />
-                                <Bar name="Basic Shares Outstanding" dataKey="shares_outstanding_basic" shape={<CustomBar></CustomBar>}  activeBar={<CustomActiveBar></CustomActiveBar>} />
+                                <Bar name="Basic Shares Outstanding" dataKey="commonStockSharesOutstanding" shape={<CustomBar></CustomBar>}  activeBar={<CustomActiveBar></CustomActiveBar>} />
                             </BarChart>
                         </ResponsiveContainer>
                     </Box>
