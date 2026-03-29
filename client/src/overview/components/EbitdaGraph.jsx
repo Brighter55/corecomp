@@ -2,12 +2,10 @@ import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 import CustomBar from "./CustomBar.jsx"
 import CustomActiveBar from "./CustomActiveBar.jsx"
 import {useState, useEffect, useRef, useMemo} from "react"
-import { useNavigate } from "react-router-dom";
 import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
-import { authenticatedClientWithRetry } from "../../helpers/api.js"
 // mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
@@ -50,36 +48,11 @@ const explanation = (
     </Stack>
 )
 
-function EbitdaGraph({ symbol, fetchVersion, setSymbol, period }) {
-    const navigate = useNavigate();
-    const [statement, setStatement] = useState(null);
+function EbitdaGraph({ statement, period }) {
     const [timeRange, setTimeRange] = useState("all");
     const [graphClicked, setGraphClicked] = useState(false);
 
     const graphRef = useRef(null);
-
-    useEffect(() => {
-        async function getStatement() {
-            const payload = {symbol: symbol};
-            const response = await authenticatedClientWithRetry("/pages/income-statement", payload, () => isActive, navigate, setSymbol);
-            if (!isActive) {
-                return;
-            }
-            if (response.status === 204) {
-                setStatement([]);
-                return;
-            }
-            const data = await response.json();
-            setStatement(data);
-        }
-
-        let isActive = true;
-        getStatement();
-
-        return  () => {
-            isActive = false;
-        };
-    }, [symbol, fetchVersion]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {

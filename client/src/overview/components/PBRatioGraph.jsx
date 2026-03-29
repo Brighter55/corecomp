@@ -7,8 +7,6 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import {useState, useEffect, useRef, useMemo} from "react"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
-import { useNavigate } from "react-router-dom";
-import { authenticatedClientWithRetry } from "../../helpers/api.js"
 import Skeleton from '@mui/material/Skeleton';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import CustomBar from "./CustomBar.jsx"
@@ -55,36 +53,11 @@ const explanation = (
 )
 
 
-export default function PBRatioGraph({ symbol, fetchVersion, setSymbol, period }) {
-	const navigate = useNavigate();
-	const [statement, setStatement] = useState(null);
+export default function PBRatioGraph({ statement, period }) {
 	const [timeRange, setTimeRange] = useState("all");
 	const [graphClicked, setGraphClicked] = useState(false);
 
 	const graphRef = useRef(null);
-
-	useEffect(() => {
-		async function getStatement() {
-			const payload = {symbol: symbol, graph: "PBRatio"};
-			const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
-			if (!isActive) {
-				return;
-			}
-			if (response.status === 204) {
-				setStatement([]);
-				return;
-			}
-			const data = await response.json();
-			setStatement(data);
-		}
-
-		let isActive = true;
-		getStatement();
-
-		return  () => {
-			isActive = false;
-		};
-	}, [symbol, fetchVersion]);
 
 	useEffect(() => {
 		const handleClickOutside = (event) => {

@@ -3,9 +3,7 @@ import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Respons
 import GraphCard from "./GraphCard.jsx"
 import GraphTitle from "./GraphTitle.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
-import { useNavigate } from "react-router-dom";
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
-import { authenticatedClientWithRetry } from "../../helpers/api.js"
 //mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
@@ -46,38 +44,11 @@ const explanation = (
     </Stack>
 )
 
-function DividendsPayoutGraph({ symbol, fetchVersion, setSymbol, period }) {
-    const navigate = useNavigate();
-    const [statement, setStatement] = useState(null);
+function DividendsPayoutGraph({ statement, period }) {
     const [timeRange, setTimeRange] = useState("all");
     const [graphClicked, setGraphClicked] = useState(false);
 
     const graphRef = useRef(null);
-
-    useEffect(() => {
-        async function getStatement() {
-            const payload = {symbol: symbol};
-            const response = await authenticatedClientWithRetry("/pages/dividends", payload, () => isActive, navigate, setSymbol);
-            if (!isActive) {
-                return;
-            }
-
-            if (response.status === 204) {
-                setStatement([]);
-                return;
-            }
-
-            const data = await response.json();
-            setStatement(data);
-        }
-
-        let isActive = true;
-        getStatement();
-
-        return  () => {
-            isActive = false;
-        };
-    }, [symbol, fetchVersion]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {

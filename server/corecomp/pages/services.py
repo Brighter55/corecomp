@@ -50,11 +50,6 @@ class FinancialDataService:
         url = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol={symbol}&apikey={api_key}"
         data = fetchAlphaVantage(url)
         return data
-    
-    def get_shares_outstanding(self, symbol):
-        url = f"https://www.alphavantage.co/query?function=SHARES_OUTSTANDING&symbol={symbol}&apikey={api_key}"
-        data = fetchAlphaVantage(url)
-        return data
            
 class MockFinancialDataService:
     def get_current_price(self, symbol):
@@ -101,12 +96,6 @@ class MockFinancialDataService:
     
     def get_pricing(self, symbol):
         path = "pages/statement_samples/pricing.json"
-        with open(path, 'r') as file:
-            data = json.load(file)
-        return data
-    
-    def get_shares_outstanding(self, symbol):
-        path = "pages/statement_samples/shares_outstanding.json"
         with open(path, 'r') as file:
             data = json.load(file)
         return data

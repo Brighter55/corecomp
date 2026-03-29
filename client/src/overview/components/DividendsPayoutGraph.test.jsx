@@ -1,215 +1,54 @@
-import DividendsPayoutGraph from './DividendsPayoutGraph';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import DividendsPayoutGraph from "./DividendsPayoutGraph.jsx";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
-const mockFetch = vi.fn();
-const mockSetSymbol = vi.fn();
 const mockFilterReports = vi.fn();
 const mockGetPercentChange = vi.fn();
 
-global.fetch = mockFetch;
-
 vi.mock("recharts", async () => {
-    const actual = await vi.importActual("recharts");
-    return {
-        ...actual,
-        ResponsiveContainer: () => (
-            <div></div>
-        ),
-    } 
+  const actual = await vi.importActual("recharts");
+  return { ...actual, ResponsiveContainer: () => <div></div> };
 });
+
 vi.mock("../../helpers/GraphsHelper.js", async () => {
-    const actual = await vi.importActual("../../helpers/GraphsHelper.js");
-    return {
-        ...actual,
-        filterReports: () => mockFilterReports(),
-        getPercentChange: () => mockGetPercentChange(),
-    }
+  const actual = await vi.importActual("../../helpers/GraphsHelper.js");
+  return {
+    ...actual,
+    filterReports: () => mockFilterReports(),
+    getPercentChange: () => mockGetPercentChange(),
+  };
 });
 
 describe("DividendsPayoutGraph", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
+  beforeEach(() => vi.clearAllMocks());
 
-    test("loads up properly", async () => {
-        const return_value = {
-            data: [
-                { ex_dividend_date: "2024-01-01",  amount: "1.00"},
-            ]
-        }
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            status: 200,
-            json: async () => (return_value),
-        });
-        mockFilterReports.mockReturnValue([{ ex_dividend_date: "2024-01-01",  amount: "1.00"}]);
-        mockGetPercentChange.mockReturnValue(0);
-        render(
-            <MemoryRouter>
-                <DividendsPayoutGraph symbol="AAPL" fetchVersion={0} setSymbol={mockSetSymbol} period="annually"></DividendsPayoutGraph>
-            </MemoryRouter>
-        );
-        await waitFor(() => {
-            expect(mockFetch).toHaveBeenCalledWith(
-                "http://localhost:8000/pages/dividends",
-                expect.objectContaining({
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({symbol: "AAPL"}),
-                }),
-            );
-        });
-        const title = await screen.findByText(/Dividend Payouts/i);
-        expect(title).toBeInTheDocument();
-        expect(mockFilterReports).toHaveBeenCalledTimes(1);
-        expect(mockGetPercentChange).toHaveBeenCalledTimes(1);
-    });
+  test("loads with statement prop", async () => {
+    const statement = { data: [{ ex_dividend_date: "2024-01-01", amount: "1.2" }] };
+    mockFilterReports.mockReturnValue(statement.data);
+    mockGetPercentChange.mockReturnValue(0);
 
-    test("update graph if symbol or fetchVersion changes", async () => {
-        const firstReturnValue = {
-            data: [
-                { ex_dividend_date: "2024-01-01",  amount: "1.00"},
-            ]
-        }
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            status: 200,
-            json: async () => (firstReturnValue),
-        });
+    render(<MemoryRouter><DividendsPayoutGraph statement={statement} period="annually" /></MemoryRouter>);
 
-        mockFilterReports.mockReturnValue([{ ex_dividend_date: "2024-01-01",  amount: "1.00"},]);
-        mockGetPercentChange.mockReturnValue(0);
+    expect(await screen.findByText("Dividend Payouts")).toBeInTheDocument();
+    expect(mockFilterReports).toHaveBeenCalledTimes(1);
+  });
 
-        const { rerender } = render(
-            <MemoryRouter>
-                <DividendsPayoutGraph symbol="AAPL" fetchVersion={0} setSymbol={mockSetSymbol} period="annually"></DividendsPayoutGraph>
-            </MemoryRouter>
-        );
-        await waitFor(() => {
-            expect(mockFetch).toHaveBeenCalledWith(
-                "http://localhost:8000/pages/dividends",
-                expect.objectContaining({
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({symbol: "AAPL"}),
-                }),
-            );
-        });
+  test("updates when statement prop changes", async () => {
+    const first = { data: [{ ex_dividend_date: "2024-01-01", amount: "1.2" }] };
+    const second = { data: [{ ex_dividend_date: "2024-01-01", amount: "1.4" }] };
 
-        const secondReturnValue = {
-            data: [
-                { ex_dividend_date: "2024-01-01",  amount: "2.00"},
-            ]
-        }
+    mockFilterReports.mockReturnValue(first.data);
+    const { rerender } = render(<MemoryRouter><DividendsPayoutGraph statement={first} period="annually" /></MemoryRouter>);
 
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            status: 200,
-            json: async () => (secondReturnValue),
-        });
+    mockFilterReports.mockReturnValue(second.data);
+    rerender(<MemoryRouter><DividendsPayoutGraph statement={second} period="annually" /></MemoryRouter>);
 
-        mockFilterReports.mockReturnValue([{ ex_dividend_date: "2024-01-01",  amount: "2.00"},]);
-        mockGetPercentChange.mockReturnValue(0);
+    expect(await screen.findByText("Dividend Payouts")).toBeInTheDocument();
+    expect(mockFilterReports).toHaveBeenCalledTimes(2);
+  });
 
-        rerender(
-            <MemoryRouter>
-                <DividendsPayoutGraph symbol="TSLA" fetchVersion={1} setSymbol={mockSetSymbol} period="annually"></DividendsPayoutGraph>
-            </MemoryRouter>
-        );
-
-        await waitFor(() => {
-            expect(mockFetch).toHaveBeenCalledWith(
-                "http://localhost:8000/pages/dividends",
-                expect.objectContaining({
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({symbol: "TSLA"}),
-                }),
-            );
-        });
-        const title = await screen.findByText(/Dividend Payouts/i);
-        expect(title).toBeInTheDocument();
-        expect(mockFilterReports).toHaveBeenCalledTimes(2);
-        expect(mockGetPercentChange).toHaveBeenCalledTimes(2);
-
-        const thirdReturnValue = {
-            data: [
-                { ex_dividend_date: "2024-01-01",  amount: "3.00"},
-            ]
-        }
-        
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            status: 200,
-            json: async () => (thirdReturnValue),
-        });
-
-        mockFilterReports.mockReturnValue([{ ex_dividend_date: "2024-01-01",  amount: "3.00"}]);
-        mockGetPercentChange.mockReturnValue(0);
-
-        rerender(
-            <MemoryRouter>
-                <DividendsPayoutGraph symbol="TSLA" fetchVersion={2} setSymbol={mockSetSymbol} period="annually"></DividendsPayoutGraph>
-            </MemoryRouter>
-        );
-
-        await waitFor(() => {
-            expect(mockFetch).toHaveBeenCalledWith(
-                "http://localhost:8000/pages/dividends",
-                expect.objectContaining({
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({symbol: "TSLA"}),
-                }),
-            );
-        });
-        
-        expect(await screen.findByText(/Dividend Payouts/i)).toBeInTheDocument();
-        expect(mockFilterReports).toHaveBeenCalledTimes(3);
-        expect(mockGetPercentChange).toHaveBeenCalledTimes(3);
-    });
-
-    test("renders NoDataGraph if fetch returns 204", async () => {
-        mockFetch.mockResolvedValueOnce({
-            ok: true,
-            status: 204,
-        });
-
-        render(
-            <MemoryRouter>
-                <DividendsPayoutGraph symbol="AAPL" fetchVersion={0} setSymbol={mockSetSymbol} period="annually"></DividendsPayoutGraph>
-            </MemoryRouter>
-        );
-        await waitFor(() => {
-            expect(mockFetch).toHaveBeenCalledWith(
-                "http://localhost:8000/pages/dividends",
-                expect.objectContaining({
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({symbol: "AAPL"}),
-                }),
-            );
-        });
-
-        expect(await screen.findByText(/No Data/i)).toBeInTheDocument();
-        }
-    )
-        
-
+  test("renders NoDataGraph if statement is empty", async () => {
+    render(<MemoryRouter><DividendsPayoutGraph statement={[]} period="annually" /></MemoryRouter>);
+    expect(await screen.findByText(/No Data/i)).toBeInTheDocument();
+  });
 });
