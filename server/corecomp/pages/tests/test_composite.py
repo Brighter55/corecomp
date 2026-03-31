@@ -225,6 +225,30 @@ def test_call_compute_pb(
     assert response.status_code == 200
     mock_compute_pb.assert_called_once()
 
+@pytest.mark.django_db
+@patch("pages.views.overview.compute_market_cap")
+@patch("pages.views.overview.financial_data_service.get_balance_sheet")
+@patch("pages.views.overview.financial_data_service.get_pricing")
+def test_call_compute_market_cap(
+    mock_get_pricing,
+    mock_get_balance_sheet,
+    mock_compute_market_cap,
+    authorized_client,
+):
+    _create_symbol()
+    mock_get_pricing.return_value = _pricing_payload()
+    mock_get_balance_sheet.return_value = _balance_sheet_payload()
+    mock_compute_market_cap.return_value = {
+        "annualReports": [{"fiscalDateEnding": "2023-12-31", "marketCap": "15000"}],
+        "quarterlyReports": [{"fiscalDateEnding": "2023-09-30", "marketCap": "14500"}],
+    }
+
+    payload = {"symbol": "IBM", "graph": "MarketCap"}
+    response = authorized_client.post(url, payload, format="json")
+
+    assert response.status_code == 200
+    mock_compute_market_cap.assert_called_once()
+
 
 @pytest.mark.django_db
 @patch("pages.views.overview.compute_roe")

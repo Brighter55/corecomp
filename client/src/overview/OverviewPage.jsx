@@ -15,7 +15,7 @@ import IconButton from "@mui/material/IconButton";
 import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
     SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph, ROEGraph,
-    PERatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph
+    PERatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph
 } from "./index.js"
 
 
@@ -40,6 +40,7 @@ function OverviewPage() {
     const [roeStatement, setRoeStatement] = useState(null);
     const [peStatement, setPeStatement] = useState(null);
     const [pbStatement, setPbStatement] = useState(null);
+    const [marketCapStatement, setMarketCapStatement] = useState(null);
 
 
     function handleSearchSubmit(event, symbolFromChild) {
@@ -276,6 +277,34 @@ function OverviewPage() {
 
     useEffect(() => {
         if (!symbol) {
+            setMarketCapStatement(null);
+            return;
+        }
+
+        async function getMarketCapStatement() {
+            const payload = {symbol: symbol, graph: "MarketCap"};
+            const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setMarketCapStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setMarketCapStatement(data);
+        }
+
+        let isActive = true;
+        getMarketCapStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
             setPbStatement(null);
             return;
         }
@@ -313,9 +342,10 @@ function OverviewPage() {
                     <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
                     <Info symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Info>
                     <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Pricing Statement</Typography>
+                        <Typography variant="h4">Pricing</Typography>
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <PricingGraph statement={pricingStatement} period={period} />
+                            <MarketCapGraph statement={marketCapStatement} period={period}/>
                         </GraphsContainer>
                     </Stack>
                     <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>

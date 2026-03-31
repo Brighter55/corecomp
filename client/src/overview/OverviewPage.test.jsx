@@ -50,6 +50,7 @@ vi.mock("./index.js", () => ({
   EbitGraph: () => <div>EBIT</div>,
   EbitdaGraph: () => <div>EBITDA</div>,
   PBRatioGraph: () => <div>PBRatioGraph</div>,
+  MarketCapGraph: () => <div>MarketCapGraph</div>,
 }));
 
 describe("OverviewPage", () => {
@@ -85,7 +86,7 @@ describe("OverviewPage", () => {
     });
 
     expect(screen.getByTestId("info")).toBeInTheDocument();
-    expect(screen.getByText("Pricing Statement")).toBeInTheDocument();
+    expect(screen.getByText("Pricing")).toBeInTheDocument();
     expect(screen.getByText("Dividend Statement")).toBeInTheDocument();
     expect(screen.getByText("Earnings Statement")).toBeInTheDocument();
     expect(screen.getByText("Income Statement")).toBeInTheDocument();
@@ -94,7 +95,7 @@ describe("OverviewPage", () => {
     expect(screen.getByText("Ratios Statement")).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(9);
+      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(10);
     });
 
     const calledEndpoints = mockAuthenticatedClientWithRetry.mock.calls.map((call) => call[0]);
