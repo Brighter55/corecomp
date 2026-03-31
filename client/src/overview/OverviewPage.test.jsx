@@ -36,7 +36,11 @@ vi.mock("./index.js", () => ({
   Info: () => <div data-testid="info">Info</div>,
   TotalRevenueGraph: () => <div>TotalRevenueGraph</div>,
   GrossProfitGraph: () => <div>GrossProfitGraph</div>,
+  CostOfRevenueGraph: () => <div>CostOfRevenueGraph</div>,
+  ResearchAndDevelopmentGraph: () => <div>ResearchAndDevelopmentGraph</div>,
+  OperatingExpensesGraph: () => <div>OperatingExpensesGraph</div>,
   NetIncomeGraph: () => <div>NetIncomeGraph</div>,
+  NetIncomeFromContinuingOperationsGraph: () => <div>NetIncomeFromContinuingOperationsGraph</div>,
   OperatingCashflowGraph: () => <div>OperatingCashflowGraph</div>,
   CapitalExpendituresGraph: () => <div>CapitalExpendituresGraph</div>,
   FreeCashflowGraph: () => <div>FreeCashflowGraph</div>,
@@ -92,6 +96,10 @@ describe("OverviewPage", () => {
     expect(screen.getByText("Earnings Statement")).toBeInTheDocument();
     expect(screen.getByText("Income Statement")).toBeInTheDocument();
     expect(screen.getByText("GrossProfitGraph")).toBeInTheDocument();
+    expect(screen.getByText("CostOfRevenueGraph")).toBeInTheDocument();
+    expect(screen.getByText("ResearchAndDevelopmentGraph")).toBeInTheDocument();
+    expect(screen.getByText("OperatingExpensesGraph")).toBeInTheDocument();
+    expect(screen.getByText("NetIncomeFromContinuingOperationsGraph")).toBeInTheDocument();
     expect(screen.getByText("Cash Flow Statement")).toBeInTheDocument();
     expect(screen.getByText("Balance Sheet Statement")).toBeInTheDocument();
     expect(screen.getByText("Ratios Statement")).toBeInTheDocument();
