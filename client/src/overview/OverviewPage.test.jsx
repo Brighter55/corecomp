@@ -35,6 +35,7 @@ vi.mock("./index.js", () => ({
   Hero: () => <div data-testid="hero">Hero</div>,
   Info: () => <div data-testid="info">Info</div>,
   TotalRevenueGraph: () => <div>TotalRevenueGraph</div>,
+  GrossProfitGraph: () => <div>GrossProfitGraph</div>,
   NetIncomeGraph: () => <div>NetIncomeGraph</div>,
   OperatingCashflowGraph: () => <div>OperatingCashflowGraph</div>,
   CapitalExpendituresGraph: () => <div>CapitalExpendituresGraph</div>,
@@ -90,6 +91,7 @@ describe("OverviewPage", () => {
     expect(screen.getByText("Dividend Statement")).toBeInTheDocument();
     expect(screen.getByText("Earnings Statement")).toBeInTheDocument();
     expect(screen.getByText("Income Statement")).toBeInTheDocument();
+    expect(screen.getByText("GrossProfitGraph")).toBeInTheDocument();
     expect(screen.getByText("Cash Flow Statement")).toBeInTheDocument();
     expect(screen.getByText("Balance Sheet Statement")).toBeInTheDocument();
     expect(screen.getByText("Ratios Statement")).toBeInTheDocument();

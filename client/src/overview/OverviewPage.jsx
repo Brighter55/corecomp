@@ -14,7 +14,7 @@ import IconButton from "@mui/material/IconButton";
 // components
 import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
-    SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph, ROEGraph,
+    SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph, GrossProfitGraph, ROEGraph,
     PERatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph
 } from "./index.js"
 
@@ -366,6 +366,7 @@ function OverviewPage() {
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <ProfitMarginGraph statement={incomeStatement} period={period}></ProfitMarginGraph>
                             <TotalRevenueGraph statement={incomeStatement} period={period} />
+                            <GrossProfitGraph statement={incomeStatement} period={period} />
                             <NetIncomeGraph statement={incomeStatement} period={period}></NetIncomeGraph>
                             <EbitGraph statement={incomeStatement} period={period}/>
                             <EbitdaGraph statement={incomeStatement} period={period}/>
