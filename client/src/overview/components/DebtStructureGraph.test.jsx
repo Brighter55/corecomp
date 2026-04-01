@@ -1,4 +1,4 @@
-import TotalAssets from "./TotalAssets.jsx";
+import DebtStructureGraph from "./DebtStructureGraph.jsx";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
@@ -19,31 +19,36 @@ vi.mock("../../helpers/GraphsHelper.js", async () => {
   };
 });
 
-describe("TotalAssets", () => {
-  beforeEach(() => vi.clearAllMocks());
+describe("DebtStructureGraph", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   test("loads with statement prop", async () => {
     const statement = {
       annualReports: [
         {
           fiscalDateEnding: "2024-01-01",
-          totalAssets: "5000",
-          totalLiabilities: "2000",
-          totalShareholderEquity: "3000",
+          shortTermDebt: "1000",
+          longTermDebt: "4000",
+          shortLongTermDebtTotal: "5000",
         },
       ],
       quarterlyReports: [],
     };
+
     mockFilterReports.mockReturnValue(statement.annualReports);
     mockGetPercentChange.mockReturnValue(5);
 
     render(
       <MemoryRouter>
-        <TotalAssets statement={statement} period="annually" />
+        <DebtStructureGraph statement={statement} period="annually" />
       </MemoryRouter>
     );
 
-    expect(await screen.findByText("Total Assets")).toBeInTheDocument();
+    expect(await screen.findByText("Debt Structure")).toBeInTheDocument();
+    expect(mockFilterReports).toHaveBeenCalledTimes(1);
+    expect(mockGetPercentChange).toHaveBeenCalledTimes(1);
   });
 
   test("updates when statement prop changes", async () => {
@@ -51,20 +56,21 @@ describe("TotalAssets", () => {
       annualReports: [
         {
           fiscalDateEnding: "2024-01-01",
-          totalAssets: "5000",
-          totalLiabilities: "2000",
-          totalShareholderEquity: "3000",
+          shortTermDebt: "1000",
+          longTermDebt: "4000",
+          shortLongTermDebtTotal: "5000",
         },
       ],
       quarterlyReports: [],
     };
+
     const second = {
       annualReports: [
         {
           fiscalDateEnding: "2024-01-01",
-          totalAssets: "6000",
-          totalLiabilities: "2500",
-          totalShareholderEquity: "3500",
+          shortTermDebt: "1500",
+          longTermDebt: "4500",
+          shortLongTermDebtTotal: "6000",
         },
       ],
       quarterlyReports: [],
@@ -74,7 +80,7 @@ describe("TotalAssets", () => {
     mockGetPercentChange.mockReturnValue(5);
     const { rerender } = render(
       <MemoryRouter>
-        <TotalAssets statement={first} period="annually" />
+        <DebtStructureGraph statement={first} period="annually" />
       </MemoryRouter>
     );
 
@@ -82,20 +88,22 @@ describe("TotalAssets", () => {
     mockGetPercentChange.mockReturnValue(10);
     rerender(
       <MemoryRouter>
-        <TotalAssets statement={second} period="annually" />
+        <DebtStructureGraph statement={second} period="annually" />
       </MemoryRouter>
     );
 
-    expect(await screen.findByText("Total Assets")).toBeInTheDocument();
+    expect(await screen.findByText("Debt Structure")).toBeInTheDocument();
     expect(mockFilterReports).toHaveBeenCalledTimes(2);
+    expect(mockGetPercentChange).toHaveBeenCalledTimes(2);
   });
 
   test("renders NoDataGraph if statement is empty", async () => {
     render(
       <MemoryRouter>
-        <TotalAssets statement={[]} period="annually" />
+        <DebtStructureGraph statement={[]} period="annually" />
       </MemoryRouter>
     );
+
     expect(await screen.findByText(/No Data/i)).toBeInTheDocument();
   });
-  });
+});

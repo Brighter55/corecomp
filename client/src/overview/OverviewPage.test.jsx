@@ -1,6 +1,7 @@
 import OverviewPage from "./OverviewPage.jsx";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import DebtStructureGraph from "./components/DebtStructureGraph.jsx";
 
 const { mockAuthenticatedClientWithRetry } = vi.hoisted(() => ({
   mockAuthenticatedClientWithRetry: vi.fn(),
@@ -56,7 +57,8 @@ vi.mock("./index.js", () => ({
   EbitdaGraph: () => <div>EBITDA</div>,
   PBRatioGraph: () => <div>PBRatioGraph</div>,
   MarketCapGraph: () => <div>MarketCapGraph</div>,
-  TotalAssets: () => <div>TotalAssets</div>,
+  TotalAssetsGraph: () => <div>TotalAssetsGraph</div>,
+  DebtStructureGraph: () => <div>DebtStructureGraph</div>,
 }));
 
 describe("OverviewPage", () => {
