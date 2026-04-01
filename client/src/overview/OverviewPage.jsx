@@ -16,7 +16,7 @@ import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
     SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph, GrossProfitGraph, CostOfRevenueGraph,
     ResearchAndDevelopmentGraph, OperatingExpensesGraph, NetIncomeFromContinuingOperationsGraph, ROEGraph,
-    PERatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph
+    PERatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph, TotalAssets
 } from "./index.js"
 
 
@@ -388,6 +388,7 @@ function OverviewPage() {
                     <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
                         <Typography variant="h4">Balance Sheet Statement</Typography>
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <TotalAssets statement={balanceSheetStatement} period={period}/>
                             <CashVsDebtGraph statement={balanceSheetStatement} period={period}></CashVsDebtGraph>
                             <SharesOutstandingGraph statement={balanceSheetStatement} period={period}></SharesOutstandingGraph>
                         </GraphsContainer>
