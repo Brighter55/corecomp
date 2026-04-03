@@ -99,8 +99,9 @@ def transform_pricing(data):
     for date in records:
         transformed_data.append(
             {
-            "date": date,
-            "adjustedClose": str(round(float(records[date]["5. adjusted close"]), 2)),
+                "date": date,
+                "adjustedClose": str(round(float(records[date]["5. adjusted close"]), 2)),
+                "close": str(round(float(records[date]["4. close"]), 2)),
             }
         )
 
@@ -363,7 +364,7 @@ def compute_market_cap(pricing, balance_sheet):
     for point in pricing:
         date_str = point.get("date")
         month = _month_key(date_str)
-        close = safe_float(point.get("adjustedClose"))
+        close = safe_float(point.get("close"))
 
         if month is None or close is None:
             continue

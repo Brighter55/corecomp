@@ -45,7 +45,7 @@ describe("REarningsVsCStock", () => {
       </MemoryRouter>
     );
 
-    expect(await screen.findByText("Retained Earnings v Common Stock")).toBeInTheDocument();
+    expect(await screen.findByText("Retained Earnings vs Paid-in Capital")).toBeInTheDocument();
     expect(mockFilterReports).toHaveBeenCalledTimes(1);
     expect(mockGetPercentChange).toHaveBeenCalledTimes(2);
   });
@@ -91,7 +91,7 @@ describe("REarningsVsCStock", () => {
       </MemoryRouter>
     );
 
-    expect(await screen.findByText("Retained Earnings v Common Stock")).toBeInTheDocument();
+    expect(await screen.findByText("Retained Earnings vs Paid-in Capital")).toBeInTheDocument();
     expect(mockFilterReports).toHaveBeenCalledTimes(2);
     expect(mockGetPercentChange).toHaveBeenCalledTimes(4);
   });
