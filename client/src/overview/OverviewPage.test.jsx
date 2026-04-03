@@ -59,6 +59,11 @@ vi.mock("./index.js", () => ({
   TotalAssetsGraph: () => <div>TotalAssetsGraph</div>,
   DebtStructureGraph: () => <div>DebtStructureGraph</div>,
   REarningsVsCStockGraph: () => <div>REarningsVsCStockGraph</div>,
+  DepreciationAndAmortizationGraph: () => <div>DepreciationAndAmortizationGraph</div>,
+  DividendPayoutCommonStockGraph: () => <div>DividendPayoutCommonStockGraph</div>,
+  CashflowFromInvestmentGraph: () => <div>CashflowFromInvestmentGraph</div>,
+  CashflowFromFinancingGraph: () => <div>CashflowFromFinancingGraph</div>,
+  ChangeInInventoryGraph: () => <div>ChangeInInventoryGraph</div>,
 }));
 
 describe("OverviewPage", () => {
