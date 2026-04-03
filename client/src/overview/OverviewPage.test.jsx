@@ -35,7 +35,12 @@ vi.mock("./index.js", () => ({
   Hero: () => <div data-testid="hero">Hero</div>,
   Info: () => <div data-testid="info">Info</div>,
   TotalRevenueGraph: () => <div>TotalRevenueGraph</div>,
+  GrossProfitGraph: () => <div>GrossProfitGraph</div>,
+  CostOfRevenueGraph: () => <div>CostOfRevenueGraph</div>,
+  ResearchAndDevelopmentGraph: () => <div>ResearchAndDevelopmentGraph</div>,
+  OperatingExpensesGraph: () => <div>OperatingExpensesGraph</div>,
   NetIncomeGraph: () => <div>NetIncomeGraph</div>,
+  NetIncomeFromContinuingOperationsGraph: () => <div>NetIncomeFromContinuingOperationsGraph</div>,
   OperatingCashflowGraph: () => <div>OperatingCashflowGraph</div>,
   CapitalExpendituresGraph: () => <div>CapitalExpendituresGraph</div>,
   FreeCashflowGraph: () => <div>FreeCashflowGraph</div>,
@@ -50,6 +55,10 @@ vi.mock("./index.js", () => ({
   EbitGraph: () => <div>EBIT</div>,
   EbitdaGraph: () => <div>EBITDA</div>,
   PBRatioGraph: () => <div>PBRatioGraph</div>,
+  MarketCapGraph: () => <div>MarketCapGraph</div>,
+  TotalAssetsGraph: () => <div>TotalAssetsGraph</div>,
+  DebtStructureGraph: () => <div>DebtStructureGraph</div>,
+  REarningsVsCStockGraph: () => <div>REarningsVsCStockGraph</div>,
 }));
 
 describe("OverviewPage", () => {
@@ -85,16 +94,21 @@ describe("OverviewPage", () => {
     });
 
     expect(screen.getByTestId("info")).toBeInTheDocument();
-    expect(screen.getByText("Pricing Statement")).toBeInTheDocument();
+    expect(screen.getByText("Pricing")).toBeInTheDocument();
     expect(screen.getByText("Dividend Statement")).toBeInTheDocument();
     expect(screen.getByText("Earnings Statement")).toBeInTheDocument();
     expect(screen.getByText("Income Statement")).toBeInTheDocument();
+    expect(screen.getByText("GrossProfitGraph")).toBeInTheDocument();
+    expect(screen.getByText("CostOfRevenueGraph")).toBeInTheDocument();
+    expect(screen.getByText("ResearchAndDevelopmentGraph")).toBeInTheDocument();
+    expect(screen.getByText("OperatingExpensesGraph")).toBeInTheDocument();
+    expect(screen.getByText("NetIncomeFromContinuingOperationsGraph")).toBeInTheDocument();
     expect(screen.getByText("Cash Flow Statement")).toBeInTheDocument();
     expect(screen.getByText("Balance Sheet Statement")).toBeInTheDocument();
     expect(screen.getByText("Ratios Statement")).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(9);
+      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(10);
     });
 
     const calledEndpoints = mockAuthenticatedClientWithRetry.mock.calls.map((call) => call[0]);

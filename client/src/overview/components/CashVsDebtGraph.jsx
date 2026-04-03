@@ -175,7 +175,7 @@ function CashVsDebtGraph({ statement, period }) {
                             <Tooltip formatter={(value) => formatToUnits(value)}/>
                             <Legend />
                             <Bar name="cash" dataKey="cashAndCashEquivalentsAtCarryingValue" stackId="a" fill="#588157"  activeBar={{ fill: "#A3B18A", stroke: "#DAD7CD", strokeWidth: 2 }}/>
-                            <Bar name="debt" dataKey="shortLongTermDebtTotal" stackId="a" fill="#bc4749" activeBar={{ fill: "#B35C5E", stroke: "#DAD7CD", strokeWidth: 2 }}/>
+                            <Bar name="debt" dataKey="shortLongTermDebtTotal" stackId="b" fill="#bc4749" activeBar={{ fill: "#B35C5E", stroke: "#DAD7CD", strokeWidth: 2 }}/>
                         </BarChart>
                     </ResponsiveContainer>
                 </Box>

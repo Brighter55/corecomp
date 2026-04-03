@@ -99,8 +99,9 @@ def transform_pricing(data):
     for date in records:
         transformed_data.append(
             {
-            "date": date,
-            "adjustedClose": str(round(float(records[date]["5. adjusted close"]), 2)),
+                "date": date,
+                "adjustedClose": str(round(float(records[date]["5. adjusted close"]), 2)),
+                "close": str(round(float(records[date]["4. close"]), 2)),
             }
         )
 
@@ -346,3 +347,57 @@ def compute_pb(pricing, balance_sheet):
     _append_pb(balance_sheet.get("quarterlyReports", []), "quarterlyReports")
 
     return result
+
+def compute_market_cap(pricing, balance_sheet):
+    result = {
+        "annualReports": [],
+        "quarterlyReports": [],
+    }
+
+    def _month_key(date_str):
+        key = date_str[:7]
+        if len(key) != 7 or key[4] != "-":
+            return None
+        return key
+
+    pricing_by_month = {}
+    for point in pricing:
+        date_str = point.get("date")
+        month = _month_key(date_str)
+        close = safe_float(point.get("close"))
+
+        if month is None or close is None:
+            continue
+
+        pricing_by_month[month] = close
+
+    if not pricing_by_month:
+        return result
+
+    def _append_market_cap(reports, bucket_name):
+        for report in reports:
+            fiscal_date = report.get("fiscalDateEnding")
+            price = pricing_by_month.get(_month_key(fiscal_date))
+
+            # Pricing is passive and may be misaligned; skip when no monthly match exists.
+            if price is None:
+                continue
+
+            shares_outstanding = safe_int(report.get("commonStockSharesOutstanding"))
+            if shares_outstanding is None:
+                result[bucket_name].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "marketCap": None,
+                })
+                continue
+
+            result[bucket_name].append({
+                "fiscalDateEnding": fiscal_date,
+                "marketCap": str(round(price * shares_outstanding)),
+            })
+
+    _append_market_cap(balance_sheet.get("annualReports", []), "annualReports")
+    _append_market_cap(balance_sheet.get("quarterlyReports", []), "quarterlyReports")
+
+    return result
+    
