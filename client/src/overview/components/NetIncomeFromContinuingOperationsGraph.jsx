@@ -18,14 +18,7 @@ export const explanation = (
     <Stack spacing={2}>
         <Typography variant="explanationTopic">What is it?</Typography>
         <Typography variant="explanationText">
-            Net income from continuing operations is profit from the core business, excluding discontinued segments or one-off shutdowns.
-        </Typography>
-        <Typography variant="explanationTopic">Calculation</Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
-            Net Income From Continuing Operations = Pre-Tax Income From Ongoing Business - Taxes
+            Net income from continuing operations is the profit a company generates from its core, ongoing business activities, excluding one-time events, discontinued segments, or accounting changes. It represents sustainable, recurring earnings, making it a critical metric for investors evaluating a company's true profitability and future performance potential. 
         </Typography>
         <Typography variant="explanationTopic">Interpretation</Typography>
         <Stack direction="row" spacing={1}>
@@ -33,7 +26,7 @@ export const explanation = (
                 sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
             />
             <Typography variant="explanationText">
-                A rising trend shows the ongoing core business is becoming more profitable.
+                A rising trend indicates rising profitability from core products or services. it could be driven by high demand, strong sales volume, or improved pricing power.
             </Typography>
         </Stack>
         <Stack direction="row" spacing={1}>
@@ -41,9 +34,10 @@ export const explanation = (
                 sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
             />
             <Typography variant="explanationText">
-                A falling trend can point to pressure in recurring operations even when headline earnings appear stable.
+                A falling trend suggests that the primary business activities are becoming less profitable.
             </Typography>
         </Stack>
+        <Typography variant="explanationText">Note: A downward trend might be temporary due to restructuring for long-term growth, while an upward trend might be driven by unsustainable, temporary market conditions.</Typography>
     </Stack>
 );
 

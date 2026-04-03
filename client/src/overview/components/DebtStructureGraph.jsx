@@ -5,8 +5,6 @@ import GraphTitle from "./GraphTitle.jsx";
 import GraphCard from "./GraphCard.jsx";
 import NoDataGraph from "./NoDataGraph.jsx";
 // mui
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -24,25 +22,15 @@ const explanation = (
 			variant="explanationText"
 			sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
 		>
-			Short + Long-Term Debt = shortTermDebt + longTermDebt
+			Total Debt = short-term debt + long-term debt
 		</Typography>
 		<Typography variant="explanationTopic">Interpretation</Typography>
-		<Stack direction="row" spacing={1}>
-			<TrendingUpIcon
-				sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
-			/>
-			<Typography variant="explanationText">
-				An increasing debt structure can support growth when debt is used efficiently and stays manageable versus cash flow.
-			</Typography>
-		</Stack>
-		<Stack direction="row" spacing={1}>
-			<TrendingDownIcon
-				sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
-			/>
-			<Typography variant="explanationText">
-				A decreasing debt structure can reduce financing risk, but context matters if declines come from constrained access to capital.
-			</Typography>
-		</Stack>
+		<Typography variant="explanationText">
+			Large Short-Term Portion: Suggests high liquidity risk, as a significant amount is due soon. If this exceeds cash equivalents, the company may face solvency issues.
+		</Typography>
+		<Typography variant="explanationText">
+			Large Long-Term Portion: Implies a more stable, long-term financing strategy (e.g., bonds), which is less urgent but still creates long-term interest burdens.
+		</Typography>
 	</Stack>
 );
 

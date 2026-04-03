@@ -17,7 +17,7 @@ const explanation = (
   <Stack spacing={2}>
 	  <Typography variant="explanationTopic">What is it?</Typography>
 	  <Typography variant="explanationText">
-		  Market capitalization is the total value of a company based on its stock price and number of shares outstanding.
+		  Market capitalization represents the market's total valuation of a company and is used to determine a company's size, risk, and growth potential.
 	  </Typography>
 	  <Typography variant="explanationTopic">Calculation</Typography>
 	  <Typography

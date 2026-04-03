@@ -20,20 +20,13 @@ export const explanation = (
         <Typography variant="explanationText">
             Operating expenses are the day-to-day costs required to run the business, excluding direct production costs.
         </Typography>
-        <Typography variant="explanationTopic">Calculation</Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
-            Operating Expenses = Selling, General, Administrative, and Other Operating Costs
-        </Typography>
         <Typography variant="explanationTopic">Interpretation</Typography>
         <Stack direction="row" spacing={1}>
             <TrendingUpIcon
                 sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
             />
             <Typography variant="explanationText">
-                Increasing operating expenses can support growth if revenue scales faster than costs.
+                An upward trend indicates rising costs, which can signal growth or inefficiency
             </Typography>
         </Stack>
         <Stack direction="row" spacing={1}>
@@ -41,9 +34,14 @@ export const explanation = (
                 sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
             />
             <Typography variant="explanationText">
-                Declining operating expenses may improve efficiency, but sharp cuts can also signal underinvestment.
+                A downward trend indicates falling costs, suggesting improved efficiency or reduced business activity
             </Typography>
         </Stack>
+        <Typography variant="explanationText">
+                Note: Growth and Expansion (Positive): If operating expenses are rising, but revenue is growing faster, it suggests the company is investing in growth (e.g., higher marketing spend, opening new locations, or increasing headcount).
+                Inefficiency and Declining Margins (Negative): If expenses rise while revenue is flat or declining, this indicates a dangerous increase in costs that reduces profitability.
+        </Typography>
+        
     </Stack>
 );
 

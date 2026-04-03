@@ -33,7 +33,7 @@ export const explanation = (
                 sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
             />
             <Typography variant="explanationText">
-                A rising trend suggests stronger pricing power, better production efficiency, or improved product mix.
+                An increasing gross profit indicates that revenue is growing faster than the cost of producing goods, or that production costs are being reduced. 
             </Typography>
         </Stack>
         <Stack direction="row" spacing={1}>
@@ -41,7 +41,7 @@ export const explanation = (
                 sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
             />
             <Typography variant="explanationText">
-                A falling trend can indicate margin pressure from higher input costs, weaker pricing, or declining demand.
+                A decreasing gross profit indicates that direct production costs are rising faster than revenue, or that sales are declining while costs remain stagnant.
             </Typography>
         </Stack>
     </Stack>

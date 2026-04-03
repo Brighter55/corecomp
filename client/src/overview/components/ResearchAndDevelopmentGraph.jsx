@@ -20,20 +20,13 @@ export const explanation = (
         <Typography variant="explanationText">
             Research and development spending measures how much a company invests in new products, technology, and innovation.
         </Typography>
-        <Typography variant="explanationTopic">Calculation</Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
-            Research and Development = Reported R and D Operating Expense
-        </Typography>
         <Typography variant="explanationTopic">Interpretation</Typography>
         <Stack direction="row" spacing={1}>
             <TrendingUpIcon
                 sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
             />
             <Typography variant="explanationText">
-                Rising R and D can reflect long-term growth investment and product pipeline expansion.
+                An upward trend in R&D spending indicates a strategic commitment to future growth, product differentiation, and technological advancement.
             </Typography>
         </Stack>
         <Stack direction="row" spacing={1}>
@@ -41,7 +34,7 @@ export const explanation = (
                 sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
             />
             <Typography variant="explanationText">
-                Falling R and D may improve short-term margins but can weaken future competitiveness.
+                A downward trend in R&D expenditure generally suggests that an organization is prioritizing short-term profitability over long-term growth or is facing financial pressure.  It may indicate a shift from a "growth" phase to a "maturity" or "harvesting" phase, where the focus is on maintaining existing products rather than developing new ones.
             </Typography>
         </Stack>
     </Stack>

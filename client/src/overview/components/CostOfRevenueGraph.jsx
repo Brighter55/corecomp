@@ -18,14 +18,16 @@ export const explanation = (
     <Stack spacing={2}>
         <Typography variant="explanationTopic">What is it?</Typography>
         <Typography variant="explanationText">
-            Cost of revenue is the direct cost tied to producing and delivering a company&apos;s goods or services.
+            Cost of revenue is the total direct expense a company incurs to produce,
+            sell, and deliver its goods or services to customers.
+            It represents the direct costs—such as raw materials, direct labor, and shipping
         </Typography>
         <Typography variant="explanationTopic">Calculation</Typography>
         <Typography
             variant="explanationText"
             sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
         >
-            Cost of Revenue = Direct Production and Service Delivery Costs
+            COR = cost of labor + materials + marketing + distribution + sales discounts
         </Typography>
         <Typography variant="explanationTopic">Interpretation</Typography>
         <Stack direction="row" spacing={1}>

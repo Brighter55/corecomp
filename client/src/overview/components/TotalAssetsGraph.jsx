@@ -17,7 +17,7 @@ const explanation = (
 	<Stack spacing={2}>
 		<Typography variant="explanationTopic">What is it?</Typography>
 		<Typography variant="explanationText">
-			Total assets represent everything a company owns that has economic value. In accounting, total assets are funded by liabilities and shareholder equity.
+			Total assets represent everything a company owns, which has future economic value. This includes cash, inventory, property, equipment, and intangible assets like patents.
 		</Typography>
 		<Typography variant="explanationTopic">Calculation</Typography>
 		<Typography
