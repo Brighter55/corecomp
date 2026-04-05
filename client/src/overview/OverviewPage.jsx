@@ -18,7 +18,7 @@ import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     ResearchAndDevelopmentGraph, OperatingExpensesGraph, NetIncomeFromContinuingOperationsGraph, ROEGraph,
     PERatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph, TotalAssetsGraph, DebtStructureGraph,
     REarningsVsCStockGraph, DepreciationAndAmortizationGraph, DividendPayoutCommonStockGraph,
-    CashflowFromInvestmentGraph, CashflowFromFinancingGraph, CashFlowTrifectaGraph, ChangeInInventoryGraph,
+    CashflowFromInvestmentGraph, CashflowFromFinancingGraph, CashFlowTrifectaGraph, NetIncomeVsOcfGraph, ChangeInInventoryGraph,
 } from "./index.js"
 
 
@@ -383,7 +383,7 @@ function OverviewPage() {
                         <Typography variant="h4">Cash Flow Statement</Typography>
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <OperatingCashflowGraph statement={cashFlowStatement} period={period}></OperatingCashflowGraph>
-                            <CashFlowTrifectaGraph statement={cashFlowStatement} period={period} />
+                            <NetIncomeVsOcfGraph statement={cashFlowStatement} period={period} />
                             <CapitalExpendituresGraph statement={cashFlowStatement} period={period}></CapitalExpendituresGraph>
                             <FreeCashflowGraph statement={cashFlowStatement} period={period} />
                             <DepreciationAndAmortizationGraph statement={cashFlowStatement} period={period} />
@@ -391,6 +391,7 @@ function OverviewPage() {
                             <CashflowFromInvestmentGraph statement={cashFlowStatement} period={period} />
                             <CashflowFromFinancingGraph statement={cashFlowStatement} period={period} />
                             <ChangeInInventoryGraph statement={cashFlowStatement} period={period} />
+                            <CashFlowTrifectaGraph statement={cashFlowStatement} period={period} />
                         </GraphsContainer>
                     </Stack>
                     <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
