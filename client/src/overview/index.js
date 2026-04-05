@@ -14,6 +14,7 @@ export { default as DepreciationAndAmortizationGraph } from "./components/Deprec
 export { default as DividendPayoutCommonStockGraph } from "./components/DividendPayoutCommonStockGraph.jsx"
 export { default as CashflowFromInvestmentGraph } from "./components/CashflowFromInvestmentGraph.jsx"
 export { default as CashflowFromFinancingGraph } from "./components/CashflowFromFinancingGraph.jsx"
+export { default as CashFlowTrifectaGraph } from "./components/CashFlowTrifectaGraph.jsx"
 export { default as ChangeInInventoryGraph } from "./components/ChangeInInventoryGraph.jsx"
 export { default as  DividendsPayoutGraph } from "./components/DividendsPayoutGraph.jsx"
 export { default as  CashVsDebtGraph } from "./components/CashVsDebtGraph.jsx"

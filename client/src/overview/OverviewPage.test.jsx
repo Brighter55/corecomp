@@ -63,6 +63,7 @@ vi.mock("./index.js", () => ({
   DividendPayoutCommonStockGraph: () => <div>DividendPayoutCommonStockGraph</div>,
   CashflowFromInvestmentGraph: () => <div>CashflowFromInvestmentGraph</div>,
   CashflowFromFinancingGraph: () => <div>CashflowFromFinancingGraph</div>,
+  CashFlowTrifectaGraph: () => <div>CashFlowTrifectaGraph</div>,
   ChangeInInventoryGraph: () => <div>ChangeInInventoryGraph</div>,
 }));
 
@@ -109,6 +110,7 @@ describe("OverviewPage", () => {
     expect(screen.getByText("OperatingExpensesGraph")).toBeInTheDocument();
     expect(screen.getByText("NetIncomeFromContinuingOperationsGraph")).toBeInTheDocument();
     expect(screen.getByText("Cash Flow Statement")).toBeInTheDocument();
+    expect(screen.getByText("CashFlowTrifectaGraph")).toBeInTheDocument();
     expect(screen.getByText("Balance Sheet Statement")).toBeInTheDocument();
     expect(screen.getByText("Ratios Statement")).toBeInTheDocument();
 
