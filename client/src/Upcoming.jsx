@@ -7,6 +7,20 @@ import Container from "@mui/material/Container"
 const versions = [
     {
         name: "Current Version",
+        version: "0.5.0",
+        date: "04/05/2026",
+        updates: [
+            "Cash Flow Trifecta graph",
+            "Cash Flow From Financing graph",
+            "Cash Flow From Investment graph",
+            "Change in Inventory graph",
+            "D&A graph",
+            "Dividend Payout Common Stock graph",
+            "Net Income Vs OCF graph",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.4.0",
         date: "04/03/2026",
         updates: [
