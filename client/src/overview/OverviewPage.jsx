@@ -16,7 +16,7 @@ import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
     SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph, GrossProfitGraph, CostOfRevenueGraph,
     ResearchAndDevelopmentGraph, OperatingExpensesGraph, NetIncomeFromContinuingOperationsGraph, ROEGraph,
-    PERatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph, TotalAssetsGraph, DebtStructureGraph,
+    PERatioGraph, PSRatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph, TotalAssetsGraph, DebtStructureGraph,
     REarningsVsCStockGraph, DepreciationAndAmortizationGraph, DividendPayoutCommonStockGraph,
     CashflowFromInvestmentGraph, CashflowFromFinancingGraph, CashFlowTrifectaGraph, NetIncomeVsOcfGraph, ChangeInInventoryGraph,
 } from "./index.js"
@@ -43,6 +43,7 @@ function OverviewPage() {
     const [roeStatement, setRoeStatement] = useState(null);
     const [peStatement, setPeStatement] = useState(null);
     const [pbStatement, setPbStatement] = useState(null);
+    const [psStatement, setPsStatement] = useState(null);
     const [marketCapStatement, setMarketCapStatement] = useState(null);
 
 
@@ -334,6 +335,34 @@ function OverviewPage() {
         };
     }, [symbol, fetchVersion, navigate]);
 
+    useEffect(() => {
+        if (!symbol) {
+            setPsStatement(null);
+            return;
+        }
+
+        async function getPsStatement() {
+            const payload = {symbol: symbol, graph: "PSRatio"};
+            const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setPsStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setPsStatement(data);
+        }
+
+        let isActive = true;
+        getPsStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
     if (symbol) {
         return (
             <Container maxWidth="lg">
@@ -410,6 +439,12 @@ function OverviewPage() {
                             <ROEGraph statement={roeStatement} period={period} />
                             <PERatioGraph statement={peStatement} period={period}/>
                             <PBRatioGraph statement={pbStatement} period={period}/>
+                        </GraphsContainer>
+                    </Stack>
+                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
+                        <Typography variant="h4">Price Ratio</Typography>
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <PSRatioGraph statement={psStatement} period={period}/>
                         </GraphsContainer>
                     </Stack>
                 </Stack>

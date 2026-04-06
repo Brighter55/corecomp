@@ -400,4 +400,104 @@ def compute_market_cap(pricing, balance_sheet):
     _append_market_cap(balance_sheet.get("quarterlyReports", []), "quarterlyReports")
 
     return result
+
+def compute_ps(pricing, income_statement, balance_sheet):
+    result = {
+        "annualReports": [],
+        "quarterlyReports": [],
+    }
+
+    def _month_key(date_str):
+        key = date_str[:7]
+        if len(key) != 7 or key[4] != "-":
+            return None
+        return key
+
+    pricing_by_month = {}
+    for point in pricing:
+        date_str = point.get("date")
+        month = _month_key(date_str)
+        close = safe_float(point.get("close"))
+
+        if month is None or close is None:
+            continue
+
+        pricing_by_month[month] = close
+
+    if not pricing_by_month:
+        return result
+
+    annual_income = {report.get("fiscalDateEnding"): report for report in income_statement.get("annualReports", [])}
+
+    def _append_ps_annual(balance_reports):
+        for report in balance_reports:
+            fiscal_date = report.get("fiscalDateEnding")
+            price = pricing_by_month.get(_month_key(fiscal_date))
+
+            # Pricing is passive and may be misaligned; skip when no monthly match exists.
+            if price is None:
+                continue
+
+            shares_outstanding = safe_int(report.get("commonStockSharesOutstanding"))
+            income_report = annual_income.get(fiscal_date)
+            total_revenue = None if income_report is None else safe_int(income_report.get("totalRevenue"))
+
+            if shares_outstanding is None or total_revenue is None or total_revenue == 0:
+                result["annualReports"].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PSRatio": None,
+                })
+                continue
+
+            market_cap = price * shares_outstanding
+            result["annualReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PSRatio": str(round(market_cap / total_revenue, 2)),
+            })
+
+    def _append_ps_quarterly(balance_reports):
+        quarterly_income_reports = income_statement.get("quarterlyReports", [])
+        income_index_by_date = {
+            report.get("fiscalDateEnding"): i
+            for i, report in enumerate(quarterly_income_reports)
+        }
+
+        for report in balance_reports:
+            fiscal_date = report.get("fiscalDateEnding")
+            price = pricing_by_month.get(_month_key(fiscal_date))
+
+            # Pricing is passive and may be misaligned; skip when no monthly match exists.
+            if price is None:
+                continue
+
+            shares_outstanding = safe_int(report.get("commonStockSharesOutstanding"))
+            start_idx = income_index_by_date.get(fiscal_date)
+
+            # skip points that cannot form a full TTM window.
+            if start_idx is None or start_idx > len(quarterly_income_reports) - 4:
+                continue
+
+            ttm_revenue = None
+            ttm_reports = quarterly_income_reports[start_idx:start_idx + 4]
+            ttm_revenue_values = [safe_int(item.get("totalRevenue")) for item in ttm_reports]
+            if all(value is not None for value in ttm_revenue_values):
+                ttm_revenue = sum(ttm_revenue_values)
+
+            if shares_outstanding is None or ttm_revenue is None or ttm_revenue == 0:
+                result["quarterlyReports"].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PSRatio": None,
+                })
+                continue
+
+            market_cap = price * shares_outstanding
+            result["quarterlyReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PSRatio": str(round(market_cap / ttm_revenue, 2)),
+            })
+
+    _append_ps_annual(balance_sheet.get("annualReports", []))
+    _append_ps_quarterly(balance_sheet.get("quarterlyReports", []))
+
+    return result
     

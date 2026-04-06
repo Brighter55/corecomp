@@ -251,6 +251,34 @@ def test_call_compute_market_cap(
 
 
 @pytest.mark.django_db
+@patch("pages.views.overview.compute_ps")
+@patch("pages.views.overview.financial_data_service.get_balance_sheet")
+@patch("pages.views.overview.financial_data_service.get_income_statement")
+@patch("pages.views.overview.financial_data_service.get_pricing")
+def test_call_compute_ps(
+    mock_get_pricing,
+    mock_get_income_statement,
+    mock_get_balance_sheet,
+    mock_compute_ps,
+    authorized_client,
+):
+    _create_symbol()
+    mock_get_pricing.return_value = _pricing_payload()
+    mock_get_income_statement.return_value = _income_statement_payload()
+    mock_get_balance_sheet.return_value = _balance_sheet_payload()
+    mock_compute_ps.return_value = {
+        "annualReports": [{"fiscalDateEnding": "2023-12-31", "PSRatio": "5.0"}],
+        "quarterlyReports": [{"fiscalDateEnding": "2023-09-30", "PSRatio": "4.8"}],
+    }
+
+    payload = {"symbol": "IBM", "graph": "PSRatio"}
+    response = authorized_client.post(url, payload, format="json")
+
+    assert response.status_code == 200
+    mock_compute_ps.assert_called_once()
+
+
+@pytest.mark.django_db
 @patch("pages.views.overview.compute_roe")
 @patch("pages.views.overview.financial_data_service.get_balance_sheet")
 @patch("pages.views.overview.financial_data_service.get_income_statement")

@@ -21,7 +21,8 @@ class CompositeGraphSerializer(serializers.Serializer):
         "ROEPercentage",
         "PERatio",
         "PBRatio",
-        "MarketCap"
+        "MarketCap",
+        "PSRatio"
     ]
     
     def validate_graph(self, value):

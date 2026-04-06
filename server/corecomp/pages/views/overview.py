@@ -11,7 +11,8 @@ from pages.utils import (
     compute_roe,
     compute_pe,
     compute_pb, 
-    compute_market_cap
+    compute_market_cap,
+    compute_ps,
 )
 from django.core.cache import cache
 from django_redis import get_redis_connection
@@ -361,6 +362,7 @@ def composite(request):
             "PERatio": ["pricing", "earnings"],
             "PBRatio": ["pricing", "balance_sheet"],
             "MarketCap": ["pricing", "balance_sheet"],
+            "PSRatio": ["pricing", "income_statement", "balance_sheet"],
         }
 
         statements_needed = GRAPH_STATEMENTS.get(graph)
@@ -406,6 +408,8 @@ def composite(request):
             data = compute_pb(statements["pricing"], statements["balance_sheet"])
         elif graph == "MarketCap":
             data = compute_market_cap(statements["pricing"], statements["balance_sheet"])
+        elif graph == "PSRatio":
+            data = compute_ps(statements["pricing"], statements["income_statement"], statements["balance_sheet"])
 
         if not data.get("annualReports") or not data.get("quarterlyReports"):
             return Response(status=status.HTTP_204_NO_CONTENT)
