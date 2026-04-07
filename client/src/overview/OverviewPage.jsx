@@ -2,6 +2,7 @@ import {useEffect, useState} from "react"
 import { useNavigate } from "react-router-dom";
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
 import PeriodSwitch from "./components/PeriodSwitch.jsx"
+import CollapsibleSection from "./components/CollapsibleSection.jsx"
 import SymbolSearch from "../shared/SymbolSearch.jsx"
 import { authenticatedClientWithRetry } from "../helpers/api.js"
 // mui components
@@ -403,46 +404,39 @@ function OverviewPage() {
                 <Stack spacing={5} sx={{ alignItems: "center" }}>
                     <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
                     <Info symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Info>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Pricing</Typography>
+                    
+                    <CollapsibleSection title="Pricing">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <PricingGraph statement={pricingStatement} period={period} />
                             <MarketCapGraph statement={marketCapStatement} period={period}/>
                         </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Dividend Statement</Typography>
-                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
-                            <DividendsPayoutGraph statement={dividendsStatement} period={period}></DividendsPayoutGraph>
-                        </GraphsContainer>
-                    </Stack>
-                    <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Earnings Statement</Typography>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Earnings History">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <EPSGraph statement={earningsStatement} period={period}></EPSGraph>
                         </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Income Statement</Typography>
+                    </CollapsibleSection>
+
+                    <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
+
+                    <CollapsibleSection title="Income Statement">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
-                            <ProfitMarginGraph statement={incomeStatement} period={period}></ProfitMarginGraph>
                             <TotalRevenueGraph statement={incomeStatement} period={period} />
                             <GrossProfitGraph statement={incomeStatement} period={period} />
                             <CostOfRevenueGraph statement={incomeStatement} period={period} />
-                            <ResearchAndDevelopmentGraph statement={incomeStatement} period={period} />
                             <OperatingExpensesGraph statement={incomeStatement} period={period} />
-                            <NetIncomeGraph statement={incomeStatement} period={period}></NetIncomeGraph>
-                            <NetIncomeFromContinuingOperationsGraph statement={incomeStatement} period={period} />
+                            <ResearchAndDevelopmentGraph statement={incomeStatement} period={period} />
                             <EbitGraph statement={incomeStatement} period={period}/>
                             <EbitdaGraph statement={incomeStatement} period={period}/>
+                            <NetIncomeGraph statement={incomeStatement} period={period}></NetIncomeGraph>
+                            <NetIncomeFromContinuingOperationsGraph statement={incomeStatement} period={period} />
                         </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Cash Flow Statement</Typography>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Cash Flow Statement">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <OperatingCashflowGraph statement={cashFlowStatement} period={period}></OperatingCashflowGraph>
-                            <NetIncomeVsOcfGraph statement={cashFlowStatement} period={period} />
                             <CapitalExpendituresGraph statement={cashFlowStatement} period={period}></CapitalExpendituresGraph>
                             <FreeCashflowGraph statement={cashFlowStatement} period={period} />
                             <DepreciationAndAmortizationGraph statement={cashFlowStatement} period={period} />
@@ -450,34 +444,42 @@ function OverviewPage() {
                             <CashflowFromInvestmentGraph statement={cashFlowStatement} period={period} />
                             <CashflowFromFinancingGraph statement={cashFlowStatement} period={period} />
                             <ChangeInInventoryGraph statement={cashFlowStatement} period={period} />
+                            <NetIncomeVsOcfGraph statement={cashFlowStatement} period={period} />
                             <CashFlowTrifectaGraph statement={cashFlowStatement} period={period} />
                         </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Balance Sheet Statement</Typography>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Balance Sheet">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <TotalAssetsGraph statement={balanceSheetStatement} period={period}/>
                             <DebtStructureGraph statement={balanceSheetStatement} period={period} />
-                            <REarningsVsCStockGraph statement={balanceSheetStatement} period={period} />
                             <CashVsDebtGraph statement={balanceSheetStatement} period={period}></CashVsDebtGraph>
                             <SharesOutstandingGraph statement={balanceSheetStatement} period={period}></SharesOutstandingGraph>
+                            <REarningsVsCStockGraph statement={balanceSheetStatement} period={period} />
                         </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Ratios Statement</Typography>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Dividends">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <DividendsPayoutGraph statement={dividendsStatement} period={period}></DividendsPayoutGraph>
+                        </GraphsContainer>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Profitability Ratios">
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <ProfitMarginGraph statement={incomeStatement} period={period}></ProfitMarginGraph>
                             <ROEGraph statement={roeStatement} period={period} />
+                        </GraphsContainer>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Price Ratios">
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <PERatioGraph statement={peStatement} period={period}/>
                             <PBRatioGraph statement={pbStatement} period={period}/>
-                        </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Price Ratio</Typography>
-                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <PSRatioGraph statement={psStatement} period={period}/>
                             <PFCFRatioGraph statement={pfcfStatement} period={period}/>
                         </GraphsContainer>
-                    </Stack>
+                    </CollapsibleSection>
                 </Stack>
             </Container>
         )
