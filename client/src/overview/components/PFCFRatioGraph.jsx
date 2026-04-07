@@ -17,7 +17,7 @@ const explanation = (
   <Stack spacing={2}>
       <Typography variant="explanationTopic">What is it?</Typography>
       <Typography variant="explanationText">
-          Price to Free Cash Flow ratio measures how much investors are paying for each dollar of free cash flow.
+          P/FCF (Price-to-Free Cash Flow) shows how much investors are paying for the actual cash a company generates after expenses and reinvestment. It focuses on real, usable cash rather than accounting profit.
       </Typography>
       <Typography variant="explanationTopic">Calculation</Typography>
       <Typography
@@ -32,7 +32,7 @@ const explanation = (
               sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
           />
           <Typography variant="explanationText">
-              A higher trend can indicate the market is pricing in stronger future cash generation.
+              Rising trend suggests investors are paying more for each dollar of cash flow, usually due to strong growth expectations, improving cash efficiency, or high-quality, predictable cash generation.
           </Typography>
       </Stack>
       <Stack direction="row" spacing={1}>
@@ -40,7 +40,7 @@ const explanation = (
               sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
           />
           <Typography variant="explanationText">
-              A lower trend can point to improving value or weaker growth expectations.
+              Falling trend suggests investors are paying less for each dollar of cash flow, which may signal slowing growth, declining cash flow quality, or a potential undervaluation.
           </Typography>
       </Stack>
   </Stack>

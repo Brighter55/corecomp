@@ -41,7 +41,7 @@ function CollapsibleSection({ title, children, defaultExpanded = true }) {
                     sx={{ marginLeft: "auto" }}
                     onClick={handleExpandClick}
                 >
-                    <ExpandMoreIconStyled expand={expanded} />
+                    <ExpandMoreIconStyled expand={expanded} sx={{color: "var(--main-dust-grey)"}}/>
                 </IconButton>
             </Stack>
             <Collapse in={expanded} timeout="auto" unmountOnExit>
