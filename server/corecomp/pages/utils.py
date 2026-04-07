@@ -93,6 +93,32 @@ def annotate_free_cash_flow(data):
     
     return data
 
+
+def annotate_current_ratio(data):
+    annual_reports = data["annualReports"]
+    quarterly_reports = data["quarterlyReports"]
+
+    # CurrentRatio = totalCurrentAssets / totalCurrentLiabilities
+    for report in annual_reports:
+        total_current_assets = safe_int(report.get("totalCurrentAssets"))
+        total_current_liabilities = safe_int(report.get("totalCurrentLiabilities"))
+
+        if total_current_assets is None or total_current_liabilities in (None, 0):
+            report["CurrentRatio"] = None
+        else:
+            report["CurrentRatio"] = str(round(total_current_assets / total_current_liabilities, 2))
+
+    for report in quarterly_reports:
+        total_current_assets = safe_int(report.get("totalCurrentAssets"))
+        total_current_liabilities = safe_int(report.get("totalCurrentLiabilities"))
+
+        if total_current_assets is None or total_current_liabilities in (None, 0):
+            report["CurrentRatio"] = None
+        else:
+            report["CurrentRatio"] = str(round(total_current_assets / total_current_liabilities, 2))
+
+    return data
+
 def transform_pricing(data):
     records = data["Monthly Adjusted Time Series"]
     transformed_data = []

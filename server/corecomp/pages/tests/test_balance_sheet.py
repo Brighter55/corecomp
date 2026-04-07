@@ -17,12 +17,26 @@ def test_valid_fetch(mock_get_balance_sheet, authorized_client):
     )
     symbol.save()
     return_value = {
-        "data": "valid data"
+        "annualReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "totalCurrentAssets": "200",
+                "totalCurrentLiabilities": "100",
+            }
+        ],
+        "quarterlyReports": [
+            {
+                "fiscalDateEnding": "2024-09-30",
+                "totalCurrentAssets": "300",
+                "totalCurrentLiabilities": "120",
+            }
+        ],
     }
     mock_get_balance_sheet.return_value = return_value
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
-    assert response.json() == return_value
+    assert response.json()["annualReports"][0]["CurrentRatio"] == "2.0"
+    assert response.json()["quarterlyReports"][0]["CurrentRatio"] == "2.5"
     assert response.status_code == 200
 
 # test for valid request where the endpoint returns cached_data
@@ -36,12 +50,26 @@ def test_valid_cache(mock_get_balance_sheet, authorized_client):
     )
     symbol.save()
     return_value = {
-        "data": "valid data"
+        "annualReports": [
+            {
+                "fiscalDateEnding": "2024-12-31",
+                "totalCurrentAssets": "200",
+                "totalCurrentLiabilities": "100",
+            }
+        ],
+        "quarterlyReports": [
+            {
+                "fiscalDateEnding": "2024-09-30",
+                "totalCurrentAssets": "300",
+                "totalCurrentLiabilities": "120",
+            }
+        ],
     }
     mock_get_balance_sheet.return_value = return_value
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
-    assert response.json() == return_value
+    assert response.json()["annualReports"][0]["CurrentRatio"] == "2.0"
+    assert response.json()["quarterlyReports"][0]["CurrentRatio"] == "2.5"
     assert response.status_code == 200
     response = authorized_client.post(url, payload, format="json")
     assert response.status_code == 200

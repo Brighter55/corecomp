@@ -56,3 +56,6 @@
 
 ## Related Guidance
 - See `.github/agents/coding.agent.md` for specialized coding-agent behavior and response format expectations.
+
+## Planning Questions
+- When asking the user clarification questions in plan mode, always include an `Other` option and allow freeform input.
