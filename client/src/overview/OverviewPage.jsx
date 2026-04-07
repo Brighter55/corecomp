@@ -19,6 +19,7 @@ import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     PERatioGraph, PSRatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph, TotalAssetsGraph, DebtStructureGraph,
     REarningsVsCStockGraph, DepreciationAndAmortizationGraph, DividendPayoutCommonStockGraph,
     CashflowFromInvestmentGraph, CashflowFromFinancingGraph, CashFlowTrifectaGraph, NetIncomeVsOcfGraph, ChangeInInventoryGraph,
+    PFCFRatioGraph,
 } from "./index.js"
 
 
@@ -44,6 +45,7 @@ function OverviewPage() {
     const [peStatement, setPeStatement] = useState(null);
     const [pbStatement, setPbStatement] = useState(null);
     const [psStatement, setPsStatement] = useState(null);
+    const [pfcfStatement, setPfcfStatement] = useState(null);
     const [marketCapStatement, setMarketCapStatement] = useState(null);
 
 
@@ -363,6 +365,34 @@ function OverviewPage() {
         };
     }, [symbol, fetchVersion, navigate]);
 
+    useEffect(() => {
+        if (!symbol) {
+            setPfcfStatement(null);
+            return;
+        }
+
+        async function getPfcfStatement() {
+            const payload = {symbol: symbol, graph: "PFCFRatio"};
+            const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setPfcfStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setPfcfStatement(data);
+        }
+
+        let isActive = true;
+        getPfcfStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
     if (symbol) {
         return (
             <Container maxWidth="lg">
@@ -445,6 +475,7 @@ function OverviewPage() {
                         <Typography variant="h4">Price Ratio</Typography>
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <PSRatioGraph statement={psStatement} period={period}/>
+                            <PFCFRatioGraph statement={pfcfStatement} period={period}/>
                         </GraphsContainer>
                     </Stack>
                 </Stack>

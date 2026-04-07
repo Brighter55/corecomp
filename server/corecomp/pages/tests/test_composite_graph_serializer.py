@@ -7,6 +7,11 @@ class TestCompositeGraphSerializer:
         assert serializer.is_valid()
         assert serializer.validated_data["graph"] == "ROEPercentage"
 
+    def test_valid_pfcf_graph_allowed(self):
+        serializer = CompositeGraphSerializer(data={"graph": "PFCFRatio"})
+        assert serializer.is_valid()
+        assert serializer.validated_data["graph"] == "PFCFRatio"
+
     def test_invalid_graph_raises_error(self):
         serializer = CompositeGraphSerializer(data={"graph": "InvalidGraph"})
         assert not serializer.is_valid()

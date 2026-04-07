@@ -26,6 +26,7 @@ export { default as  ProfitMarginGraph } from "./components/ProfitMarginGraph.js
 export { default as  ROEGraph } from "./components/ROEGraph.jsx"
 export { default as PERatioGraph } from "./components/PERatioGraph.jsx"
 export { default as PSRatioGraph } from "./components/PSRatioGraph.jsx"
+export { default as PFCFRatioGraph } from "./components/PFCFRatioGraph.jsx"
 export { default as EbitGraph } from "./components/EbitGraph.jsx"
 export { default as EbitdaGraph } from "./components/EbitdaGraph.jsx"
 export {default as PBRatioGraph} from "./components/./PBRatioGraph.jsx"

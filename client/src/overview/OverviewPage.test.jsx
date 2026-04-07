@@ -67,6 +67,7 @@ vi.mock("./index.js", () => ({
   NetIncomeVsOcfGraph: () => <div>NetIncomeVsOcfGraph</div>,
   ChangeInInventoryGraph: () => <div>ChangeInInventoryGraph</div>,
   PSRatioGraph: () => <div>PSRatioGraph</div>,
+  PFCFRatioGraph: () => <div>PFCFRatioGraph</div>,
 }));
 
 describe("OverviewPage", () => {
@@ -116,9 +117,10 @@ describe("OverviewPage", () => {
     expect(screen.getByText("NetIncomeVsOcfGraph")).toBeInTheDocument();
     expect(screen.getByText("Balance Sheet Statement")).toBeInTheDocument();
     expect(screen.getByText("Ratios Statement")).toBeInTheDocument();
+    expect(screen.getByText("PFCFRatioGraph")).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(11);
+      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(12);
     });
 
     const calledEndpoints = mockAuthenticatedClientWithRetry.mock.calls.map((call) => call[0]);

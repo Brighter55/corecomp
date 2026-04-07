@@ -13,6 +13,7 @@ from pages.utils import (
     compute_pb, 
     compute_market_cap,
     compute_ps,
+    compute_pfcf,
 )
 from django.core.cache import cache
 from django_redis import get_redis_connection
@@ -363,6 +364,7 @@ def composite(request):
             "PBRatio": ["pricing", "balance_sheet"],
             "MarketCap": ["pricing", "balance_sheet"],
             "PSRatio": ["pricing", "income_statement", "balance_sheet"],
+            "PFCFRatio": ["pricing", "cash_flow", "balance_sheet"],
         }
 
         statements_needed = GRAPH_STATEMENTS.get(graph)
@@ -388,6 +390,8 @@ def composite(request):
 
                         if statement == "income_statement":
                             fetched = annotate_profit_margin(fetched)
+                        elif statement == "cash_flow":
+                            fetched = annotate_free_cash_flow(fetched)
                         elif statement == "pricing":
                             fetched = transform_pricing(fetched)
                         
@@ -410,6 +414,8 @@ def composite(request):
             data = compute_market_cap(statements["pricing"], statements["balance_sheet"])
         elif graph == "PSRatio":
             data = compute_ps(statements["pricing"], statements["income_statement"], statements["balance_sheet"])
+        elif graph == "PFCFRatio":
+            data = compute_pfcf(statements["pricing"], statements["cash_flow"], statements["balance_sheet"])
 
         if not data.get("annualReports") or not data.get("quarterlyReports"):
             return Response(status=status.HTTP_204_NO_CONTENT)

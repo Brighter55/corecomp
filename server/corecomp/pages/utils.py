@@ -500,4 +500,109 @@ def compute_ps(pricing, income_statement, balance_sheet):
     _append_ps_quarterly(balance_sheet.get("quarterlyReports", []))
 
     return result
+
+
+def compute_pfcf(pricing, cash_flow, balance_sheet):
+    result = {
+        "annualReports": [],
+        "quarterlyReports": [],
+    }
+
+    def _month_key(date_str):
+        key = date_str[:7]
+        if len(key) != 7 or key[4] != "-":
+            return None
+        return key
+
+    pricing_by_month = {}
+    for point in pricing:
+        date_str = point.get("date")
+        month = _month_key(date_str)
+        close = safe_float(point.get("close"))
+
+        if month is None or close is None:
+            continue
+
+        pricing_by_month[month] = close
+
+    if not pricing_by_month:
+        return result
+
+    annual_cash_flow = {
+        report.get("fiscalDateEnding"): report
+        for report in cash_flow.get("annualReports", [])
+    }
+
+    quarterly_cash_flow_reports = cash_flow.get("quarterlyReports", [])
+
+    def _append_pfcf_annual(balance_reports):
+        for report in balance_reports:
+            fiscal_date = report.get("fiscalDateEnding")
+            price = pricing_by_month.get(_month_key(fiscal_date))
+
+            # Pricing is passive and may be misaligned; skip when no monthly match exists.
+            if price is None:
+                continue
+
+            shares_outstanding = safe_int(report.get("commonStockSharesOutstanding"))
+            cash_flow_report = annual_cash_flow.get(fiscal_date)
+            free_cash_flow = None if cash_flow_report is None else safe_int(cash_flow_report.get("freeCashFlow"))
+
+            if shares_outstanding is None or free_cash_flow is None or free_cash_flow <= 0:
+                result["annualReports"].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PFCFRatio": None,
+                })
+                continue
+
+            market_cap = price * shares_outstanding
+            result["annualReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PFCFRatio": str(round(market_cap / free_cash_flow, 2)),
+            })
+
+    def _append_pfcf_quarterly(balance_reports):
+        cash_flow_index_by_date = {
+            report.get("fiscalDateEnding"): i
+            for i, report in enumerate(quarterly_cash_flow_reports)
+        }
+
+        for report in balance_reports:
+            fiscal_date = report.get("fiscalDateEnding")
+            price = pricing_by_month.get(_month_key(fiscal_date))
+
+            # Pricing is passive and may be misaligned; skip when no monthly match exists.
+            if price is None:
+                continue
+
+            shares_outstanding = safe_int(report.get("commonStockSharesOutstanding"))
+            start_idx = cash_flow_index_by_date.get(fiscal_date)
+
+            # skip points that cannot form a full TTM window.
+            if start_idx is None or start_idx > len(quarterly_cash_flow_reports) - 4:
+                continue
+
+            ttm_reports = quarterly_cash_flow_reports[start_idx:start_idx + 4]
+            ttm_fcf_values = [safe_int(item.get("freeCashFlow")) for item in ttm_reports]
+            ttm_free_cash_flow = None
+            if all(value is not None for value in ttm_fcf_values):
+                ttm_free_cash_flow = sum(ttm_fcf_values)
+
+            if shares_outstanding is None or ttm_free_cash_flow is None or ttm_free_cash_flow <= 0:
+                result["quarterlyReports"].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PFCFRatio": None,
+                })
+                continue
+
+            market_cap = price * shares_outstanding
+            result["quarterlyReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PFCFRatio": str(round(market_cap / ttm_free_cash_flow, 2)),
+            })
+
+    _append_pfcf_annual(balance_sheet.get("annualReports", []))
+    _append_pfcf_quarterly(balance_sheet.get("quarterlyReports", []))
+
+    return result
     
