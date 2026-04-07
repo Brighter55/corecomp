@@ -20,7 +20,7 @@ import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     PERatioGraph, PSRatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph, TotalAssetsGraph, DebtStructureGraph,
     REarningsVsCStockGraph, DepreciationAndAmortizationGraph, DividendPayoutCommonStockGraph,
     CashflowFromInvestmentGraph, CashflowFromFinancingGraph, CashFlowTrifectaGraph, NetIncomeVsOcfGraph, ChangeInInventoryGraph,
-    PFCFRatioGraph, CurrentRatioGraph,
+    PFCFRatioGraph, CurrentRatioGraph, QuickRatioGraph,
 } from "./index.js"
 
 
@@ -484,6 +484,7 @@ function OverviewPage() {
                     <CollapsibleSection title="Other Ratios">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <CurrentRatioGraph statement={balanceSheetStatement} period={period} />
+                            <QuickRatioGraph statement={balanceSheetStatement} period={period} />
                         </GraphsContainer>
                     </CollapsibleSection>
                 </Stack>

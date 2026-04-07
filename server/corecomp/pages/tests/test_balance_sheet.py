@@ -21,6 +21,9 @@ def test_valid_fetch(mock_get_balance_sheet, authorized_client):
             {
                 "fiscalDateEnding": "2024-12-31",
                 "totalCurrentAssets": "200",
+                "cashAndCashEquivalentsAtCarryingValue": "50",
+                "shortTermInvestments": "30",
+                "currentNetReceivables": "20",
                 "totalCurrentLiabilities": "100",
             }
         ],
@@ -28,6 +31,9 @@ def test_valid_fetch(mock_get_balance_sheet, authorized_client):
             {
                 "fiscalDateEnding": "2024-09-30",
                 "totalCurrentAssets": "300",
+                "cashAndCashEquivalentsAtCarryingValue": "60",
+                "shortTermInvestments": "40",
+                "currentNetReceivables": "30",
                 "totalCurrentLiabilities": "120",
             }
         ],
@@ -36,7 +42,9 @@ def test_valid_fetch(mock_get_balance_sheet, authorized_client):
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.json()["annualReports"][0]["CurrentRatio"] == "2.0"
+    assert response.json()["annualReports"][0]["QuickRatio"] == "1.0"
     assert response.json()["quarterlyReports"][0]["CurrentRatio"] == "2.5"
+    assert response.json()["quarterlyReports"][0]["QuickRatio"] == "1.08"
     assert response.status_code == 200
 
 # test for valid request where the endpoint returns cached_data
@@ -54,6 +62,9 @@ def test_valid_cache(mock_get_balance_sheet, authorized_client):
             {
                 "fiscalDateEnding": "2024-12-31",
                 "totalCurrentAssets": "200",
+                "cashAndCashEquivalentsAtCarryingValue": "50",
+                "shortTermInvestments": "30",
+                "currentNetReceivables": "20",
                 "totalCurrentLiabilities": "100",
             }
         ],
@@ -61,6 +72,9 @@ def test_valid_cache(mock_get_balance_sheet, authorized_client):
             {
                 "fiscalDateEnding": "2024-09-30",
                 "totalCurrentAssets": "300",
+                "cashAndCashEquivalentsAtCarryingValue": "60",
+                "shortTermInvestments": "40",
+                "currentNetReceivables": "30",
                 "totalCurrentLiabilities": "120",
             }
         ],
@@ -69,7 +83,9 @@ def test_valid_cache(mock_get_balance_sheet, authorized_client):
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")
     assert response.json()["annualReports"][0]["CurrentRatio"] == "2.0"
+    assert response.json()["annualReports"][0]["QuickRatio"] == "1.0"
     assert response.json()["quarterlyReports"][0]["CurrentRatio"] == "2.5"
+    assert response.json()["quarterlyReports"][0]["QuickRatio"] == "1.08"
     assert response.status_code == 200
     response = authorized_client.post(url, payload, format="json")
     assert response.status_code == 200

@@ -69,6 +69,7 @@ vi.mock("./index.js", () => ({
   PSRatioGraph: () => <div>PSRatioGraph</div>,
   PFCFRatioGraph: () => <div>PFCFRatioGraph</div>,
   CurrentRatioGraph: () => <div>CurrentRatioGraph</div>,
+  QuickRatioGraph: () => <div>QuickRatioGraph</div>,
 }));
 
 describe("OverviewPage", () => {
@@ -122,6 +123,7 @@ describe("OverviewPage", () => {
     expect(screen.getByText("Other Ratios")).toBeInTheDocument();
     expect(screen.getByText("PFCFRatioGraph")).toBeInTheDocument();
     expect(screen.getByText("CurrentRatioGraph")).toBeInTheDocument();
+    expect(screen.getByText("QuickRatioGraph")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(12);

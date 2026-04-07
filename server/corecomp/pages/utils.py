@@ -119,6 +119,48 @@ def annotate_current_ratio(data):
 
     return data
 
+
+def annotate_quick_ratio(data):
+    annual_reports = data["annualReports"]
+    quarterly_reports = data["quarterlyReports"]
+
+    # QuickRatio = (cashAndCashEquivalentsAtCarryingValue + shortTermInvestments + currentNetReceivables) / totalCurrentLiabilities
+    for report in annual_reports:
+        cash = safe_int(report.get("cashAndCashEquivalentsAtCarryingValue"))
+        short_term_investments = safe_int(report.get("shortTermInvestments"))
+        receivables = safe_int(report.get("currentNetReceivables"))
+        total_current_liabilities = safe_int(report.get("totalCurrentLiabilities"))
+
+        if (
+            cash is None
+            or short_term_investments is None
+            or receivables is None
+            or total_current_liabilities in (None, 0)
+        ):
+            report["QuickRatio"] = None
+        else:
+            quick_ratio = (cash + short_term_investments + receivables) / total_current_liabilities
+            report["QuickRatio"] = str(round(quick_ratio, 2))
+
+    for report in quarterly_reports:
+        cash = safe_int(report.get("cashAndCashEquivalentsAtCarryingValue"))
+        short_term_investments = safe_int(report.get("shortTermInvestments"))
+        receivables = safe_int(report.get("currentNetReceivables"))
+        total_current_liabilities = safe_int(report.get("totalCurrentLiabilities"))
+
+        if (
+            cash is None
+            or short_term_investments is None
+            or receivables is None
+            or total_current_liabilities in (None, 0)
+        ):
+            report["QuickRatio"] = None
+        else:
+            quick_ratio = (cash + short_term_investments + receivables) / total_current_liabilities
+            report["QuickRatio"] = str(round(quick_ratio, 2))
+
+    return data
+
 def transform_pricing(data):
     records = data["Monthly Adjusted Time Series"]
     transformed_data = []
