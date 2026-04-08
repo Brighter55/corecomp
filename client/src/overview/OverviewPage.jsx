@@ -16,7 +16,7 @@ import IconButton from "@mui/material/IconButton";
 import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
     SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph, GrossProfitGraph, CostOfRevenueGraph,
-    ResearchAndDevelopmentGraph, OperatingExpensesGraph, NetIncomeFromContinuingOperationsGraph, ROEGraph,
+    ResearchAndDevelopmentGraph, OperatingExpensesGraph, NetIncomeFromContinuingOperationsGraph, ROEGraph, ReturnOnAssetsGraph,
     PERatioGraph, PSRatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph, TotalAssetsGraph, DebtStructureGraph,
     REarningsVsCStockGraph, DepreciationAndAmortizationGraph, DividendPayoutCommonStockGraph,
     CashflowFromInvestmentGraph, CashflowFromFinancingGraph, CashFlowTrifectaGraph, NetIncomeVsOcfGraph, ChangeInInventoryGraph,
@@ -43,6 +43,7 @@ function OverviewPage() {
     const [cashFlowStatement, setCashFlowStatement] = useState(null);
     const [balanceSheetStatement, setBalanceSheetStatement] = useState(null);
     const [roeStatement, setRoeStatement] = useState(null);
+    const [roaStatement, setRoaStatement] = useState(null);
     const [peStatement, setPeStatement] = useState(null);
     const [pbStatement, setPbStatement] = useState(null);
     const [psStatement, setPsStatement] = useState(null);
@@ -248,6 +249,34 @@ function OverviewPage() {
 
         let isActive = true;
         getRoeStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
+            setRoaStatement(null);
+            return;
+        }
+
+        async function getRoaStatement() {
+            const payload = {symbol: symbol, graph: "ROAPercentage"};
+            const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setRoaStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setRoaStatement(data);
+        }
+
+        let isActive = true;
+        getRoaStatement();
 
         return  () => {
             isActive = false;
@@ -469,6 +498,7 @@ function OverviewPage() {
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <ProfitMarginGraph statement={incomeStatement} period={period}></ProfitMarginGraph>
                             <ROEGraph statement={roeStatement} period={period} />
+                            <ReturnOnAssetsGraph statement={roaStatement} period={period} />
                         </GraphsContainer>
                     </CollapsibleSection>
 

@@ -19,6 +19,7 @@ class CompositeGraphSerializer(serializers.Serializer):
     
     ALLOWED_GRAPHS = [
         "ROEPercentage",
+        "ROAPercentage",
         "PERatio",
         "PBRatio",
         "MarketCap",

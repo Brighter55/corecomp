@@ -51,6 +51,7 @@ vi.mock("./index.js", () => ({
   PricingGraph: () => <div>PricingGraph</div>,
   ProfitMarginGraph: () => <div>ProfitMarginGraph</div>,
   ROEGraph: () => <div>ROEGraph</div>,
+  ReturnOnAssetsGraph: () => <div>ReturnOnAssetsGraph</div>,
   PERatioGraph: () => <div>PERatioGraph</div>,
   EbitGraph: () => <div>EBIT</div>,
   EbitdaGraph: () => <div>EBITDA</div>,
@@ -122,13 +123,14 @@ describe("OverviewPage", () => {
     expect(screen.getByText("Profitability Ratios")).toBeInTheDocument();
     expect(screen.getByText("Price Ratios")).toBeInTheDocument();
     expect(screen.getByText("Other Ratios")).toBeInTheDocument();
+    expect(screen.getByText("ReturnOnAssetsGraph")).toBeInTheDocument();
     expect(screen.getByText("PFCFRatioGraph")).toBeInTheDocument();
     expect(screen.getByText("CurrentRatioGraph")).toBeInTheDocument();
     expect(screen.getByText("QuickRatioGraph")).toBeInTheDocument();
     expect(screen.getByText("DebtEquityRatioGraph")).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(12);
+      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(13);
     });
 
     const calledEndpoints = mockAuthenticatedClientWithRetry.mock.calls.map((call) => call[0]);

@@ -294,6 +294,74 @@ def compute_roe(income_statement, balance_sheet):
         "quarterlyReports": quarterly_roe
     }
 
+
+def compute_roa(income_statement, balance_sheet):
+    result = {
+        "annualReports": [],
+        "quarterlyReports": [],
+    }
+
+    annual_balance_lookup = {
+        report.get("fiscalDateEnding"): report
+        for report in balance_sheet.get("annualReports", [])
+    }
+
+    for income_report in income_statement.get("annualReports", []):
+        fiscal_date = income_report.get("fiscalDateEnding")
+        balance_report = annual_balance_lookup.get(fiscal_date)
+
+        # Skip points where income statement and balance sheet dates do not align.
+        if balance_report is None:
+            continue
+
+        net_income = safe_int(income_report.get("netIncome"))
+        total_assets = safe_int(balance_report.get("totalAssets"))
+
+        if net_income is None or total_assets in (None, 0):
+            result["annualReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "ROAPercentage": None,
+            })
+            continue
+
+        result["annualReports"].append({
+            "fiscalDateEnding": fiscal_date,
+            "ROAPercentage": str(round((net_income / total_assets) * 100, 2)),
+        })
+
+    quarterly_income_reports = income_statement.get("quarterlyReports", [])
+    income_index_by_date = {
+        report.get("fiscalDateEnding"): i
+        for i, report in enumerate(quarterly_income_reports)
+    }
+
+    for balance_report in balance_sheet.get("quarterlyReports", []):
+        fiscal_date = balance_report.get("fiscalDateEnding")
+        start_idx = income_index_by_date.get(fiscal_date)
+
+        # Skip points that cannot form a full TTM window.
+        if start_idx is None or start_idx > len(quarterly_income_reports) - 4:
+            continue
+
+        ttm_reports = quarterly_income_reports[start_idx:start_idx + 4]
+        ttm_net_income_values = [safe_int(item.get("netIncome")) for item in ttm_reports]
+        total_assets = safe_int(balance_report.get("totalAssets"))
+
+        if total_assets in (None, 0) or any(value is None for value in ttm_net_income_values):
+            result["quarterlyReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "ROAPercentage": None,
+            })
+            continue
+
+        ttm_net_income = sum(ttm_net_income_values)
+        result["quarterlyReports"].append({
+            "fiscalDateEnding": fiscal_date,
+            "ROAPercentage": str(round((ttm_net_income / total_assets) * 100, 2)),
+        })
+
+    return result
+
 def compute_pe(pricing, earnings):
     # must return a dict of annualReports and quarterlyReports. each report must be a list of dict containing fiscalDateEnding and PERatio
     result = {

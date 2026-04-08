@@ -12,6 +12,7 @@ from pages.utils import (
     annotate_debt_equity_ratio,
     transform_pricing,
     compute_roe,
+    compute_roa,
     compute_pe,
     compute_pb, 
     compute_market_cap,
@@ -367,6 +368,7 @@ def composite(request):
 
         GRAPH_STATEMENTS = {
             "ROEPercentage": ["income_statement", "balance_sheet"],
+            "ROAPercentage": ["income_statement", "balance_sheet"],
             "PERatio": ["pricing", "earnings"],
             "PBRatio": ["pricing", "balance_sheet"],
             "MarketCap": ["pricing", "balance_sheet"],
@@ -417,6 +419,8 @@ def composite(request):
 
         if graph == "ROEPercentage":
             data = compute_roe(income_statement=statements["income_statement"], balance_sheet=statements["balance_sheet"])
+        elif graph == "ROAPercentage":
+            data = compute_roa(income_statement=statements["income_statement"], balance_sheet=statements["balance_sheet"])
         elif graph == "PERatio":
             data = compute_pe(statements["pricing"], statements["earnings"])
         elif graph == "PBRatio":
