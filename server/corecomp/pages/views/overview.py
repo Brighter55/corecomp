@@ -9,6 +9,7 @@ from pages.utils import (
     annotate_free_cash_flow,
     annotate_current_ratio,
     annotate_quick_ratio,
+    annotate_debt_equity_ratio,
     transform_pricing,
     compute_roe,
     compute_pe,
@@ -235,6 +236,7 @@ def balance_sheet(request):
 
             data = annotate_current_ratio(data)
             data = annotate_quick_ratio(data)
+            data = annotate_debt_equity_ratio(data)
 
             cache.set(key, data, timeout=604800)
 
@@ -402,6 +404,7 @@ def composite(request):
                         elif statement == "balance_sheet":
                             fetched = annotate_current_ratio(fetched)
                             fetched = annotate_quick_ratio(fetched)
+                            fetched = annotate_debt_equity_ratio(fetched)
                         
                         if statement == "pricing":
                             cache.set(statement_key, fetched, timeout=86400)

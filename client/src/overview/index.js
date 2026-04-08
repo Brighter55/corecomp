@@ -36,3 +36,4 @@ export {default as DebtStructureGraph} from "./components/DebtStructureGraph.jsx
 export {default as REarningsVsCStockGraph} from "./components/REarningsVsCStockGraph.jsx"
 export {default as CurrentRatioGraph} from "./components/CurrentRatioGraph.jsx"
 export {default as QuickRatioGraph} from "./components/QuickRatioGraph.jsx"
+export {default as DebtEquityRatioGraph} from "./components/DebtEquityRatioGraph.jsx"

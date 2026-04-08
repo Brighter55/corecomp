@@ -161,6 +161,32 @@ def annotate_quick_ratio(data):
 
     return data
 
+
+def annotate_debt_equity_ratio(data):
+    annual_reports = data["annualReports"]
+    quarterly_reports = data["quarterlyReports"]
+
+    # DebtEquityRatio = shortLongTermDebtTotal / totalShareholderEquity
+    for report in annual_reports:
+        short_long_term_debt_total = safe_int(report.get("shortLongTermDebtTotal"))
+        total_shareholder_equity = safe_int(report.get("totalShareholderEquity"))
+
+        if short_long_term_debt_total is None or total_shareholder_equity in (None, 0):
+            report["DebtEquityRatio"] = None
+        else:
+            report["DebtEquityRatio"] = str(round(short_long_term_debt_total / total_shareholder_equity, 2))
+
+    for report in quarterly_reports:
+        short_long_term_debt_total = safe_int(report.get("shortLongTermDebtTotal"))
+        total_shareholder_equity = safe_int(report.get("totalShareholderEquity"))
+
+        if short_long_term_debt_total is None or total_shareholder_equity in (None, 0):
+            report["DebtEquityRatio"] = None
+        else:
+            report["DebtEquityRatio"] = str(round(short_long_term_debt_total / total_shareholder_equity, 2))
+
+    return data
+
 def transform_pricing(data):
     records = data["Monthly Adjusted Time Series"]
     transformed_data = []
