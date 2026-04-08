@@ -2,8 +2,6 @@ import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
 import Box from '@mui/material/Box';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import {useState, useEffect, useRef, useMemo} from "react"
@@ -17,30 +15,25 @@ const explanation = (
   <Stack spacing={2}>
       <Typography variant="explanationTopic">What is it?</Typography>
       <Typography variant="explanationText">
-          Debt/Equity ratio compares total short and long-term debt to shareholder equity to show how much leverage a company uses.
+          The debt-to-equity (D/E) ratio measures a company's financial leverage by dividing its total liabilities by shareholder equity. It shows how much debt a company uses to finance assets relative to the value of shareholders' equity. A lower ratio implies less risk, while a higher ratio indicates greater leverage.
       </Typography>
       <Typography variant="explanationTopic">Calculation</Typography>
       <Typography
           variant="explanationText"
           sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
       >
-          Debt/Equity Ratio = shortLongTermDebtTotal / totalShareholderEquity
+          Debt/Equity Ratio = Short Term & Long Term Debt / Total Shareholder Equity
       </Typography>
       <Typography variant="explanationTopic">Interpretation</Typography>
-      <Stack direction="row" spacing={1}>
-          <TrendingUpIcon
-              sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-          />
+      <Stack direction="column" spacing={1}>
           <Typography variant="explanationText">
-              A rising debt/equity ratio can indicate higher financial risk due to greater reliance on debt financing.
+              High D/E Ratio (&gt; 1.5–2.0): Suggests the company is financing growth heavily through debt. This indicates higher risk, especially during economic downturns, as interest expenses must be paid regardless of earnings.
           </Typography>
-      </Stack>
-      <Stack direction="row" spacing={1}>
-          <TrendingDownIcon
-              sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-          />
           <Typography variant="explanationText">
-                A falling debt/equity ratio can indicate a stronger equity cushion and lower balance-sheet leverage.
+              Low D/E Ratio (&lt; 1.0): Suggests a more conservative approach with less debt and stronger equity backing, typically seen as more stable.
+          </Typography>
+          <Typography variant="explanationText">
+              Note: The definition of a "good" ratio varies by industry; capital-intensive industries (e.g., manufacturing, utilities) often have higher acceptable ratios (e.g., 2.0 or higher) compared to technology companies.
           </Typography>
       </Stack>
   </Stack>

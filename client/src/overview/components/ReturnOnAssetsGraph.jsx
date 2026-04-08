@@ -2,8 +2,6 @@ import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
 import Box from '@mui/material/Box';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import {useState, useEffect, useRef, useMemo} from "react"
@@ -17,7 +15,7 @@ const explanation = (
   <Stack spacing={2}>
       <Typography variant="explanationTopic">What is it?</Typography>
       <Typography variant="explanationText">
-          Return on assets is a profitability ratio that shows how efficiently a business uses its assets to generate net income. It helps measure how productive the company is with everything it owns.
+          Return on Assets (ROA) is measures how efficiently a company uses its assets to generate profit. It shows the net income produced per dollar of assets, indicating operational efficiency. A higher ROA indicates more effective management of assets.
       </Typography>
       <Typography variant="explanationTopic">Calculation</Typography>
       <Typography
@@ -27,20 +25,15 @@ const explanation = (
           ROA = Net Income / Total Assets
       </Typography>
       <Typography variant="explanationTopic">Interpretation</Typography>
-      <Stack direction="row" spacing={1}>
-          <TrendingUpIcon
-              sx={{ color: "green", bgcolor: "white", borderRadius: "10px", }}
-          />
+      <Stack direction="column" spacing={1}>
           <Typography variant="explanationText">
-              A positive trend in return on assets suggests the company is improving its ability to generate net profit from its asset base.
+              Rising Trend: Indicates increasing operational efficiency, better asset utilization, and smarter, more productive investment in assets over time.
           </Typography>
-      </Stack>
-      <Stack direction="row" spacing={1}>
-          <TrendingDownIcon
-              sx={{ color: "red", bgcolor: "white", borderRadius: "10px", }}
-          />
           <Typography variant="explanationText">
-                A negative trend suggests the company is becoming less efficient at turning assets into net profit.
+              Declining Trend: Acts as a potential early warning signal for aging assets, rising unplanned costs, or decreasing efficiency.
+          </Typography>
+          <Typography variant="explanationText">
+              High/Low Numbers: Generally, &gt;5% is considered decent, and &gt;10% is strong, though this varies heavily by industry. Asset-heavy industries (e.g., utilities) often have lower ROA compared to tech or service industries.
           </Typography>
       </Stack>
   </Stack>

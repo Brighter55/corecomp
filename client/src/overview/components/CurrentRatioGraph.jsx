@@ -2,8 +2,6 @@ import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
 import Box from '@mui/material/Box';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import {useState, useEffect, useRef, useMemo} from "react"
@@ -17,30 +15,25 @@ const explanation = (
   <Stack spacing={2}>
       <Typography variant="explanationTopic">What is it?</Typography>
       <Typography variant="explanationText">
-          Current ratio measures a company's short-term liquidity by comparing current assets to current liabilities.
+          Current ratio is a liquidity metric that measures a company's ability to pay short-term obligations (due within one year) with its short-term assets.
       </Typography>
       <Typography variant="explanationTopic">Calculation</Typography>
       <Typography
           variant="explanationText"
           sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
       >
-          Current Ratio = totalCurrentAssets / totalCurrentLiabilities
+          Current Ratio = Total Current Assets / Total Current Liabilities
       </Typography>
       <Typography variant="explanationTopic">Interpretation</Typography>
-      <Stack direction="row" spacing={1}>
-          <TrendingUpIcon
-              sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-          />
+      <Stack direction="column" spacing={1}>
           <Typography variant="explanationText">
-              A rising current ratio can indicate stronger short-term financial flexibility and lower near-term liquidity risk.
+              Current ratio &lt; 1: The company may have difficulty paying short-term debts.
           </Typography>
-      </Stack>
-      <Stack direction="row" spacing={1}>
-          <TrendingDownIcon
-              sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-          />
           <Typography variant="explanationText">
-                A falling current ratio can signal tighter liquidity and a reduced cushion to cover near-term obligations.
+              Current ratio 1 - 1.5: Generally considered acceptable, depending on the industry.
+          </Typography>
+          <Typography variant="explanationText">
+              Current ratio &gt; 3: Could indicate high liquidity, but may also mean the company is not using its assets efficiently.
           </Typography>
       </Stack>
   </Stack>

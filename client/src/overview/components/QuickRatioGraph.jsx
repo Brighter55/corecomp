@@ -2,8 +2,6 @@ import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
 import Box from '@mui/material/Box';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import {useState, useEffect, useRef, useMemo} from "react"
@@ -17,30 +15,28 @@ const explanation = (
   <Stack spacing={2}>
       <Typography variant="explanationTopic">What is it?</Typography>
       <Typography variant="explanationText">
-          Quick ratio measures short-term liquidity using the most liquid current assets.
+          The quick ratio, or "acid-test ratio," measures a company’s ability to pay short-term liabilities (due within one year) using its most liquid assets—cash, marketable securities, and accounts receivable. It excludes inventories and prepaid expenses, providing a stricter liquidity test than the current ratio.
       </Typography>
       <Typography variant="explanationTopic">Calculation</Typography>
       <Typography
           variant="explanationText"
           sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
       >
-          Quick Ratio = (cashAndCashEquivalentsAtCarryingValue + shortTermInvestments + currentNetReceivables) / totalCurrentLiabilities
+          Quick Ratio = (Cash & Cash Equivalents + Short Term Investment + Current Net Receivables) / Total Current Liabilities
       </Typography>
       <Typography variant="explanationTopic">Interpretation</Typography>
-      <Stack direction="row" spacing={1}>
-          <TrendingUpIcon
-              sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-          />
+      <Stack direction="column" spacing={1}>
           <Typography variant="explanationText">
-              A rising quick ratio can indicate stronger ability to meet short-term obligations with liquid assets.
+              &gt; 1.0: The company has sufficient liquid assets to cover its current liabilities.
           </Typography>
-      </Stack>
-      <Stack direction="row" spacing={1}>
-          <TrendingDownIcon
-              sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-          />
           <Typography variant="explanationText">
-                A falling quick ratio can indicate increased short-term liquidity pressure.
+              &lt; 1.0: The company may struggle to pay immediate debts, suggesting potential cash flow issues.
+          </Typography>
+          <Typography variant="explanationText">
+              Too High Ratio (e.g., 7 or 8): May indicate an inefficient use of cash that could be used for growth.
+          </Typography>
+          <Typography variant="explanationText">
+              Trends: A decreasing ratio over time (e.g., 1.1 down to 0.9) suggests deteriorating liquidity.
           </Typography>
       </Stack>
   </Stack>

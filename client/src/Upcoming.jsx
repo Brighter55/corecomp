@@ -7,6 +7,20 @@ import Container from "@mui/material/Container"
 const versions = [
     {
         name: "Current Version",
+        version: "0.6.0",
+        date: "04/08/2026",
+        updates: [
+            "Current Ratio graph",
+            "Quick Ratio graph",
+            "Debt/Equity Ratio graph",
+            "Return on Assets (ROA) graph",
+            "Price-to-Sales (P/S) Ratio graph",
+            "Price-to-Free Cash Flow (P/FCF) Ratio graph",
+            "Implement collapsible graph sections",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.5.0",
         date: "04/05/2026",
         updates: [
