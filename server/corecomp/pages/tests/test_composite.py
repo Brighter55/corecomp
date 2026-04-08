@@ -44,6 +44,7 @@ def _balance_sheet_payload():
                 "totalShareholderEquity": "1000",
                 "totalAssets": "2000",
                 "totalLiabilities": "1000",
+                "commonStockSharesOutstanding": "100",
             }
         ],
         "quarterlyReports": [
@@ -52,6 +53,7 @@ def _balance_sheet_payload():
                 "totalShareholderEquity": "900",
                 "totalAssets": "1800",
                 "totalLiabilities": "900",
+                "commonStockSharesOutstanding": "95",
             }
         ],
     }
@@ -72,6 +74,27 @@ def _earnings_payload():
     return {
         "annualEarnings": [{"fiscalDateEnding": "2023-12-31", "reportedEPS": "10"}],
         "quarterlyEarnings": [{"fiscalDateEnding": "2023-12-31", "reportedEPS": "2.5"}],
+    }
+
+
+def _cash_flow_payload():
+    return {
+        "annualReports": [
+            {
+                "fiscalDateEnding": "2023-12-31",
+                "operatingCashflow": "900",
+                "capitalExpenditures": "300",
+                "freeCashFlow": "600",
+            }
+        ],
+        "quarterlyReports": [
+            {
+                "fiscalDateEnding": "2023-09-30",
+                "operatingCashflow": "220",
+                "capitalExpenditures": "70",
+                "freeCashFlow": "150",
+            }
+        ],
     }
 
 
@@ -248,6 +271,62 @@ def test_call_compute_market_cap(
 
     assert response.status_code == 200
     mock_compute_market_cap.assert_called_once()
+
+
+@pytest.mark.django_db
+@patch("pages.views.overview.compute_ps")
+@patch("pages.views.overview.financial_data_service.get_balance_sheet")
+@patch("pages.views.overview.financial_data_service.get_income_statement")
+@patch("pages.views.overview.financial_data_service.get_pricing")
+def test_call_compute_ps(
+    mock_get_pricing,
+    mock_get_income_statement,
+    mock_get_balance_sheet,
+    mock_compute_ps,
+    authorized_client,
+):
+    _create_symbol()
+    mock_get_pricing.return_value = _pricing_payload()
+    mock_get_income_statement.return_value = _income_statement_payload()
+    mock_get_balance_sheet.return_value = _balance_sheet_payload()
+    mock_compute_ps.return_value = {
+        "annualReports": [{"fiscalDateEnding": "2023-12-31", "PSRatio": "5.0"}],
+        "quarterlyReports": [{"fiscalDateEnding": "2023-09-30", "PSRatio": "4.8"}],
+    }
+
+    payload = {"symbol": "IBM", "graph": "PSRatio"}
+    response = authorized_client.post(url, payload, format="json")
+
+    assert response.status_code == 200
+    mock_compute_ps.assert_called_once()
+
+
+@pytest.mark.django_db
+@patch("pages.views.overview.compute_pfcf")
+@patch("pages.views.overview.financial_data_service.get_balance_sheet")
+@patch("pages.views.overview.financial_data_service.get_cash_flow")
+@patch("pages.views.overview.financial_data_service.get_pricing")
+def test_call_compute_pfcf(
+    mock_get_pricing,
+    mock_get_cash_flow,
+    mock_get_balance_sheet,
+    mock_compute_pfcf,
+    authorized_client,
+):
+    _create_symbol()
+    mock_get_pricing.return_value = _pricing_payload()
+    mock_get_cash_flow.return_value = _cash_flow_payload()
+    mock_get_balance_sheet.return_value = _balance_sheet_payload()
+    mock_compute_pfcf.return_value = {
+        "annualReports": [{"fiscalDateEnding": "2023-12-31", "PFCFRatio": "25.0"}],
+        "quarterlyReports": [{"fiscalDateEnding": "2023-09-30", "PFCFRatio": "21.2"}],
+    }
+
+    payload = {"symbol": "IBM", "graph": "PFCFRatio"}
+    response = authorized_client.post(url, payload, format="json")
+
+    assert response.status_code == 200
+    mock_compute_pfcf.assert_called_once()
 
 
 @pytest.mark.django_db

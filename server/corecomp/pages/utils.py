@@ -93,6 +93,100 @@ def annotate_free_cash_flow(data):
     
     return data
 
+
+def annotate_current_ratio(data):
+    annual_reports = data["annualReports"]
+    quarterly_reports = data["quarterlyReports"]
+
+    # CurrentRatio = totalCurrentAssets / totalCurrentLiabilities
+    for report in annual_reports:
+        total_current_assets = safe_int(report.get("totalCurrentAssets"))
+        total_current_liabilities = safe_int(report.get("totalCurrentLiabilities"))
+
+        if total_current_assets is None or total_current_liabilities in (None, 0):
+            report["CurrentRatio"] = None
+        else:
+            report["CurrentRatio"] = str(round(total_current_assets / total_current_liabilities, 2))
+
+    for report in quarterly_reports:
+        total_current_assets = safe_int(report.get("totalCurrentAssets"))
+        total_current_liabilities = safe_int(report.get("totalCurrentLiabilities"))
+
+        if total_current_assets is None or total_current_liabilities in (None, 0):
+            report["CurrentRatio"] = None
+        else:
+            report["CurrentRatio"] = str(round(total_current_assets / total_current_liabilities, 2))
+
+    return data
+
+
+def annotate_quick_ratio(data):
+    annual_reports = data["annualReports"]
+    quarterly_reports = data["quarterlyReports"]
+
+    # QuickRatio = (cashAndCashEquivalentsAtCarryingValue + shortTermInvestments + currentNetReceivables) / totalCurrentLiabilities
+    for report in annual_reports:
+        cash = safe_int(report.get("cashAndCashEquivalentsAtCarryingValue"))
+        short_term_investments = safe_int(report.get("shortTermInvestments"))
+        receivables = safe_int(report.get("currentNetReceivables"))
+        total_current_liabilities = safe_int(report.get("totalCurrentLiabilities"))
+
+        if (
+            cash is None
+            or short_term_investments is None
+            or receivables is None
+            or total_current_liabilities in (None, 0)
+        ):
+            report["QuickRatio"] = None
+        else:
+            quick_ratio = (cash + short_term_investments + receivables) / total_current_liabilities
+            report["QuickRatio"] = str(round(quick_ratio, 2))
+
+    for report in quarterly_reports:
+        cash = safe_int(report.get("cashAndCashEquivalentsAtCarryingValue"))
+        short_term_investments = safe_int(report.get("shortTermInvestments"))
+        receivables = safe_int(report.get("currentNetReceivables"))
+        total_current_liabilities = safe_int(report.get("totalCurrentLiabilities"))
+
+        if (
+            cash is None
+            or short_term_investments is None
+            or receivables is None
+            or total_current_liabilities in (None, 0)
+        ):
+            report["QuickRatio"] = None
+        else:
+            quick_ratio = (cash + short_term_investments + receivables) / total_current_liabilities
+            report["QuickRatio"] = str(round(quick_ratio, 2))
+
+    return data
+
+
+def annotate_debt_equity_ratio(data):
+    annual_reports = data["annualReports"]
+    quarterly_reports = data["quarterlyReports"]
+
+    # DebtEquityRatio = shortLongTermDebtTotal / totalShareholderEquity
+    for report in annual_reports:
+        short_long_term_debt_total = safe_int(report.get("shortLongTermDebtTotal"))
+        total_shareholder_equity = safe_int(report.get("totalShareholderEquity"))
+
+        if short_long_term_debt_total is None or total_shareholder_equity in (None, 0):
+            report["DebtEquityRatio"] = None
+        else:
+            report["DebtEquityRatio"] = str(round(short_long_term_debt_total / total_shareholder_equity, 2))
+
+    for report in quarterly_reports:
+        short_long_term_debt_total = safe_int(report.get("shortLongTermDebtTotal"))
+        total_shareholder_equity = safe_int(report.get("totalShareholderEquity"))
+
+        if short_long_term_debt_total is None or total_shareholder_equity in (None, 0):
+            report["DebtEquityRatio"] = None
+        else:
+            report["DebtEquityRatio"] = str(round(short_long_term_debt_total / total_shareholder_equity, 2))
+
+    return data
+
 def transform_pricing(data):
     records = data["Monthly Adjusted Time Series"]
     transformed_data = []
@@ -199,6 +293,74 @@ def compute_roe(income_statement, balance_sheet):
         "annualReports": annual_roe,
         "quarterlyReports": quarterly_roe
     }
+
+
+def compute_roa(income_statement, balance_sheet):
+    result = {
+        "annualReports": [],
+        "quarterlyReports": [],
+    }
+
+    annual_balance_lookup = {
+        report.get("fiscalDateEnding"): report
+        for report in balance_sheet.get("annualReports", [])
+    }
+
+    for income_report in income_statement.get("annualReports", []):
+        fiscal_date = income_report.get("fiscalDateEnding")
+        balance_report = annual_balance_lookup.get(fiscal_date)
+
+        # Skip points where income statement and balance sheet dates do not align.
+        if balance_report is None:
+            continue
+
+        net_income = safe_int(income_report.get("netIncome"))
+        total_assets = safe_int(balance_report.get("totalAssets"))
+
+        if net_income is None or total_assets in (None, 0):
+            result["annualReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "ROAPercentage": None,
+            })
+            continue
+
+        result["annualReports"].append({
+            "fiscalDateEnding": fiscal_date,
+            "ROAPercentage": str(round((net_income / total_assets) * 100, 2)),
+        })
+
+    quarterly_income_reports = income_statement.get("quarterlyReports", [])
+    income_index_by_date = {
+        report.get("fiscalDateEnding"): i
+        for i, report in enumerate(quarterly_income_reports)
+    }
+
+    for balance_report in balance_sheet.get("quarterlyReports", []):
+        fiscal_date = balance_report.get("fiscalDateEnding")
+        start_idx = income_index_by_date.get(fiscal_date)
+
+        # Skip points that cannot form a full TTM window.
+        if start_idx is None or start_idx > len(quarterly_income_reports) - 4:
+            continue
+
+        ttm_reports = quarterly_income_reports[start_idx:start_idx + 4]
+        ttm_net_income_values = [safe_int(item.get("netIncome")) for item in ttm_reports]
+        total_assets = safe_int(balance_report.get("totalAssets"))
+
+        if total_assets in (None, 0) or any(value is None for value in ttm_net_income_values):
+            result["quarterlyReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "ROAPercentage": None,
+            })
+            continue
+
+        ttm_net_income = sum(ttm_net_income_values)
+        result["quarterlyReports"].append({
+            "fiscalDateEnding": fiscal_date,
+            "ROAPercentage": str(round((ttm_net_income / total_assets) * 100, 2)),
+        })
+
+    return result
 
 def compute_pe(pricing, earnings):
     # must return a dict of annualReports and quarterlyReports. each report must be a list of dict containing fiscalDateEnding and PERatio
@@ -398,6 +560,211 @@ def compute_market_cap(pricing, balance_sheet):
 
     _append_market_cap(balance_sheet.get("annualReports", []), "annualReports")
     _append_market_cap(balance_sheet.get("quarterlyReports", []), "quarterlyReports")
+
+    return result
+
+def compute_ps(pricing, income_statement, balance_sheet):
+    result = {
+        "annualReports": [],
+        "quarterlyReports": [],
+    }
+
+    def _month_key(date_str):
+        key = date_str[:7]
+        if len(key) != 7 or key[4] != "-":
+            return None
+        return key
+
+    pricing_by_month = {}
+    for point in pricing:
+        date_str = point.get("date")
+        month = _month_key(date_str)
+        close = safe_float(point.get("close"))
+
+        if month is None or close is None:
+            continue
+
+        pricing_by_month[month] = close
+
+    if not pricing_by_month:
+        return result
+
+    annual_income = {report.get("fiscalDateEnding"): report for report in income_statement.get("annualReports", [])}
+
+    def _append_ps_annual(balance_reports):
+        for report in balance_reports:
+            fiscal_date = report.get("fiscalDateEnding")
+            price = pricing_by_month.get(_month_key(fiscal_date))
+
+            # Pricing is passive and may be misaligned; skip when no monthly match exists.
+            if price is None:
+                continue
+
+            shares_outstanding = safe_int(report.get("commonStockSharesOutstanding"))
+            income_report = annual_income.get(fiscal_date)
+            total_revenue = None if income_report is None else safe_int(income_report.get("totalRevenue"))
+
+            if shares_outstanding is None or total_revenue is None or total_revenue == 0:
+                result["annualReports"].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PSRatio": None,
+                })
+                continue
+
+            market_cap = price * shares_outstanding
+            result["annualReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PSRatio": str(round(market_cap / total_revenue, 2)),
+            })
+
+    def _append_ps_quarterly(balance_reports):
+        quarterly_income_reports = income_statement.get("quarterlyReports", [])
+        income_index_by_date = {
+            report.get("fiscalDateEnding"): i
+            for i, report in enumerate(quarterly_income_reports)
+        }
+
+        for report in balance_reports:
+            fiscal_date = report.get("fiscalDateEnding")
+            price = pricing_by_month.get(_month_key(fiscal_date))
+
+            # Pricing is passive and may be misaligned; skip when no monthly match exists.
+            if price is None:
+                continue
+
+            shares_outstanding = safe_int(report.get("commonStockSharesOutstanding"))
+            start_idx = income_index_by_date.get(fiscal_date)
+
+            # skip points that cannot form a full TTM window.
+            if start_idx is None or start_idx > len(quarterly_income_reports) - 4:
+                continue
+
+            ttm_revenue = None
+            ttm_reports = quarterly_income_reports[start_idx:start_idx + 4]
+            ttm_revenue_values = [safe_int(item.get("totalRevenue")) for item in ttm_reports]
+            if all(value is not None for value in ttm_revenue_values):
+                ttm_revenue = sum(ttm_revenue_values)
+
+            if shares_outstanding is None or ttm_revenue is None or ttm_revenue == 0:
+                result["quarterlyReports"].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PSRatio": None,
+                })
+                continue
+
+            market_cap = price * shares_outstanding
+            result["quarterlyReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PSRatio": str(round(market_cap / ttm_revenue, 2)),
+            })
+
+    _append_ps_annual(balance_sheet.get("annualReports", []))
+    _append_ps_quarterly(balance_sheet.get("quarterlyReports", []))
+
+    return result
+
+
+def compute_pfcf(pricing, cash_flow, balance_sheet):
+    result = {
+        "annualReports": [],
+        "quarterlyReports": [],
+    }
+
+    def _month_key(date_str):
+        key = date_str[:7]
+        if len(key) != 7 or key[4] != "-":
+            return None
+        return key
+
+    pricing_by_month = {}
+    for point in pricing:
+        date_str = point.get("date")
+        month = _month_key(date_str)
+        close = safe_float(point.get("close"))
+
+        if month is None or close is None:
+            continue
+
+        pricing_by_month[month] = close
+
+    if not pricing_by_month:
+        return result
+
+    annual_cash_flow = {
+        report.get("fiscalDateEnding"): report
+        for report in cash_flow.get("annualReports", [])
+    }
+
+    quarterly_cash_flow_reports = cash_flow.get("quarterlyReports", [])
+
+    def _append_pfcf_annual(balance_reports):
+        for report in balance_reports:
+            fiscal_date = report.get("fiscalDateEnding")
+            price = pricing_by_month.get(_month_key(fiscal_date))
+
+            # Pricing is passive and may be misaligned; skip when no monthly match exists.
+            if price is None:
+                continue
+
+            shares_outstanding = safe_int(report.get("commonStockSharesOutstanding"))
+            cash_flow_report = annual_cash_flow.get(fiscal_date)
+            free_cash_flow = None if cash_flow_report is None else safe_int(cash_flow_report.get("freeCashFlow"))
+
+            if shares_outstanding is None or free_cash_flow is None or free_cash_flow <= 0:
+                result["annualReports"].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PFCFRatio": None,
+                })
+                continue
+
+            market_cap = price * shares_outstanding
+            result["annualReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PFCFRatio": str(round(market_cap / free_cash_flow, 2)),
+            })
+
+    def _append_pfcf_quarterly(balance_reports):
+        cash_flow_index_by_date = {
+            report.get("fiscalDateEnding"): i
+            for i, report in enumerate(quarterly_cash_flow_reports)
+        }
+
+        for report in balance_reports:
+            fiscal_date = report.get("fiscalDateEnding")
+            price = pricing_by_month.get(_month_key(fiscal_date))
+
+            # Pricing is passive and may be misaligned; skip when no monthly match exists.
+            if price is None:
+                continue
+
+            shares_outstanding = safe_int(report.get("commonStockSharesOutstanding"))
+            start_idx = cash_flow_index_by_date.get(fiscal_date)
+
+            # skip points that cannot form a full TTM window.
+            if start_idx is None or start_idx > len(quarterly_cash_flow_reports) - 4:
+                continue
+
+            ttm_reports = quarterly_cash_flow_reports[start_idx:start_idx + 4]
+            ttm_fcf_values = [safe_int(item.get("freeCashFlow")) for item in ttm_reports]
+            ttm_free_cash_flow = None
+            if all(value is not None for value in ttm_fcf_values):
+                ttm_free_cash_flow = sum(ttm_fcf_values)
+
+            if shares_outstanding is None or ttm_free_cash_flow is None or ttm_free_cash_flow <= 0:
+                result["quarterlyReports"].append({
+                    "fiscalDateEnding": fiscal_date,
+                    "PFCFRatio": None,
+                })
+                continue
+
+            market_cap = price * shares_outstanding
+            result["quarterlyReports"].append({
+                "fiscalDateEnding": fiscal_date,
+                "PFCFRatio": str(round(market_cap / ttm_free_cash_flow, 2)),
+            })
+
+    _append_pfcf_annual(balance_sheet.get("annualReports", []))
+    _append_pfcf_quarterly(balance_sheet.get("quarterlyReports", []))
 
     return result
     

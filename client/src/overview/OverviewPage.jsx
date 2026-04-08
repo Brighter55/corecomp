@@ -2,6 +2,7 @@ import {useEffect, useState} from "react"
 import { useNavigate } from "react-router-dom";
 import ProductHeader from "../headers/product-header/ProductHeader.jsx"
 import PeriodSwitch from "./components/PeriodSwitch.jsx"
+import CollapsibleSection from "./components/CollapsibleSection.jsx"
 import SymbolSearch from "../shared/SymbolSearch.jsx"
 import { authenticatedClientWithRetry } from "../helpers/api.js"
 // mui components
@@ -15,10 +16,11 @@ import IconButton from "@mui/material/IconButton";
 import { Hero, Info, TotalRevenueGraph, NetIncomeGraph, OperatingCashflowGraph,
     CapitalExpendituresGraph, FreeCashflowGraph, DividendsPayoutGraph, CashVsDebtGraph,
     SharesOutstandingGraph, EPSGraph, PricingGraph, ProfitMarginGraph, GrossProfitGraph, CostOfRevenueGraph,
-    ResearchAndDevelopmentGraph, OperatingExpensesGraph, NetIncomeFromContinuingOperationsGraph, ROEGraph,
-    PERatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph, TotalAssetsGraph, DebtStructureGraph,
+    ResearchAndDevelopmentGraph, OperatingExpensesGraph, NetIncomeFromContinuingOperationsGraph, ROEGraph, ReturnOnAssetsGraph,
+    PERatioGraph, PSRatioGraph, EbitdaGraph, EbitGraph, PBRatioGraph, MarketCapGraph, TotalAssetsGraph, DebtStructureGraph,
     REarningsVsCStockGraph, DepreciationAndAmortizationGraph, DividendPayoutCommonStockGraph,
     CashflowFromInvestmentGraph, CashflowFromFinancingGraph, CashFlowTrifectaGraph, NetIncomeVsOcfGraph, ChangeInInventoryGraph,
+    PFCFRatioGraph, CurrentRatioGraph, QuickRatioGraph, DebtEquityRatioGraph,
 } from "./index.js"
 
 
@@ -41,8 +43,11 @@ function OverviewPage() {
     const [cashFlowStatement, setCashFlowStatement] = useState(null);
     const [balanceSheetStatement, setBalanceSheetStatement] = useState(null);
     const [roeStatement, setRoeStatement] = useState(null);
+    const [roaStatement, setRoaStatement] = useState(null);
     const [peStatement, setPeStatement] = useState(null);
     const [pbStatement, setPbStatement] = useState(null);
+    const [psStatement, setPsStatement] = useState(null);
+    const [pfcfStatement, setPfcfStatement] = useState(null);
     const [marketCapStatement, setMarketCapStatement] = useState(null);
 
 
@@ -252,6 +257,34 @@ function OverviewPage() {
 
     useEffect(() => {
         if (!symbol) {
+            setRoaStatement(null);
+            return;
+        }
+
+        async function getRoaStatement() {
+            const payload = {symbol: symbol, graph: "ROAPercentage"};
+            const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setRoaStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setRoaStatement(data);
+        }
+
+        let isActive = true;
+        getRoaStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
             setPeStatement(null);
             return;
         }
@@ -334,6 +367,62 @@ function OverviewPage() {
         };
     }, [symbol, fetchVersion, navigate]);
 
+    useEffect(() => {
+        if (!symbol) {
+            setPsStatement(null);
+            return;
+        }
+
+        async function getPsStatement() {
+            const payload = {symbol: symbol, graph: "PSRatio"};
+            const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setPsStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setPsStatement(data);
+        }
+
+        let isActive = true;
+        getPsStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
+    useEffect(() => {
+        if (!symbol) {
+            setPfcfStatement(null);
+            return;
+        }
+
+        async function getPfcfStatement() {
+            const payload = {symbol: symbol, graph: "PFCFRatio"};
+            const response = await authenticatedClientWithRetry("/pages/composite", payload, () => isActive, navigate, setSymbol);
+            if (!isActive) {
+                return;
+            }
+            if (response.status === 204) {
+                setPfcfStatement([]);
+                return;
+            }
+            const data = await response.json();
+            setPfcfStatement(data);
+        }
+
+        let isActive = true;
+        getPfcfStatement();
+
+        return  () => {
+            isActive = false;
+        };
+    }, [symbol, fetchVersion, navigate]);
+
     if (symbol) {
         return (
             <Container maxWidth="lg">
@@ -344,46 +433,39 @@ function OverviewPage() {
                 <Stack spacing={5} sx={{ alignItems: "center" }}>
                     <Hero symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Hero>
                     <Info symbol={symbol} fetchVersion={fetchVersion} setSymbol={setSymbol}></Info>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Pricing</Typography>
+                    
+                    <CollapsibleSection title="Pricing">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <PricingGraph statement={pricingStatement} period={period} />
                             <MarketCapGraph statement={marketCapStatement} period={period}/>
                         </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Dividend Statement</Typography>
-                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
-                            <DividendsPayoutGraph statement={dividendsStatement} period={period}></DividendsPayoutGraph>
-                        </GraphsContainer>
-                    </Stack>
-                    <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Earnings Statement</Typography>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Earnings History">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <EPSGraph statement={earningsStatement} period={period}></EPSGraph>
                         </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Income Statement</Typography>
+                    </CollapsibleSection>
+
+                    <PeriodSwitch setPeriod={setPeriod} period={period}></PeriodSwitch>
+
+                    <CollapsibleSection title="Income Statement">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
-                            <ProfitMarginGraph statement={incomeStatement} period={period}></ProfitMarginGraph>
                             <TotalRevenueGraph statement={incomeStatement} period={period} />
                             <GrossProfitGraph statement={incomeStatement} period={period} />
                             <CostOfRevenueGraph statement={incomeStatement} period={period} />
-                            <ResearchAndDevelopmentGraph statement={incomeStatement} period={period} />
                             <OperatingExpensesGraph statement={incomeStatement} period={period} />
-                            <NetIncomeGraph statement={incomeStatement} period={period}></NetIncomeGraph>
-                            <NetIncomeFromContinuingOperationsGraph statement={incomeStatement} period={period} />
+                            <ResearchAndDevelopmentGraph statement={incomeStatement} period={period} />
                             <EbitGraph statement={incomeStatement} period={period}/>
                             <EbitdaGraph statement={incomeStatement} period={period}/>
+                            <NetIncomeGraph statement={incomeStatement} period={period}></NetIncomeGraph>
+                            <NetIncomeFromContinuingOperationsGraph statement={incomeStatement} period={period} />
                         </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Cash Flow Statement</Typography>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Cash Flow Statement">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <OperatingCashflowGraph statement={cashFlowStatement} period={period}></OperatingCashflowGraph>
-                            <NetIncomeVsOcfGraph statement={cashFlowStatement} period={period} />
                             <CapitalExpendituresGraph statement={cashFlowStatement} period={period}></CapitalExpendituresGraph>
                             <FreeCashflowGraph statement={cashFlowStatement} period={period} />
                             <DepreciationAndAmortizationGraph statement={cashFlowStatement} period={period} />
@@ -391,27 +473,51 @@ function OverviewPage() {
                             <CashflowFromInvestmentGraph statement={cashFlowStatement} period={period} />
                             <CashflowFromFinancingGraph statement={cashFlowStatement} period={period} />
                             <ChangeInInventoryGraph statement={cashFlowStatement} period={period} />
+                            <NetIncomeVsOcfGraph statement={cashFlowStatement} period={period} />
                             <CashFlowTrifectaGraph statement={cashFlowStatement} period={period} />
                         </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Balance Sheet Statement</Typography>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Balance Sheet">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <TotalAssetsGraph statement={balanceSheetStatement} period={period}/>
                             <DebtStructureGraph statement={balanceSheetStatement} period={period} />
-                            <REarningsVsCStockGraph statement={balanceSheetStatement} period={period} />
                             <CashVsDebtGraph statement={balanceSheetStatement} period={period}></CashVsDebtGraph>
                             <SharesOutstandingGraph statement={balanceSheetStatement} period={period}></SharesOutstandingGraph>
+                            <REarningsVsCStockGraph statement={balanceSheetStatement} period={period} />
                         </GraphsContainer>
-                    </Stack>
-                    <Stack spacing={2} sx={{ width: "95vw", maxWidth: "1300px" }}>
-                        <Typography variant="h4">Ratios Statement</Typography>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Dividends">
                         <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <DividendsPayoutGraph statement={dividendsStatement} period={period}></DividendsPayoutGraph>
+                        </GraphsContainer>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Profitability Ratios">
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <ProfitMarginGraph statement={incomeStatement} period={period}></ProfitMarginGraph>
                             <ROEGraph statement={roeStatement} period={period} />
+                            <ReturnOnAssetsGraph statement={roaStatement} period={period} />
+                        </GraphsContainer>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Price Ratios">
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
                             <PERatioGraph statement={peStatement} period={period}/>
                             <PBRatioGraph statement={pbStatement} period={period}/>
+                            <PSRatioGraph statement={psStatement} period={period}/>
+                            <PFCFRatioGraph statement={pfcfStatement} period={period}/>
                         </GraphsContainer>
-                    </Stack>
+                    </CollapsibleSection>
+
+                    <CollapsibleSection title="Other Ratios">
+                        <GraphsContainer direction={{ xs: "column", md: "row" }}>
+                            <CurrentRatioGraph statement={balanceSheetStatement} period={period} />
+                            <QuickRatioGraph statement={balanceSheetStatement} period={period} />
+                            <DebtEquityRatioGraph statement={balanceSheetStatement} period={period} />
+                        </GraphsContainer>
+                    </CollapsibleSection>
                 </Stack>
             </Container>
         )

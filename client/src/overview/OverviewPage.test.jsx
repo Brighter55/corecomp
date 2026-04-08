@@ -51,6 +51,7 @@ vi.mock("./index.js", () => ({
   PricingGraph: () => <div>PricingGraph</div>,
   ProfitMarginGraph: () => <div>ProfitMarginGraph</div>,
   ROEGraph: () => <div>ROEGraph</div>,
+  ReturnOnAssetsGraph: () => <div>ReturnOnAssetsGraph</div>,
   PERatioGraph: () => <div>PERatioGraph</div>,
   EbitGraph: () => <div>EBIT</div>,
   EbitdaGraph: () => <div>EBITDA</div>,
@@ -66,6 +67,11 @@ vi.mock("./index.js", () => ({
   CashFlowTrifectaGraph: () => <div>CashFlowTrifectaGraph</div>,
   NetIncomeVsOcfGraph: () => <div>NetIncomeVsOcfGraph</div>,
   ChangeInInventoryGraph: () => <div>ChangeInInventoryGraph</div>,
+  PSRatioGraph: () => <div>PSRatioGraph</div>,
+  PFCFRatioGraph: () => <div>PFCFRatioGraph</div>,
+  CurrentRatioGraph: () => <div>CurrentRatioGraph</div>,
+  QuickRatioGraph: () => <div>QuickRatioGraph</div>,
+  DebtEquityRatioGraph: () => <div>DebtEquityRatioGraph</div>,
 }));
 
 describe("OverviewPage", () => {
@@ -102,8 +108,7 @@ describe("OverviewPage", () => {
 
     expect(screen.getByTestId("info")).toBeInTheDocument();
     expect(screen.getByText("Pricing")).toBeInTheDocument();
-    expect(screen.getByText("Dividend Statement")).toBeInTheDocument();
-    expect(screen.getByText("Earnings Statement")).toBeInTheDocument();
+    expect(screen.getByText("Earnings History")).toBeInTheDocument();
     expect(screen.getByText("Income Statement")).toBeInTheDocument();
     expect(screen.getByText("GrossProfitGraph")).toBeInTheDocument();
     expect(screen.getByText("CostOfRevenueGraph")).toBeInTheDocument();
@@ -113,11 +118,19 @@ describe("OverviewPage", () => {
     expect(screen.getByText("Cash Flow Statement")).toBeInTheDocument();
     expect(screen.getByText("CashFlowTrifectaGraph")).toBeInTheDocument();
     expect(screen.getByText("NetIncomeVsOcfGraph")).toBeInTheDocument();
-    expect(screen.getByText("Balance Sheet Statement")).toBeInTheDocument();
-    expect(screen.getByText("Ratios Statement")).toBeInTheDocument();
+    expect(screen.getByText("Balance Sheet")).toBeInTheDocument();
+    expect(screen.getByText("Dividends")).toBeInTheDocument();
+    expect(screen.getByText("Profitability Ratios")).toBeInTheDocument();
+    expect(screen.getByText("Price Ratios")).toBeInTheDocument();
+    expect(screen.getByText("Other Ratios")).toBeInTheDocument();
+    expect(screen.getByText("ReturnOnAssetsGraph")).toBeInTheDocument();
+    expect(screen.getByText("PFCFRatioGraph")).toBeInTheDocument();
+    expect(screen.getByText("CurrentRatioGraph")).toBeInTheDocument();
+    expect(screen.getByText("QuickRatioGraph")).toBeInTheDocument();
+    expect(screen.getByText("DebtEquityRatioGraph")).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(10);
+      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(13);
     });
 
     const calledEndpoints = mockAuthenticatedClientWithRetry.mock.calls.map((call) => call[0]);

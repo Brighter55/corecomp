@@ -7,11 +7,17 @@ import os
 from pages.utils import (
     annotate_profit_margin,
     annotate_free_cash_flow,
+    annotate_current_ratio,
+    annotate_quick_ratio,
+    annotate_debt_equity_ratio,
     transform_pricing,
     compute_roe,
+    compute_roa,
     compute_pe,
     compute_pb, 
-    compute_market_cap
+    compute_market_cap,
+    compute_ps,
+    compute_pfcf,
 )
 from django.core.cache import cache
 from django_redis import get_redis_connection
@@ -229,6 +235,10 @@ def balance_sheet(request):
             if not data:
                 return Response(status=status.HTTP_204_NO_CONTENT)
 
+            data = annotate_current_ratio(data)
+            data = annotate_quick_ratio(data)
+            data = annotate_debt_equity_ratio(data)
+
             cache.set(key, data, timeout=604800)
 
         return Response(data, status=status.HTTP_200_OK)
@@ -358,9 +368,12 @@ def composite(request):
 
         GRAPH_STATEMENTS = {
             "ROEPercentage": ["income_statement", "balance_sheet"],
+            "ROAPercentage": ["income_statement", "balance_sheet"],
             "PERatio": ["pricing", "earnings"],
             "PBRatio": ["pricing", "balance_sheet"],
             "MarketCap": ["pricing", "balance_sheet"],
+            "PSRatio": ["pricing", "income_statement", "balance_sheet"],
+            "PFCFRatio": ["pricing", "cash_flow", "balance_sheet"],
         }
 
         statements_needed = GRAPH_STATEMENTS.get(graph)
@@ -386,8 +399,14 @@ def composite(request):
 
                         if statement == "income_statement":
                             fetched = annotate_profit_margin(fetched)
+                        elif statement == "cash_flow":
+                            fetched = annotate_free_cash_flow(fetched)
                         elif statement == "pricing":
                             fetched = transform_pricing(fetched)
+                        elif statement == "balance_sheet":
+                            fetched = annotate_current_ratio(fetched)
+                            fetched = annotate_quick_ratio(fetched)
+                            fetched = annotate_debt_equity_ratio(fetched)
                         
                         if statement == "pricing":
                             cache.set(statement_key, fetched, timeout=86400)
@@ -400,12 +419,18 @@ def composite(request):
 
         if graph == "ROEPercentage":
             data = compute_roe(income_statement=statements["income_statement"], balance_sheet=statements["balance_sheet"])
+        elif graph == "ROAPercentage":
+            data = compute_roa(income_statement=statements["income_statement"], balance_sheet=statements["balance_sheet"])
         elif graph == "PERatio":
             data = compute_pe(statements["pricing"], statements["earnings"])
         elif graph == "PBRatio":
             data = compute_pb(statements["pricing"], statements["balance_sheet"])
         elif graph == "MarketCap":
             data = compute_market_cap(statements["pricing"], statements["balance_sheet"])
+        elif graph == "PSRatio":
+            data = compute_ps(statements["pricing"], statements["income_statement"], statements["balance_sheet"])
+        elif graph == "PFCFRatio":
+            data = compute_pfcf(statements["pricing"], statements["cash_flow"], statements["balance_sheet"])
 
         if not data.get("annualReports") or not data.get("quarterlyReports"):
             return Response(status=status.HTTP_204_NO_CONTENT)
