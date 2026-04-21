@@ -1,18 +1,13 @@
-import {useState} from "react"
-import {loadStripe} from '@stripe/stripe-js';
+import { useState } from "react";
+import { loadStripe } from '@stripe/stripe-js';
 import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout
 } from '@stripe/react-stripe-js';
-import ProductHeader from "./headers/product-header/ProductHeader.jsx"
-import StyledButton from "./shared/StyledButton.jsx"
-// mui components
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import { authenticatedClient } from "./helpers/api.js"
-import { useAuth } from "./auth/AuthProvider.jsx"
-import Stack from "@mui/material/Stack"
-import Divider from "@mui/material/Divider";
+import ProductHeader from "./headers/product-header/ProductHeader.jsx";
+import { authenticatedClient } from "./helpers/api.js";
+import { useAuth } from "./auth/AuthProvider.jsx";
+import { Button } from "./components/ui/button";
 import TwoColumn from "./shared/TwoColumn.jsx";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY, {
@@ -42,30 +37,27 @@ function AuthenticatedUserAccount() {
     }
 
     return (
-        <Container maxWidth="lg">
+        <div className="mx-auto max-w-6xl px-4 pb-12">
             <ProductHeader />
-            <Stack spacing={2}>
+            <div className="space-y-2">
                 <TwoColumn>
-                    <Typography variant="h4">Username</Typography>
-                    <Typography varaint="h5">{user.username}</Typography>
+                    <h2 className="text-2xl font-semibold">Username</h2>
+                    <p className="text-lg">{user.username}</p>
                 </TwoColumn>
-                <Divider orientation="horizontal" flexItem sx={{ backgroundColor: "var(--main-dust-grey)" }}/>
+                <hr className="border-[var(--line-muted)]" />
                 <TwoColumn>
-                    <Typography variant="h4">email</Typography>
-                    <Typography varaint="h5">{user.email}</Typography>
+                    <h2 className="text-2xl font-semibold">email</h2>
+                    <p className="text-lg">{user.email}</p>
                 </TwoColumn>
-                <Divider orientation="horizontal" flexItem sx={{ backgroundColor: "var(--main-dust-grey)" }}/>
+                <hr className="border-[var(--line-muted)]" />
                 <TwoColumn>
-                    <Typography variant="h4">Subscription</Typography>
-                    <StyledButton
-                        onClick={handleSubscribeClicked}
-                        variant="contained"
-                    >
+                    <h2 className="text-2xl font-semibold">Subscription</h2>
+                    <Button onClick={handleSubscribeClicked} variant="forest">
                         Subscribe
-                    </StyledButton>
+                    </Button>
                 </TwoColumn>
-            </Stack>
-        </Container>
+            </div>
+        </div>
     )
 }
 

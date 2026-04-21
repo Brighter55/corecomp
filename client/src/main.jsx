@@ -5,6 +5,7 @@ import { createTheme, ThemeProvider, responsiveFontSizes } from '@mui/material/s
 import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './auth/AuthProvider.jsx';
+import { ThemeProvider as CoreThemeProvider } from './theme/ThemeContext.jsx';
 
 let theme = createTheme({
   typography: {
@@ -62,9 +63,11 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID} >
-        <AuthProvider>
-          <App />
-        </AuthProvider>
+        <CoreThemeProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </CoreThemeProvider>
       </GoogleOAuthProvider>
     </ThemeProvider>
   </StrictMode>,

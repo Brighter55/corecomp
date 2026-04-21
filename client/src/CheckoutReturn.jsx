@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import {useEffect} from "react"
 import { authenticatedClient } from "./helpers/api.js"
-import Typography from '@mui/material/Typography';
 
 function CheckoutReturn() {
     const {checkout_session_id} = useParams();
@@ -25,9 +24,9 @@ function CheckoutReturn() {
     }, []);
 
     return (
-        <Typography variant='body1'>
+        <p className="px-4 py-8 text-base text-[var(--text-main)]">
             Redirecting...
-        </Typography>
+        </p>
     )
 }
 

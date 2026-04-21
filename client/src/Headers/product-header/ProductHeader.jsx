@@ -1,35 +1,27 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from "react"
+import { Menu, UserCircle2, X } from "lucide-react";
 import { useAuth } from "../../auth/AuthProvider.jsx"
 // components
 import Features from "./components/Features.jsx"
-import Brand from "../../shared/Brand.jsx";
+import Brand from "../../shared/Brand.tsx";
 import HideOnScroll from "../components/HideOnScroll.jsx"
 import { authenticatedClient } from '../../helpers/api.js';
-// mui components
-import Button from '@mui/material/Button';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Container from '@mui/material/Container';
-import Stack from '@mui/material/Stack';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Box from '@mui/material/Box';
+import { Button } from "../../components/ui/button";
 
 
 function ProductHeader() {
     const navigate = useNavigate();
     const { setUser } = useAuth();
 
-    const [anchorElNav, setAnchorElNav] = useState(null);
-    const handleOpenNavMenu = (event) => {
-        setAnchorElNav(event.currentTarget);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const handleOpenNavMenu = () => {
+        setIsMobileMenuOpen(true);
     };
+
     const handleCloseNavMenu = () => {
-        setAnchorElNav(null);
+        setIsMobileMenuOpen(false);
     };
 
     function handleItemClicked(path) {
@@ -38,92 +30,74 @@ function ProductHeader() {
 
     async function handleSignoutClicked() {
         // send a request to Django with refresh token to revoke the token
-        const response = await authenticatedClient({endpoint: "/accounts/sign-out"});
+        await authenticatedClient({ endpoint: "/accounts/sign-out" });
+        handleCloseNavMenu();
         setUser(null);
         navigate("/sign-in");
     }
 
     return (
         <HideOnScroll>
-            <AppBar
-                position="sticky"
-                sx={{
-                    backgroundColor: "hsl(0, 0%, 100%, 0.027)",
-                    backdropFilter: "blur(15px)",
-                    borderRadius: "20px",
-                    marginBottom: "4rem",
-                    top: "1rem",
-                }}
-            >
-                <Container maxWidth="lg">
-                    <Toolbar disabledGutters>
+            <header className="sticky top-4 z-40 mb-16 rounded-3xl border border-[var(--line-muted)] bg-[var(--surface-glass)] shadow-sm backdrop-blur-xl">
+                <div className="mx-auto max-w-6xl px-3 sm:px-4">
+                    <div className="flex min-h-20 items-center gap-2">
                         <Brand variant="product" />
                         <Features />
-                        <Stack direction="row" sx={{ display: { xs: "none", md: "flex" } }}>
+                        <div className="hidden items-center gap-2 md:flex">
                             <Button
-                                onClick={() => {handleItemClicked("/account")}}
-                                sx={{
-                                    color: "grey",
-                                    borderRadius: "10px",
-                                    "&:hover": {background: "none", color: "var(--main-dust-grey)"},
-                                }}
+                                type="button"
+                                variant="ghost"
+                                className="rounded-xl text-[var(--text-muted)] hover:bg-transparent hover:text-[var(--text-main)]"
+                                onClick={() => { handleItemClicked("/account"); }}
                             >
-                                <AccountCircleIcon />
+                                <UserCircle2 className="h-6 w-6" />
                             </Button>
                             <Button
                                 onClick={handleSignoutClicked}
-                                sx={{
-                                    color: "black",
-                                    borderRadius: "10px",
-                                    "&:hover": {backgroundColor: "var(--main-brick)"},
-                                    backgroundColor: "var(--main-dust-grey)",
-                                }}
+                                variant="forest"
+                                className="rounded-xl"
                             >
                                 Sign Out
                             </Button>
-                        </Stack>
-                        <Box sx={{ display: {xs: "block", md: "none"} }}>
-                            <IconButton
-                                size="large"
+                        </div>
+                        <div className="md:hidden">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="rounded-xl text-[var(--text-main)]"
                                 onClick={handleOpenNavMenu}
-                                color="inherit"
                             >
-                                <MenuIcon />
-                            </IconButton>
-                            <Menu
-                                anchorEl={anchorElNav}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left',
-                                }}
-                                keepMounted
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'left',
-                                }}
-                                open={Boolean(anchorElNav)}
-                                onClose={handleCloseNavMenu}
-                                sx={{
-                                    display: { xs: 'block', md: 'none' },
-                                    ".MuiMenu-paper": {
-                                        backgroundColor: "hsl(0, 0%, 100%, 0.027)",
-                                        backdropFilter: "blur(15px)",
-                                        borderRadius: "20px"
-                                    },
-                                    ".MuiMenuItem-root": {color: "white"},
-                                }}
+                                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                            </Button>
+
+                            <div
+                                className={`absolute right-3 top-[calc(100%+0.5rem)] z-30 w-56 rounded-2xl border border-[var(--line-muted)] bg-[var(--surface-glass)] p-2 backdrop-blur-xl transition ${isMobileMenuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
                             >
-                                <MenuItem onClick={() => handleItemClicked("/account")}>
-                                    <AccountCircleIcon />
-                                </MenuItem>
-                                <MenuItem onClick={handleSignoutClicked} sx={{ "&:hover": {backgroundColor: "var(--main-brick)"} }}>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="mb-1 flex w-full justify-start rounded-xl text-[var(--text-main)]"
+                                    onClick={() => {
+                                        handleCloseNavMenu();
+                                        handleItemClicked("/account");
+                                    }}
+                                >
+                                    <UserCircle2 className="mr-2 h-5 w-5" />
+                                    Account
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="forest"
+                                    className="w-full justify-start rounded-xl"
+                                    onClick={handleSignoutClicked}
+                                >
                                     Sign Out
-                                </MenuItem>
-                            </Menu>
-                        </Box>
-                    </Toolbar>
-                </Container>
-            </AppBar>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
         </HideOnScroll>
     );
 }

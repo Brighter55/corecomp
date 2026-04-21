@@ -1,8 +1,5 @@
-import Typography from "@mui/material/Typography"
-import LandingHeader from "./headers/LandingHeader"
-import Stack from "@mui/material/Stack"
-import Footer from "./shared/Footer"
-import Container from "@mui/material/Container"
+import LandingHeader from "./headers/LandingHeader.tsx";
+import Footer from "./shared/Footer.tsx";
 
 const versions = [
     {
@@ -81,28 +78,28 @@ const versions = [
 
 function Upcoming() {
     return (
-        <Container maxWidth="lg">
-            <Stack spacing={10}>
-                <LandingHeader></LandingHeader>
-                <Stack spacing={3}>
+        <div className="mx-auto max-w-6xl px-4 pb-12">
+            <div className="space-y-10">
+                <LandingHeader />
+                <div className="space-y-6">
                     {versions.map((release) => (
-                        <Stack spacing={2} key={release.version}>
-                            <Typography variant="h5" fontWeight="bold">
+                        <div className="space-y-2" key={release.version}>
+                            <h2 className="text-2xl font-bold">
                                 {release.name}: {release.version} ({release.date})
-                            </Typography>
-                            <Stack spacing={1}>
+                            </h2>
+                            <div className="space-y-1">
                                 {release.updates.map((item) => (
-                                    <Typography variant="body1" key={item}>
+                                    <p className="text-base" key={item}>
                                         {` - ${item}`}
-                                    </Typography>
+                                    </p>
                                 ))}
-                            </Stack>
-                        </Stack>
+                            </div>
+                        </div>
                     ))}
-                </Stack>
-                <Footer></Footer>
-            </Stack>
-        </Container>
+                </div>
+                <Footer />
+            </div>
+        </div>
     )
 }
 

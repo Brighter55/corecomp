@@ -1,7 +1,7 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom"
 import AuthenticatedRoute from "./auth/AuthenticatedRoute.jsx"
 import AuthorizedRoute from "./auth/AuthorizedRoute.jsx"
-import Landing from "./landing-page/Landing.jsx"
+import Landing from "./landing-page/Landing.tsx"
 import SignIn from "./SignIn.jsx"
 import SignUp from "./SignUp.jsx"
 import OverviewPage from "./overview/OverviewPage.jsx"

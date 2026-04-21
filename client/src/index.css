@@ -1,11 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --main-dust-grey: #DAD7CD;
-  --main-dry-sage: #A3B18A;
+  --main-dust-grey: #dad7cd;
+  --main-dry-sage: #a3b18a;
   --main-fern: #588157;
-  --main-hunter-green: #3A5A40;
-  --main-pine-teal: #344E41;
+  --main-hunter-green: #3a5a40;
+  --main-pine-teal: #344e41;
   --main-brown: #746355;
   --main-brick: #bc4749;
+
+  --bg-main: #344e41;
+  --text-main: #dad7cd;
+  --text-muted: #b9bbaf;
+  --surface-main: #746355;
+  --surface-soft: #a3b18a;
+  --line-muted: rgba(218, 215, 205, 0.45);
+  --card-main: #f7f6f2;
+  --card-text: #2f3037;
+}
+
+:root.theme-light {
+  --main-dust-grey: #2f3037;
+  --main-dry-sage: #8da07a;
+  --main-fern: #3a5a40;
+  --main-hunter-green: #2b4633;
+  --main-pine-teal: #f6f2ea;
+  --main-brown: #e6d8cb;
+  --main-brick: #9e2f31;
+
+  --bg-main: #f6f2ea;
+  --text-main: #2f3037;
+  --text-muted: #4a4f48;
+  --surface-main: #e6d8cb;
+  --surface-soft: #d8e1cf;
+  --line-muted: rgba(47, 48, 55, 0.25);
+  --card-main: #ffffff;
+  --card-text: #2f3037;
 }
 
 html, body, #root {
@@ -15,11 +47,47 @@ html, body, #root {
 }
 
 body {
-  background-color: #344E41;
-  color: #DAD7CD;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 220ms ease, color 220ms ease;
 }
 
 #root {
   margin-left: auto;
   margin-right: auto;
+}
+
+@keyframes slide-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
 }

@@ -1,39 +1,12 @@
-import { useState } from "react"
-import LandingHeader from "./headers/LandingHeader.jsx"
-import { authenticatedClient } from "./helpers/api.js"
-// mui components
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import { styled } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
+import { useState } from "react";
+import LandingHeader from "./headers/LandingHeader.tsx";
+import { authenticatedClient } from "./helpers/api.js";
+import { Button } from "./components/ui/button";
 
-
-const StyledStack = styled(Stack)(({ theme }) => ({
-    height: "30rem",
-    backgroundColor: "var(--main-dust-grey)",
-    color: "var(--main-pine-teal)",
-    borderRadius: "20px",
-    padding: "20px",
-    [theme.breakpoints.up("xs")]: {
-        width: "70%"
-    },
-    [theme.breakpoints.up("md")]: {
-        width: "50%"
-    },
-    [theme.breakpoints.up("lg")]: {
-        width: "40%"
-    },
-}));
-
-const formStyle = {
-    height: "40%",
-    display: "flex",
-    flexDirection: "column",
-    gap: "4rem",
-    alignItems: "end",
+function fieldToText(value) {
+  if (Array.isArray(value)) return value.join(" ");
+  if (value == null) return "";
+  return String(value);
 }
 
 function ResetPassword() {
@@ -44,64 +17,49 @@ function ResetPassword() {
     async function handleSubmit(event) {
         event.preventDefault();
         setEmailError("");
-        const payload = {email: email};
+        const payload = { email };
 
-        const response = await authenticatedClient({ endpoint: "/accounts/reset-password", payload: payload});
+        const response = await authenticatedClient({ endpoint: "/accounts/reset-password", payload });
         const data = await response.json();
         console.log(data);
 
         if (!response.ok) {
-            if (data.email) { // if email provided fails the test
-                setEmailError(data.email);
-            }
-
+            if (data.email) setEmailError(fieldToText(data.email));
             return;
         }
 
-        // runs only if not a bad request and no network issue
         setSuccess(true);
     }
 
     return (
-        <Container maxWidth="lg" disableGutters>
-            <LandingHeader></LandingHeader>
-            <Box sx={{ display: "flex", justifyContent: "center", height: "85%" }}>
-                <StyledStack spacing={4}>
-                    <Typography variant="h3" sx={{ fontWeight: "bold" }}>Reset your password</Typography>
-                    {success ? (
-                        <Typography variant="body1">Recovery email has been sent!</Typography>
-                    ) : (
-                        <Typography variant="body1">Enter your email and we will send you a recovery email</Typography>
-                    )}
-                    <form onSubmit={handleSubmit} style={formStyle}>
-                        <TextField
-                            value={email}
-                            onChange={(event) => {setEmail(event.target.value)}}
-                            label="email"
-                            variant="outlined"
-                            sx={{
-                                width: "100%",
-                                "& .MuiInputBase-root": {
-                                    backgroundColor: "lightgrey",
-                                },
-                                "& .MuiInputLabel-root.Mui-focused": {
-                                    color: "#3A5A40",
-                                },
-                                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                                    borderColor: "#3A5A40",
-                                },
-                                "& .MuiFormHelperText-root": {backgroundColor: "#DAD7CD", margin: "0"},
-                            }}
-                            error={emailError ? true : false}
-                            helperText={emailError ? emailError : " "}
-                        />
-                        <Button sx={{ width: "20%", backgroundColor: "#588157", color: "#DAD7CD"}} type="submit">send</Button>
+        <div className="mx-auto max-w-6xl px-4 pb-12">
+            <LandingHeader />
+            <div className="mt-8 flex justify-center">
+                <div className="w-full max-w-xl rounded-2xl bg-[var(--main-dust-grey)] p-6 text-[var(--main-pine-teal)]">
+                    <h1 className="text-4xl font-bold">Reset your password</h1>
+                    <p className="mt-4 text-sm">
+                        {success ? "Recovery email has been sent!" : "Enter your email and we will send you a recovery email"}
+                    </p>
+                    <form onSubmit={handleSubmit} className="mt-10 space-y-8">
+                        <div>
+                            <label htmlFor="reset-email" className="mb-1 block text-sm">email</label>
+                            <input
+                                id="reset-email"
+                                value={email}
+                                onChange={(event) => setEmail(event.target.value)}
+                                className="w-full rounded-md border border-[var(--line-muted)] bg-[var(--bg)] px-3 py-2"
+                            />
+                            <p className="mt-1 min-h-5 text-sm text-red-700">{emailError || " "}</p>
+                        </div>
+                        <div className="flex justify-end">
+                            <Button type="submit" variant="forest">send</Button>
+                        </div>
                     </form>
-                </StyledStack>
-            </Box>
-        </Container>
-    )
+                </div>
+            </div>
+        </div>
+    );
 }
 
 
-export default ResetPassword
+export default ResetPassword;
