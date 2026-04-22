@@ -1,147 +1,79 @@
-import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check } from "lucide-react";
 import LandingHeader from "../headers/LandingHeader.tsx";
-import explanationImage from "../assets/explanation.png";
-import SampleIncomeGraph from "./components/SampleIncomeGraph.tsx";
-import GraphsCarousel from "./components/GraphsCarousel.tsx";
 import FAQ from "./components/FAQ.tsx";
-import Steps from "./components/Steps.tsx";
 import Footer from "../shared/Footer.tsx";
 import { Button } from "../components/ui/button";
-
-type FeatureItem = {
-  id: number;
-  text: string;
-  content: ReactNode;
-};
 
 function Landing() {
   const navigate = useNavigate();
 
-  const features: FeatureItem[] = [
-    {
-      id: 0,
-      text: "Over 20 years of comprehensive financial data that provides a broad view of any company.",
-      content: <SampleIncomeGraph />,
-    },
-    {
-      id: 1,
-      text: "10+ fundamentals to help you truly understand a company's performance.",
-      content: <GraphsCarousel />,
-    },
-    {
-      id: 2,
-      text: "Beginners? Professionals? CoreComp explains everything in simple terms.",
-      content: (
-        <img
-          src={explanationImage}
-          alt="explanation sample"
-          className="h-full w-full rounded-xl object-cover sm:w-[30rem] md:w-[40rem]"
-        />
-      ),
-    },
-  ];
-
-  const [currentPage, setCurrentPage] = useState(0);
-
-  const currentFeature = features[currentPage];
-
   return (
-    <main className="mx-auto max-w-6xl px-4 pb-10">
-      <LandingHeader />
-      <div className="space-y-20">
-        <section id="hero" className="flex justify-center">
-          <div className="space-y-5 text-center">
-            <h1 className="mx-auto w-full font-display text-4xl font-bold md:w-[60%] md:text-6xl">
-              An every Core detail of a Company app
+    <main className="pb-10">
+      <section className="overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+        <LandingHeader />
+        <section id="hero" className="mx-auto flex min-h-[34rem] max-w-6xl items-center justify-center px-4 pb-10 pt-15 md:min-h-[42rem]">
+          <div className="space-y-8 text-center">
+            <h1 className="mx-auto w-full font-display text-4xl font-bold tracking-[-0.03em] md:w-[72%] md:text-6xl">
+              An &ldquo;every Core detail of a Company&rdquo; app
             </h1>
-            <div className="mx-auto h-px w-[30%] bg-[var(--line-muted)]" />
-            <p className="mx-auto w-[85%] text-[var(--text-muted)] md:w-[50%]">
-              Turns complex financial data into simple, easy-to-read graphs with over 20 years of financial history and clear, beginner-friendly explanations.
+            <p className="mx-auto w-[90%] text-xl leading-relaxed text-[var(--text-muted)] md:w-[62%]">
+              Turns complex financial data into simple, easy-looking graphs with over 20+ years of financial data and clear, beginner-friendly explanations.
             </p>
-            <Button
-              className="mt-2"
-              onClick={() => {
-                navigate("/sign-up");
-              }}
-            >
-              Get Started
-            </Button>
-          </div>
-        </section>
-
-        <section
-          id="features"
-          className="flex items-center rounded-2xl bg-[var(--surface-main)] px-2 py-8 shadow-[0_0_10px_2px_rgba(0,0,0,0.4)]"
-        >
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              setCurrentPage((prev) => prev - 1);
-            }}
-            disabled={currentPage === 0}
-            aria-label="Previous feature"
-          >
-            <ChevronLeft />
-          </Button>
-
-          <div className="flex-1 overflow-hidden px-2 md:px-5">
-            <div key={currentFeature.id} className="space-y-4 animate-fade-in">
-              <h2 className="text-xl font-semibold md:text-3xl">{currentFeature.text}</h2>
-              <div className="flex h-[20rem] justify-center md:h-[30rem]">{currentFeature.content}</div>
-            </div>
-          </div>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              setCurrentPage((prev) => prev + 1);
-            }}
-            disabled={currentPage >= features.length - 1}
-            aria-label="Next feature"
-          >
-            <ChevronRight />
-          </Button>
-        </section>
-
-        <section id="steps">
-          <Steps />
-        </section>
-
-        <section id="pricing">
-          <div className="space-y-4 text-center">
-            <h2 className="text-4xl font-bold md:text-5xl">No cost (Alpha Test)</h2>
-            <p className="mx-auto w-[85%] text-[var(--text-muted)] md:w-[50%]">
-              Your money should go to your investments, not tools; this is the most affordable stock analysis app.
-            </p>
-            <div className="mx-auto mt-10 w-[80%] space-y-4 rounded-[30px] border-4 border-white bg-[var(--card-main)] p-8 text-left text-[var(--card-text)] shadow-[0_0_40px_5px_rgba(255,255,255,0.7)] md:w-[30%]">
-              <h3 className="text-2xl font-semibold">Monthly</h3>
-              <p>
-                <span className="text-6xl font-normal">$0</span>
-                <span className="ml-2 text-lg">/ month</span>
-              </p>
+            <div className="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
               <Button
-                className="h-12 w-full"
-                variant="forest"
+                className="h-14 min-w-36 rounded-2xl border-2 border-[var(--line-muted)] bg-white/20 px-8 text-xl font-bold text-[var(--text-main)] transition-all hover:border-white hover:bg-white/30"
+                onClick={() => {
+                  navigate("/sign-in");
+                }}
+              >
+                Try out!
+              </Button>
+              <Button
+                className="h-14 min-w-36 rounded-2xl bg-transparent text-lg text-[var(--text-main)] shadow-[0_16px_30px_rgba(0,0,0,0.22)]"
                 onClick={() => {
                   navigate("/sign-up");
                 }}
               >
-                Subscribe
+                Sign up
               </Button>
-              <p>All features</p>
-              <div className="h-px w-full bg-black/15" />
-              <div className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-[var(--main-fern)]" />
-                <p>Unlimited stock search</p>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <div className="mx-auto mt-3 max-w-6xl space-y-20 px-4">
+
+        <section id="pricing">
+          <div className="space-y-5 text-center">
+            <h2 className="text-4xl font-bold md:text-5xl">Pick a plan</h2>
+            <p className="mx-auto w-[85%] text-[var(--text-muted)] md:w-[50%]">
+              By far the most affordable stock analysis app
+            </p>
+            <div className="mx-auto !mt-20 w-[80%] max-w-sm rounded-[28px] border border-white/10 bg-white/5 p-8 text-left text-[var(--text-main)] shadow-[0_16px_40px_rgba(0,0,0,0.25)]">
+              <p className="text-xs uppercase tracking-[0.25em] text-[var(--text-muted)]">Basic</p>
+              <div className="mt-4 flex items-baseline gap-3">
+                <span className="text-5xl font-semibold">$7</span>
+                <span className="text-sm text-[var(--text-muted)]">/ month</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-[var(--main-fern)]" />
-                <p>And many more in the future</p>
+              <div className="mt-6 space-y-3 text-sm text-[var(--text-muted)]">
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-[var(--text-muted)]" />
+                  <p>Unlimited stock search</p>
+                </div>
+                <div className="flex items-center gap-2 !mb-20">
+                  <Check className="h-4 w-4 text-[var(--text-muted)]" />
+                  <p>and many more in the futures</p>
+                </div>
               </div>
+              <Button
+                className="mt-6 h-12 w-full rounded-xl border border-[var(--surface-soft)] bg-white/10 text-[var(--text-main)] hover:bg-white/15"
+                onClick={() => {
+                  navigate("/sign-up");
+                }}
+              >
+                Get Started
+              </Button>
             </div>
           </div>
         </section>

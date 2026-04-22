@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import Brand from "../shared/Brand.tsx";
@@ -9,26 +9,6 @@ function LandingHeader() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
-
-  useEffect(() => {
-    let lastY = window.scrollY;
-
-    function onScroll() {
-      const currentY = window.scrollY;
-      if (currentY < 32) {
-        setHidden(false);
-      } else {
-        setHidden(currentY > lastY);
-      }
-      lastY = currentY;
-    }
-
-    window.addEventListener("scroll", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
 
   function handleNavigate(path: string) {
     navigate(path);
@@ -37,22 +17,20 @@ function LandingHeader() {
 
   return (
     <header
-      className={`sticky top-4 z-20 mb-16 rounded-2xl border border-[var(--line-muted)] bg-white/10 px-4 backdrop-blur-md transition-transform duration-200 ${
-        hidden ? "-translate-y-24" : "translate-y-0"
-      }`}
+      className="mb-12 border-b border-[var(--line-muted)] bg-[var(--bg-main)] px-4 backdrop-blur-sm"
     >
       <nav className="mx-auto flex h-20 max-w-6xl items-center gap-4">
         <Brand variant="landing" />
 
         <div className="hidden flex-1 items-center justify-center gap-2 md:flex">
           <a className="rounded-md px-3 py-2 text-[var(--text-muted)] hover:text-[var(--text-main)]" href="/#features">
-            features
+            Features
           </a>
           <a className="rounded-md px-3 py-2 text-[var(--text-muted)] hover:text-[var(--text-main)]" href="/#pricing">
-            pricing
+            Pricing
           </a>
           <a className="rounded-md px-3 py-2 text-[var(--text-muted)] hover:text-[var(--text-main)]" href="/upcoming">
-            upcoming
+            Upcoming
           </a>
         </div>
 
@@ -92,7 +70,7 @@ function LandingHeader() {
               setMobileOpen(false);
             }}
           >
-            features
+            Features
           </a>
           <a
             className="block rounded-md px-3 py-2 text-[var(--text-main)] hover:bg-[var(--surface-soft)]"
@@ -101,7 +79,7 @@ function LandingHeader() {
               setMobileOpen(false);
             }}
           >
-            pricing
+            Pricing
           </a>
           <a
             className="block rounded-md px-3 py-2 text-[var(--text-main)] hover:bg-[var(--surface-soft)]"
@@ -110,7 +88,7 @@ function LandingHeader() {
               setMobileOpen(false);
             }}
           >
-            upcoming
+            Upcoming
           </a>
           <Button className="w-full" variant="ghost" onClick={() => handleNavigate("/sign-in")}>
             Sign in

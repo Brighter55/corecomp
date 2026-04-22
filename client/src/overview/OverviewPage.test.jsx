@@ -1,4 +1,4 @@
-import OverviewPage from "./OverviewPage.jsx";
+import OverviewPage from "./OverviewPage.tsx";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
@@ -31,49 +31,6 @@ vi.mock("../shared/SymbolSearch.jsx", () => ({
   ),
 }));
 
-vi.mock("./index.js", () => ({
-  Hero: () => <div data-testid="hero">Hero</div>,
-  Info: () => <div data-testid="info">Info</div>,
-  TotalRevenueGraph: () => <div>TotalRevenueGraph</div>,
-  GrossProfitGraph: () => <div>GrossProfitGraph</div>,
-  CostOfRevenueGraph: () => <div>CostOfRevenueGraph</div>,
-  ResearchAndDevelopmentGraph: () => <div>ResearchAndDevelopmentGraph</div>,
-  OperatingExpensesGraph: () => <div>OperatingExpensesGraph</div>,
-  NetIncomeGraph: () => <div>NetIncomeGraph</div>,
-  NetIncomeFromContinuingOperationsGraph: () => <div>NetIncomeFromContinuingOperationsGraph</div>,
-  OperatingCashflowGraph: () => <div>OperatingCashflowGraph</div>,
-  CapitalExpendituresGraph: () => <div>CapitalExpendituresGraph</div>,
-  FreeCashflowGraph: () => <div>FreeCashflowGraph</div>,
-  DividendsPayoutGraph: () => <div>DividendsPayoutGraph</div>,
-  CashVsDebtGraph: () => <div>CashVsDebtGraph</div>,
-  SharesOutstandingGraph: () => <div>SharesOutstandingGraph</div>,
-  EPSGraph: () => <div>EPSGraph</div>,
-  PricingGraph: () => <div>PricingGraph</div>,
-  ProfitMarginGraph: () => <div>ProfitMarginGraph</div>,
-  ROEGraph: () => <div>ROEGraph</div>,
-  ReturnOnAssetsGraph: () => <div>ReturnOnAssetsGraph</div>,
-  PERatioGraph: () => <div>PERatioGraph</div>,
-  EbitGraph: () => <div>EBIT</div>,
-  EbitdaGraph: () => <div>EBITDA</div>,
-  PBRatioGraph: () => <div>PBRatioGraph</div>,
-  MarketCapGraph: () => <div>MarketCapGraph</div>,
-  TotalAssetsGraph: () => <div>TotalAssetsGraph</div>,
-  DebtStructureGraph: () => <div>DebtStructureGraph</div>,
-  REarningsVsCStockGraph: () => <div>REarningsVsCStockGraph</div>,
-  DepreciationAndAmortizationGraph: () => <div>DepreciationAndAmortizationGraph</div>,
-  DividendPayoutCommonStockGraph: () => <div>DividendPayoutCommonStockGraph</div>,
-  CashflowFromInvestmentGraph: () => <div>CashflowFromInvestmentGraph</div>,
-  CashflowFromFinancingGraph: () => <div>CashflowFromFinancingGraph</div>,
-  CashFlowTrifectaGraph: () => <div>CashFlowTrifectaGraph</div>,
-  NetIncomeVsOcfGraph: () => <div>NetIncomeVsOcfGraph</div>,
-  ChangeInInventoryGraph: () => <div>ChangeInInventoryGraph</div>,
-  PSRatioGraph: () => <div>PSRatioGraph</div>,
-  PFCFRatioGraph: () => <div>PFCFRatioGraph</div>,
-  CurrentRatioGraph: () => <div>CurrentRatioGraph</div>,
-  QuickRatioGraph: () => <div>QuickRatioGraph</div>,
-  DebtEquityRatioGraph: () => <div>DebtEquityRatioGraph</div>,
-}));
-
 describe("OverviewPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -90,10 +47,12 @@ describe("OverviewPage", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Enter stock symbol and get started now!")).toBeInTheDocument();
+    expect(screen.getByText("CoreComp")).toBeInTheDocument();
+    expect(screen.getByText("Market Intelligence")).toBeInTheDocument();
+    expect(screen.getByText("Trending Stocks")).toBeInTheDocument();
   });
 
-  test("handles search submit, renders statement sections, and issues section fetches", async () => {
+  test("handles search submit, renders sentiment module, and issues section fetches", async () => {
     render(
       <MemoryRouter>
         <OverviewPage />
@@ -103,31 +62,12 @@ describe("OverviewPage", () => {
     fireEvent.keyDown(screen.getByTestId("symbol-search"), { key: "Enter" });
 
     await waitFor(() => {
-      expect(screen.getByTestId("hero")).toBeInTheDocument();
+      expect(screen.getByText("Market Fear Index")).toBeInTheDocument();
     });
 
-    expect(screen.getByTestId("info")).toBeInTheDocument();
-    expect(screen.getByText("Pricing")).toBeInTheDocument();
-    expect(screen.getByText("Earnings History")).toBeInTheDocument();
-    expect(screen.getByText("Income Statement")).toBeInTheDocument();
-    expect(screen.getByText("GrossProfitGraph")).toBeInTheDocument();
-    expect(screen.getByText("CostOfRevenueGraph")).toBeInTheDocument();
-    expect(screen.getByText("ResearchAndDevelopmentGraph")).toBeInTheDocument();
-    expect(screen.getByText("OperatingExpensesGraph")).toBeInTheDocument();
-    expect(screen.getByText("NetIncomeFromContinuingOperationsGraph")).toBeInTheDocument();
-    expect(screen.getByText("Cash Flow Statement")).toBeInTheDocument();
-    expect(screen.getByText("CashFlowTrifectaGraph")).toBeInTheDocument();
-    expect(screen.getByText("NetIncomeVsOcfGraph")).toBeInTheDocument();
-    expect(screen.getByText("Balance Sheet")).toBeInTheDocument();
-    expect(screen.getByText("Dividends")).toBeInTheDocument();
-    expect(screen.getByText("Profitability Ratios")).toBeInTheDocument();
-    expect(screen.getByText("Price Ratios")).toBeInTheDocument();
-    expect(screen.getByText("Other Ratios")).toBeInTheDocument();
-    expect(screen.getByText("ReturnOnAssetsGraph")).toBeInTheDocument();
-    expect(screen.getByText("PFCFRatioGraph")).toBeInTheDocument();
-    expect(screen.getByText("CurrentRatioGraph")).toBeInTheDocument();
-    expect(screen.getByText("QuickRatioGraph")).toBeInTheDocument();
-    expect(screen.getByText("DebtEquityRatioGraph")).toBeInTheDocument();
+    expect(screen.getByText("Queued for Tune Pass")).toBeInTheDocument();
+    expect(screen.getByText("Company Snapshot")).toBeInTheDocument();
+    expect(screen.getByText("Data Health")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(13);
