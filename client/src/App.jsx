@@ -5,6 +5,7 @@ import Landing from "./landing-page/Landing.tsx"
 import SignIn from "./SignIn.jsx"
 import SignUp from "./SignUp.jsx"
 import OverviewPage from "./overview/OverviewPage.tsx"
+import SymbolOverviewPage from "./overview/SymbolOverviewPage.tsx"
 import AccountVerification from "./AccountVerification.jsx"
 import Account from "./Account.jsx"
 import CheckoutReturn from "./CheckoutReturn.jsx"
@@ -22,6 +23,7 @@ function App() {
         <Route path="/sign-in" element={<SignIn></SignIn>} />
         <Route path="/sign-up" element={<SignUp></SignUp>} />
         <Route path="/overview" element={<AuthenticatedRoute><AuthorizedRoute><OverviewPage /></AuthorizedRoute></AuthenticatedRoute>} />
+        <Route path="/overview/:symbol" element={<AuthenticatedRoute><AuthorizedRoute><SymbolOverviewPage /></AuthorizedRoute></AuthenticatedRoute>} />
         <Route path="/privacy-policy" element={<PrivacyPolicy></PrivacyPolicy>} />
         <Route path="/tos" element={<TermsOfService></TermsOfService>} />
         <Route path="/account-verification/:token/:user_id" element={<AccountVerification></AccountVerification>} />
