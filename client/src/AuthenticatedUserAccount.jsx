@@ -37,25 +37,27 @@ function AuthenticatedUserAccount() {
     }
 
     return (
-        <div className="mx-auto max-w-6xl px-4 pb-12">
+        <div className="min-h-screen">
             <ProductHeader />
-            <div className="space-y-2">
-                <TwoColumn>
-                    <h2 className="text-2xl font-semibold">Username</h2>
-                    <p className="text-lg">{user.username}</p>
-                </TwoColumn>
-                <hr className="border-[var(--line-muted)]" />
-                <TwoColumn>
-                    <h2 className="text-2xl font-semibold">email</h2>
-                    <p className="text-lg">{user.email}</p>
-                </TwoColumn>
-                <hr className="border-[var(--line-muted)]" />
-                <TwoColumn>
-                    <h2 className="text-2xl font-semibold">Subscription</h2>
-                    <Button onClick={handleSubscribeClicked} variant="forest">
-                        Subscribe
-                    </Button>
-                </TwoColumn>
+            <div className="mx-auto max-w-6xl px-4 pb-12">
+                <div className="space-y-2">
+                    <TwoColumn>
+                        <h2 className="text-2xl font-semibold">Username</h2>
+                        <p className="text-lg">{user.username}</p>
+                    </TwoColumn>
+                    <hr className="border-[var(--line-muted)]" />
+                    <TwoColumn>
+                        <h2 className="text-2xl font-semibold">email</h2>
+                        <p className="text-lg">{user.email}</p>
+                    </TwoColumn>
+                    <hr className="border-[var(--line-muted)]" />
+                    <TwoColumn>
+                        <h2 className="text-2xl font-semibold">Subscription</h2>
+                        <Button onClick={handleSubscribeClicked} variant="forest">
+                            Subscribe
+                        </Button>
+                    </TwoColumn>
+                </div>
             </div>
         </div>
     )

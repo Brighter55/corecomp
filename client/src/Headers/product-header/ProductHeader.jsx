@@ -53,7 +53,7 @@ function ProductHeader() {
     }
 
     return (
-        <header className="mb-12 border-b border-[var(--line-muted)] bg-[var(--bg-main)] px-4 backdrop-blur-sm">
+        <header className="relative z-50 mb-12 border-b border-[var(--line-muted)] bg-[var(--bg-main)] px-4 backdrop-blur-sm">
             <div className="mx-auto flex h-20 max-w-6xl items-center gap-4">
                 <Brand variant="product" />
 
@@ -136,7 +136,7 @@ function ProductHeader() {
                         {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                     </Button>
 
-                    <div className={`absolute right-3 top-[calc(100%+0.5rem)] z-30 w-72 rounded-2xl border border-[var(--line-muted)] bg-[var(--surface-glass)] p-2 backdrop-blur-xl transition ${isMobileMenuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}>
+                    <div className={`absolute right-3 top-[calc(100%+0.5rem)] z-[70] w-72 rounded-2xl border border-[var(--line-muted)] bg-[var(--bg-main)] p-2 backdrop-blur-sm transition ${isMobileMenuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}>
                         <div className="mb-2">
                             <SymbolSearch
                                 className="w-full"
@@ -168,7 +168,7 @@ function ProductHeader() {
                         </Button>
                         <Button
                             type="button"
-                            variant="forest"
+                            variant="closeOut"
                             className="w-full justify-start rounded-xl"
                             onClick={handleSignoutClicked}
                         >

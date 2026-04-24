@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         default: "bg-[var(--main-dust-grey)] text-[var(--main-pine-teal)] hover:bg-[var(--surface-soft)]",
         ghost: "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-soft)]",
-        forest: "bg-[var(--main-fern)] text-[var(--main-dust-grey)] hover:bg-[var(--main-hunter-green)]",
+        forest: "bg-[var(--main-fern)] text-white hover:bg-[var(--main-hunter-green)]",
         outline: "border border-[var(--line-muted)] text-[var(--text-main)] hover:bg-[var(--surface-soft)]",
         closeOut: "bg-[var(--main-brick)] hover:bg-[var(--surface-soft)] text-[var(--card-main)] "
       },
