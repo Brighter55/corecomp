@@ -469,11 +469,11 @@ function SymbolOverviewPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_20%_0%,rgba(163,177,138,0.22),transparent_45%),radial-gradient(circle_at_80%_100%,rgba(88,129,87,0.14),transparent_42%),linear-gradient(160deg,#24382f_0%,#344e41_35%,#2f443a_100%)] pb-10">
-      <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6">
-        <ProductHeader />
-
-        <main className="space-y-6 py-6">
+    <div className="min-h-screen pb-10">
+      <ProductHeader />
+      <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6">
+        
+        <main className="space-y-6 pb-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Button variant="ghost" className="w-fit" onClick={() => navigate("/overview")}>
               <ArrowLeft className="mr-2 h-4 w-4" />

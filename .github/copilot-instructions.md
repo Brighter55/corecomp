@@ -2,18 +2,18 @@
 
 ## Code Style
 - Follow existing style in the touched area instead of reformatting unrelated files.
-- Frontend (`client/src/**`): React function components, ES modules, and existing semicolon/no-semicolon usage per file.
+- Frontend (`client/src/**`): React function components with TypeScript (`.ts`/`.tsx`) for new and migrated files, Tailwind utility classes for styling, and shadcn/ui components from `client/src/components/ui/`.
 - Backend (`server/corecomp/**`): Django + DRF patterns with decorators (`@api_view`, `@permission_classes`) and pytest-style tests.
-- Keep changes minimal and colocate tests with existing test structure (`client/src/**/*.test.jsx`, `server/corecomp/**/tests/test_*.py`).
+- Keep changes minimal and colocate tests with existing test structure (`client/src/**/*.test.{jsx,tsx}`, `server/corecomp/**/tests/test_*.py`).
 
 ## Architecture
 - Monorepo with two primary apps:
-- `client/`: Vite + React frontend.
+- `client/`: Vite + React + TypeScript + Tailwind CSS + shadcn/ui frontend.
 - `server/corecomp/`: Django backend (apps: `accounts`, `pages`, `billings`).
 - Frontend boundaries:
-- Routing is centralized in `client/src/App.jsx`.
+- Routing is centralized in `client/src/App.*`.
 - Auth/session state and protected routing live in `client/src/auth/`.
-- API helpers are in `client/src/helpers/api.js`; prefer extending these over ad hoc fetch logic.
+- API helpers are in `client/src/helpers/api.*`; prefer extending these over ad hoc fetch logic.
 - Backend boundaries:
 - Auth and user lifecycle belong in `server/corecomp/accounts/`.
 - Financial/overview endpoints belong in `server/corecomp/pages/views/overview.py` and related `pages/services.py`.
@@ -36,9 +36,12 @@
 
 ## Conventions
 - Frontend API usage:
-- Use `authenticatedClient` / `authenticatedClientWithRetry` from `client/src/helpers/api.js`.
+- Use `authenticatedClient` / `authenticatedClientWithRetry` from `client/src/helpers/api.*`.
 - Include credentials and CSRF behavior consistent with existing helpers; do not introduce alternate auth transport.
 - `authenticatedClient` returns a `Response`; callers should check status and parse JSON.
+- Frontend UI:
+- Prefer composing screens with shadcn/ui primitives from `client/src/components/ui/` before introducing custom base components.
+- Keep Tailwind class usage readable and colocated with components; use shared design tokens/config where available.
 - Frontend tests:
 - Use Vitest (`vi`) patterns used in existing tests (including `vi.hoisted` where needed).
 - Use `MemoryRouter` when testing routed components.

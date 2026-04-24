@@ -13,6 +13,7 @@ const buttonVariants = cva(
         ghost: "text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--surface-soft)]",
         forest: "bg-[var(--main-fern)] text-[var(--main-dust-grey)] hover:bg-[var(--main-hunter-green)]",
         outline: "border border-[var(--line-muted)] text-[var(--text-main)] hover:bg-[var(--surface-soft)]",
+        closeOut: "bg-[var(--main-brick)] hover:bg-[var(--surface-soft)] text-[var(--card-main)] "
       },
       size: {
         default: "h-10 px-4 py-2",

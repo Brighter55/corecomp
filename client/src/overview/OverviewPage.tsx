@@ -48,10 +48,9 @@ function OverviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_20%_0%,rgba(163,177,138,0.22),transparent_45%),radial-gradient(circle_at_80%_100%,rgba(88,129,87,0.14),transparent_42%),linear-gradient(160deg,#24382f_0%,#344e41_35%,#2f443a_100%)] pb-10">
-      <div className="mx-auto w-full max-w-[1400px] px-4 pt-4 sm:px-6">
-        <ProductHeader />
-
+    <div className="min-h-screen pb-10">
+      <ProductHeader />
+      <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6">
         <main className="grid gap-4 pb-6 lg:grid-cols-[240px_minmax(0,1fr)_250px]">
           <section className="space-y-4">
             <div className="flex items-center gap-2 px-1 text-[var(--text-main)]">
@@ -82,9 +81,12 @@ function OverviewPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <form onSubmit={(event) => event.preventDefault()}>
-                  <SymbolSearch handleSearchSubmit={handleSearchSubmit} />
-                </form>
+                <SymbolSearch
+                  className="mx-auto w-full max-w-md"
+                  label="Symbol"
+                  placeholder="Symbol"
+                  handleSearchSubmit={handleSearchSubmit}
+                />
               </CardContent>
             </Card>
           </section>
