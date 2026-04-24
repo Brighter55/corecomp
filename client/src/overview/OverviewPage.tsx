@@ -72,10 +72,10 @@ function OverviewPage() {
             ))}
           </section>
 
-          <section className="space-y-4">
+          <section className="space-y-4 pt-20">
             <Card className="border-0">
               <CardHeader className="items-center pb-3 text-center">
-                <CardTitle className="text-4xl font-light tracking-wide sm:text-5xl">CoreComp</CardTitle>
+                <CardTitle className="font-bold tracking-wide text-5xl sm:text-7xl">CoreComp</CardTitle>
                 <CardDescription className="text-base text-[var(--text-muted)]">
                   An every core detail of a company app
                 </CardDescription>
@@ -83,6 +83,7 @@ function OverviewPage() {
               <CardContent className="space-y-4">
                 <SymbolSearch
                   className="mx-auto w-full max-w-md"
+                  inputClassName="h-16 text-base"
                   label="Symbol"
                   placeholder="Symbol"
                   handleSearchSubmit={handleSearchSubmit}

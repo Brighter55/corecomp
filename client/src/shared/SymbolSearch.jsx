@@ -40,6 +40,7 @@ function createSyntheticSubmitEvent() {
 export default function SymbolSearch({
   handleSearchSubmit,
   className,
+  inputClassName,
   label = "Symbol",
   placeholder = "Symbol",
 }) {
@@ -208,7 +209,10 @@ export default function SymbolSearch({
               aria-expanded={shouldShowDropdown}
               aria-controls={shouldShowDropdown ? listId : undefined}
               role="combobox"
-              className="h-11 w-full rounded-2xl border border-[var(--line-muted)] bg-[var(--surface-soft)] pl-10 pr-4 py-2 text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--main-fern)]"
+              className={cn(
+                "h-11 w-full rounded-2xl border border-[var(--line-muted)] bg-[var(--surface-soft)] pl-10 pr-4 py-2 text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--main-fern)]",
+                inputClassName,
+              )}
             />
           </form>
         </PopoverAnchor>
