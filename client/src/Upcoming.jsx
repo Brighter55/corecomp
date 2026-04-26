@@ -78,26 +78,28 @@ const versions = [
 
 function Upcoming() {
     return (
-        <div className="mx-auto max-w-6xl px-4 pb-12">
-            <div className="space-y-10">
-                <LandingHeader />
-                <div className="space-y-6">
-                    {versions.map((release) => (
-                        <div className="space-y-2" key={release.version}>
-                            <h2 className="text-2xl font-bold">
-                                {release.name}: {release.version} ({release.date})
-                            </h2>
-                            <div className="space-y-1">
-                                {release.updates.map((item) => (
-                                    <p className="text-base" key={item}>
-                                        {` - ${item}`}
-                                    </p>
-                                ))}
+        <div className="min-h-screen pb-12">
+            <LandingHeader />
+            <div className="mx-auto max-w-6xl px-4">
+                <div className="space-y-10">
+                    <div className="space-y-6">
+                        {versions.map((release) => (
+                            <div className="space-y-2" key={release.version}>
+                                <h2 className="text-2xl font-bold">
+                                    {release.name}: {release.version} ({release.date})
+                                </h2>
+                                <div className="space-y-1">
+                                    {release.updates.map((item) => (
+                                        <p className="text-base" key={item}>
+                                            {` - ${item}`}
+                                        </p>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
+                    <Footer />
                 </div>
-                <Footer />
             </div>
         </div>
     )

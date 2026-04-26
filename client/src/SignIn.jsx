@@ -62,13 +62,14 @@ function SignIn() {
     }
 
     return (
-        <div className="mx-auto max-w-6xl px-4 pb-12">
+        <div className="min-h-screen pb-12">
             <LandingHeader />
 
-            <div className="grid overflow-hidden rounded-xl border border-[var(--line-muted)] md:grid-cols-2">
-                <section className="bg-[var(--main-brown)] px-6 py-10 text-[var(--main-dust-grey)] md:px-10">
-                    <div className="mx-auto w-full max-w-md">
-                        <h1 className="mb-6 text-4xl font-semibold">Sign In</h1>
+            <div className="mx-auto max-w-6xl px-4">
+                <div className="grid overflow-hidden rounded-xl border border-[var(--line-muted)] md:grid-cols-2">
+                    <section className="bg-[var(--main-brown)] px-6 py-10 text-[var(--main-dust-grey)] md:px-10">
+                        <div className="mx-auto w-full max-w-md">
+                            <h1 className="mb-6 text-4xl font-semibold">Sign In</h1>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
@@ -107,51 +108,52 @@ function SignIn() {
                             <Button type="submit" variant="forest" className="w-full" aria-label="sign in button">
                                 Sign in
                             </Button>
-                        </form>
+                            </form>
 
-                        <button
-                            type="button"
-                            onClick={() => navigate("/reset-password")}
-                            className="mt-3 text-sm underline underline-offset-2"
-                        >
-                            forgot your password?
-                        </button>
+                            <button
+                                type="button"
+                                onClick={() => navigate("/reset-password")}
+                                className="mt-3 text-sm underline underline-offset-2"
+                            >
+                                forgot your password?
+                            </button>
 
-                        <div className="my-6 flex items-center gap-3">
-                            <div className="h-px flex-1 bg-[var(--main-dust-grey)]/40" />
-                            <span className="text-sm">or</span>
-                            <div className="h-px flex-1 bg-[var(--main-dust-grey)]/40" />
-                        </div>
+                            <div className="my-6 flex items-center gap-3">
+                                <div className="h-px flex-1 bg-[var(--main-dust-grey)]/40" />
+                                <span className="text-sm">or</span>
+                                <div className="h-px flex-1 bg-[var(--main-dust-grey)]/40" />
+                            </div>
 
-                        <GoogleLogin
-                            onSuccess={(credentialResponse) => {
-                                const payload = { JWTToken: credentialResponse.credential };
-                                async function sendJWTToken() {
-                                    const response = await authenticatedClient({ endpoint: "/accounts/google-authentication", payload });
-                                    const data = await response.json();
-                                    if (!response.ok) {
-                                        console.log(data);
-                                        return;
+                            <GoogleLogin
+                                onSuccess={(credentialResponse) => {
+                                    const payload = { JWTToken: credentialResponse.credential };
+                                    async function sendJWTToken() {
+                                        const response = await authenticatedClient({ endpoint: "/accounts/google-authentication", payload });
+                                        const data = await response.json();
+                                        if (!response.ok) {
+                                            console.log(data);
+                                            return;
+                                        }
+                                        setUser(data);
+                                        navigate("/overview");
                                     }
-                                    setUser(data);
-                                    navigate("/overview");
-                                }
-                                sendJWTToken();
-                            }}
-                            onError={() => console.log("Log in failed")}
-                            useOneTap
-                            text="continue_with"
-                            shape="pill"
-                            size="large"
-                        />
-                    </div>
-                </section>
+                                    sendJWTToken();
+                                }}
+                                onError={() => console.log("Log in failed")}
+                                useOneTap
+                                text="continue_with"
+                                shape="pill"
+                                size="large"
+                            />
+                        </div>
+                    </section>
 
-                <section className="flex items-center justify-center bg-[var(--main-dust-grey)] px-6 py-10 text-center">
-                    <p className="max-w-sm text-2xl font-medium text-[var(--main-fern)]">
-                        an "every Core detail of a Company" app
-                    </p>
-                </section>
+                    <section className="flex items-center justify-center bg-[var(--main-dust-grey)] px-6 py-10 text-center">
+                        <p className="max-w-sm text-2xl font-medium text-[var(--main-fern)]">
+                            an "every Core detail of a Company" app
+                        </p>
+                    </section>
+                </div>
             </div>
 
             {open ? (
