@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { PieChart, Pie, Sector, ResponsiveContainer, Tooltip, Label, Cell } from "recharts";
 import ProductHeader from "../headers/product-header/ProductHeader.jsx";
 import { authenticatedClientWithRetry } from "../helpers/api.js";
+import { StockHeaderProvider } from "./StockHeaderContext.jsx";
 import {
   CapitalExpendituresGraph,
   CashFlowTrifectaGraph,
@@ -701,17 +702,20 @@ function SymbolOverviewPage() {
             </div>
           </div>
 
-          <Accordion type="multiple" defaultValue={["pricing", "earnings", "income"]} className="space-y-4">
+          <StockHeaderProvider symbol={routeSymbol} logoUrl={logoUrl}>
+            <Accordion type="multiple" defaultValue={["pricing", "earnings", "income"]} className="space-y-4">
             <AccordionItem value="pricing" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Pricing</AccordionTrigger>
               <AccordionContent>
                 <GraphGrid>
+                  {/* 
                   <PricingGraph statement={pricingStatement} period={period} />
+                  */}
                   <MarketCapGraph statement={marketCapStatement} period={period} />
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
-
+            {/* 
             <AccordionItem value="earnings" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Earnings History</AccordionTrigger>
               <AccordionContent>
@@ -811,7 +815,9 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
-          </Accordion>
+            */}
+            </Accordion>
+          </StockHeaderProvider>
         </main>
       </div>
     </div>
