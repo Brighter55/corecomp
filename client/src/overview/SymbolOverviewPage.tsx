@@ -704,7 +704,6 @@ function SymbolOverviewPage() {
 
           <StockHeaderProvider symbol={routeSymbol} logoUrl={logoUrl}>
             <Accordion type="multiple" defaultValue={["income"]} className="space-y-4">
-            {/*
             <AccordionItem value="pricing" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Pricing</AccordionTrigger>
               <AccordionContent>
@@ -723,7 +722,6 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
-            */}
 
             <AccordionItem value="income" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Income Statement</AccordionTrigger>
@@ -742,7 +740,6 @@ function SymbolOverviewPage() {
               </AccordionContent>
             </AccordionItem>
 
-            {/*
             <AccordionItem value="cash-flow" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Cash Flow Statement</AccordionTrigger>
               <AccordionContent>
@@ -816,7 +813,7 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
-            */}
+            
             </Accordion>
           </StockHeaderProvider>
         </main>

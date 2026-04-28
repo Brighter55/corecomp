@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import {useState, useEffect, useRef, useMemo} from "react"
+import { useState, useMemo } from "react";
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
@@ -7,10 +7,8 @@ import NoDataGraph from "./NoDataGraph.jsx"
 // mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import Skeleton from '@mui/material/Skeleton';
 
 
 const explanation = (
@@ -57,28 +55,11 @@ function PricingGraph({ statement, period }) {
     const [timeRange, setTimeRange] = useState("all");
     const [graphClicked, setGraphClicked] = useState(false);
 
-    const graphRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (graphRef.current && !graphRef.current.contains(event.target)) {
-                setGraphClicked(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
     const reports = useMemo(() => {
         if (!statement) return [];
         if (Array.isArray(statement) && statement.length === 0) return [];
 
-        const filteredReports = filterReports(statement, timeRange, "date");
-        console.log("PricingGraph: ", filteredReports);
-        return filteredReports;
+        return filterReports(statement, timeRange, "date");
     }, [statement, timeRange, period]);
 
     const percentChange = useMemo(() => {
@@ -90,23 +71,29 @@ function PricingGraph({ statement, period }) {
     }, [reports]);
 
     if (statement === null) {
-        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>;        
+        return (
+            <div className="flex-1">
+                <div className="h-80 w-full min-w-[21rem] animate-pulse rounded-[10px] bg-[rgba(163,177,138,0.25)] sm:h-[25rem]" />
+            </div>
+        );
     }
     if (Array.isArray(statement) && statement.length === 0) {
         return <NoDataGraph />;
     }
 
     return (
-        <Box sx={{ flex: 1 }}>
-            <GraphCard ref={graphRef} graphClicked={graphClicked}>
+        <div className="flex-1">
+            <GraphCard graphClicked={graphClicked}>
                 <GraphTitle
                     title="Adjusted Monthly Pricing"
                     explanation={explanation}
                     percentChange={percentChange}
                     timeRange={timeRange}
                     setTimeRange={setTimeRange}
+                    graphClicked={graphClicked}
+                    setGraphClicked={setGraphClicked}
                 />
-                <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                <div onClick={() => {setGraphClicked(true);}} className="min-h-0 w-full flex-1">
                     <ResponsiveContainer>
                         <LineChart
                             data={reports}
@@ -117,20 +104,20 @@ function PricingGraph({ statement, period }) {
                             bottom: 5,
                             }}
                         >
-                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                            <XAxis dataKey="date" stroke="#344E41"
+                            <CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)"/>
+                            <XAxis dataKey="date" stroke="var(--text-main)"
                                 tick={{fontSize: 12}} interval="equidistantPreserveStart"
                             />
-                            <YAxis stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}
+                            <YAxis stroke="var(--text-main)" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}
                                 allowDecimals={false} tickFormatter={(value) => `$${value}`}
                             />
                             <Tooltip formatter={(value) => `$${value}`}/>
                             <Line type="linear" dataKey="adjustedClose" stroke="#588157" dot={false} activeDot={false} />
                         </LineChart>
                     </ResponsiveContainer>
-                </Box>
+                </div>
             </GraphCard>
-        </Box>
+        </div>
     )
 }
 

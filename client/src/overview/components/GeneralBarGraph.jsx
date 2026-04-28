@@ -12,13 +12,13 @@ const defaultDomain = [
   (dataMax) => dataMax * 1.05,
 ];
 
-function resolveReports(statement, period, timeRange) {
+function resolveReports(statement, period, timeRange, xDataKey = "fiscalDateEnding") {
   if (!statement) return [];
   if (Array.isArray(statement)) return [];
 
   const sourceReports = statement[period === "annually" ? "annualReports" : "quarterlyReports"] ?? [];
   if (!sourceReports.length) return [];
-  return filterReports(sourceReports, timeRange, "fiscalDateEnding");
+  return filterReports(sourceReports, timeRange, xDataKey);
 }
 
 export default function GeneralBarGraph({
@@ -26,17 +26,25 @@ export default function GeneralBarGraph({
   period,
   title,
   dataKey,
+  xDataKey = "fiscalDateEnding",
   barName,
   explanation,
   yDomain = defaultDomain,
+  yTickFormatter,
+  tooltipFormatter,
 }) {
   const [timeRange, setTimeRange] = useState("all");
   const [graphClicked, setGraphClicked] = useState(false);
 
   const reports = useMemo(
-    () => resolveReports(statement, period, timeRange),
-    [statement, period, timeRange]
+    () => resolveReports(statement, period, timeRange, xDataKey),
+    [statement, period, timeRange, xDataKey]
   );
+  const resolvedYDomain = yDomain === null ? undefined : yDomain;
+  const resolvedYTickFormatter =
+    yTickFormatter === null ? undefined : yTickFormatter ?? formatToUnits;
+  const resolvedTooltipFormatter =
+    tooltipFormatter === null ? undefined : tooltipFormatter ?? formatToUnits;
 
   const percentChange = useMemo(() => {
     if (!reports.length) {
@@ -87,17 +95,17 @@ export default function GeneralBarGraph({
             >
               <CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)" />
               <XAxis
-                dataKey="fiscalDateEnding"
+                dataKey={xDataKey}
                 interval="equidistantPreserveStart"
                 stroke="var(--text-main)"
                 tick={{ fontSize: 12 }}
               />
               <YAxis
-                tickFormatter={(value) => formatToUnits(value)}
+                tickFormatter={resolvedYTickFormatter}
                 stroke="var(--text-main)"
-                domain={yDomain}
+                domain={resolvedYDomain}
               />
-              <Tooltip formatter={(value) => formatToUnits(value)} />
+              <Tooltip formatter={resolvedTooltipFormatter} />
               <Bar
                 name={barName ?? title}
                 dataKey={dataKey}

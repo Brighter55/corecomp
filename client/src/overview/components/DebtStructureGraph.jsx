@@ -1,14 +1,12 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { filterReports, getPercentChange, formatToUnits } from "../../helpers/GraphsHelper.js";
 import GraphTitle from "./GraphTitle.jsx";
 import GraphCard from "./GraphCard.jsx";
 import NoDataGraph from "./NoDataGraph.jsx";
 // mui
-import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import Skeleton from '@mui/material/Skeleton';
 
 
 const explanation = (
@@ -39,27 +37,12 @@ function DebtStructureGraph({ statement, period }) {
 	const [timeRange, setTimeRange] = useState("all");
 	const [graphClicked, setGraphClicked] = useState(false);
 
-	const graphRef = useRef(null);
-
-	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (graphRef.current && !graphRef.current.contains(event.target)) {
-				setGraphClicked(false);
-			}
-		};
-
-		document.addEventListener('mousedown', handleClickOutside);
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, []);
-
 	const reports = useMemo(() => {
 		if (!statement) return [];
 		if (Array.isArray(statement) && statement.length === 0) return [];
 
 		return filterReports(
-			statement[period === "annually" ? "annualReports" : "quarterlyReports"],
+			statement[period === "annually" ? "annualReports" : "quarterlyReports"] ?? [],
 			timeRange,
 			"fiscalDateEnding",
 		);
@@ -73,23 +56,34 @@ function DebtStructureGraph({ statement, period }) {
 	}, [reports]);
 
 	if (statement === null) {
-		return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }} />;
+		return (
+			<div className="flex-1">
+				<div className="h-80 w-full min-w-[21rem] animate-pulse rounded-[10px] bg-[rgba(163,177,138,0.25)] sm:h-[25rem]" />
+			</div>
+		);
 	}
 	if (Array.isArray(statement) && statement.length === 0) {
 		return <NoDataGraph />;
 	}
 
 	return (
-		<Box sx={{ flex: 1 }}>
-			<GraphCard ref={graphRef} graphClicked={graphClicked}>
+		<div className="flex-1">
+			<GraphCard graphClicked={graphClicked}>
 				<GraphTitle
 					title="Debt Structure"
 					explanation={explanation}
 					percentChange={percentChange}
 					timeRange={timeRange}
 					setTimeRange={setTimeRange}
+					graphClicked={graphClicked}
+					setGraphClicked={setGraphClicked}
 				/>
-				<Box onClick={() => { setGraphClicked(true); }} sx={{ width: "100%", height: "100%" }}>
+				<div
+					onClick={() => {
+						setGraphClicked(true);
+					}}
+					className="min-h-0 w-full flex-1"
+				>
 					<ResponsiveContainer>
 						<BarChart
 							data={reports}
@@ -100,11 +94,11 @@ function DebtStructureGraph({ statement, period }) {
 								bottom: 5,
 							}}
 						>
-							<CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A" />
-							<XAxis dataKey="fiscalDateEnding" interval="equidistantPreserveStart" stroke="#344E41" tick={{ fontSize: 12 }} />
+							<CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)" />
+							<XAxis dataKey="fiscalDateEnding" interval="equidistantPreserveStart" stroke="var(--text-main)" tick={{ fontSize: 12 }} />
 							<YAxis
 								tickFormatter={(value) => formatToUnits(value)}
-								stroke="#344E41"
+								stroke="var(--text-main)"
 								domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}
 							/>
 							<Tooltip
@@ -132,9 +126,9 @@ function DebtStructureGraph({ statement, period }) {
 							/>
 						</BarChart>
 					</ResponsiveContainer>
-				</Box>
+				</div>
 			</GraphCard>
-		</Box>
+		</div>
 	);
 }
 

@@ -1,12 +1,5 @@
-import { useState, useMemo } from "react";
+import GeneralBarGraph from "./GeneralBarGraph.jsx";
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import GraphTitle from "./GraphTitle.jsx";
-import GraphCard from "./GraphCard.jsx";
-import NoDataGraph from "./NoDataGraph.jsx";
-import CustomBar from "./CustomBar.jsx";
-import CustomActiveBar from "./CustomActiveBar.jsx";
-import { filterReports, getPercentChange, formatToUnits } from "../../helpers/GraphsHelper.js";
 
 const explanation = (
   <div className="space-y-3">
@@ -38,82 +31,15 @@ const explanation = (
 
 
 export default function MarketCapGraph({ statement, period }) {
-	const [timeRange, setTimeRange] = useState("all");
-	const [graphClicked, setGraphClicked] = useState(false);
-
-	const reports = useMemo(() => {
-		if (!statement) return [];
-		if (Array.isArray(statement) && statement.length === 0) return [];
-
-		const sourceReports = statement[period === "annually" ? "annualReports" : "quarterlyReports"];
-		return filterReports(sourceReports, timeRange, "fiscalDateEnding");
-	}, [statement, timeRange, period]);
-
-	const percentChange = useMemo(() => {
-		if (!reports.length) {
-			return NaN;
-		}
-		return getPercentChange(reports, "marketCap");
-	}, [reports]);
-
-	if (statement === null) {
-		return (
-			<div className="flex-1">
-				<div className="h-80 w-full min-w-[21rem] animate-pulse rounded-[10px] bg-[rgba(163,177,138,0.25)] sm:h-[25rem]" />
-			</div>
-		);
-	}
-	if (Array.isArray(statement) && statement.length === 0) {
-		return <NoDataGraph />;
-	}
-
 	return (
-		<div className="flex-1">
-			<GraphCard graphClicked={graphClicked}>
-				<GraphTitle
-					title="Market Cap"
-					explanation={explanation}
-					percentChange={percentChange}
-					timeRange={timeRange}
-					setTimeRange={setTimeRange}
-					graphClicked={graphClicked}
-					setGraphClicked={setGraphClicked}
-				/>
-				<div
-					onClick={() => {
-						setGraphClicked(true);
-					}}
-					className="min-h-0 w-full flex-1"
-				>
-					<ResponsiveContainer>
-						<BarChart
-							data={reports}
-							margin={{
-								top: 5,
-								right: 30,
-								left: 20,
-								bottom: 5,
-							}}
-						>
-							<CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)" />
-							<XAxis
-								dataKey="fiscalDateEnding"
-								interval="equidistantPreserveStart"
-								stroke="var(--text-main)"
-								tick={{ fontSize: 12 }}
-							/>
-							<YAxis stroke="var(--text-main)" tickFormatter={(value) => formatToUnits(value)} />
-							<Tooltip formatter={(value) => formatToUnits(value)} />
-							<Bar
-								name="Market Cap"
-								dataKey="marketCap"
-								shape={<CustomBar />}
-								activeBar={<CustomActiveBar />}
-							/>
-						</BarChart>
-					</ResponsiveContainer>
-				</div>
-			</GraphCard>
-		</div>
+		<GeneralBarGraph
+			statement={statement}
+			period={period}
+			title="Market Cap"
+			barName="Market Cap"
+			dataKey="marketCap"
+			explanation={explanation}
+			yDomain={null}
+		/>
 	);
 }

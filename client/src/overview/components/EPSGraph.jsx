@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import {useState, useEffect, useRef, useMemo} from "react"
+import { useState, useMemo } from "react";
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
@@ -7,10 +7,8 @@ import NoDataGraph from "./NoDataGraph.jsx"
 // mui
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import Skeleton from '@mui/material/Skeleton';
 
 const explanation = (
     <Stack spacing={2}>
@@ -49,28 +47,15 @@ function EPSGraph({ statement, period }) {
     const [timeRange, setTimeRange] = useState("all");
     const [graphClicked, setGraphClicked] = useState(false);
 
-    const graphRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (graphRef.current && !graphRef.current.contains(event.target)) {
-                setGraphClicked(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
     const reports = useMemo(() => {
         if (!statement) return [];
         if (Array.isArray(statement) && statement.length === 0) return [];
 
-        const filteredReports = filterReports(statement[period === "annually" ? "annualEarnings" : "quarterlyEarnings"], timeRange, "fiscalDateEnding");
-        console.log("EPSGraph: ", filteredReports);
-        return filteredReports;
+        return filterReports(
+            statement[period === "annually" ? "annualEarnings" : "quarterlyEarnings"] ?? [],
+            timeRange,
+            "fiscalDateEnding"
+        );
     }, [statement, timeRange, period]);
 
     const percentChange = useMemo(() => {
@@ -123,7 +108,11 @@ function EPSGraph({ statement, period }) {
     }
 
     if (statement === null) {
-        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>;        
+        return (
+            <div className="flex-1">
+                <div className="h-80 w-full min-w-[21rem] animate-pulse rounded-[10px] bg-[rgba(163,177,138,0.25)] sm:h-[25rem]" />
+            </div>
+        );
     }
     if (Array.isArray(statement) && statement.length === 0) {
         return <NoDataGraph />;
@@ -131,16 +120,18 @@ function EPSGraph({ statement, period }) {
 
     return (
         period === "quarterly" ? (
-            <Box sx={{ flex: 1 }}>
-                <GraphCard ref={graphRef} graphClicked={graphClicked}>
+            <div className="flex-1">
+                <GraphCard graphClicked={graphClicked}>
                     <GraphTitle
                         title="Earning per Share"
                         explanation={explanation}
                         percentChange={percentChange}
                         timeRange={timeRange}
                         setTimeRange={setTimeRange}
+                        graphClicked={graphClicked}
+                        setGraphClicked={setGraphClicked}
                     />
-                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                    <div onClick={() => {setGraphClicked(true);}} className="min-h-0 w-full flex-1">
                         <ResponsiveContainer>
                             <LineChart
                             data={reports}
@@ -151,29 +142,31 @@ function EPSGraph({ statement, period }) {
                                 bottom: 5,
                             }}
                             >
-                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                            <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                            <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                            <CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)"/>
+                            <XAxis dataKey="fiscalDateEnding" stroke="var(--text-main)" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
+                            <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="var(--text-main)" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
                             <Tooltip content={<CustomTooltip></CustomTooltip>} />
                             <Legend />
                             <Line name="estimated EPS" type="monotone" dataKey="estimatedEPS" stroke="grey" strokeWidth={0} dot={{ fill: "grey", fillOpacity: 0.3, r: 5}} activeDot={{ r: 8, strokeWidth: 1}} legendType="circle"/>
                             <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={<CustomDot></CustomDot>} activeDot={<CustomActiveDot></CustomActiveDot>} legendType="circle" />
                             </LineChart>
                         </ResponsiveContainer>
-                    </Box>
+                    </div>
                 </GraphCard>
-            </Box>
+            </div>
         ) : (
-            <Box sx={{ flex: 1 }}>
-                <GraphCard ref={graphRef} graphClicked={graphClicked}>
+            <div className="flex-1">
+                <GraphCard graphClicked={graphClicked}>
                     <GraphTitle
                         title="Earning per Share"
                         explanation={explanation}
                         percentChange={percentChange}
                         timeRange={timeRange}
                         setTimeRange={setTimeRange}
+                        graphClicked={graphClicked}
+                        setGraphClicked={setGraphClicked}
                     />
-                    <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                    <div onClick={() => {setGraphClicked(true);}} className="min-h-0 w-full flex-1">
                         <ResponsiveContainer>
                             <LineChart
                             data={reports}
@@ -184,17 +177,17 @@ function EPSGraph({ statement, period }) {
                                 bottom: 5,
                             }}
                             >
-                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                            <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                            <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                            <CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)"/>
+                            <XAxis dataKey="fiscalDateEnding" stroke="var(--text-main)" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
+                            <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="var(--text-main)" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
                             <Tooltip formatter={(value) => `$${value}`}/>
                             <Legend />
                             <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
                             </LineChart>
                         </ResponsiveContainer>
-                    </Box>
+                    </div>
                 </GraphCard>
-            </Box>
+            </div>
         )
     )
 }
