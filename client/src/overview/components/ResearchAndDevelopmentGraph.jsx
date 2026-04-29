@@ -1,34 +1,26 @@
 import GeneralBarGraph from "./GeneralBarGraph.jsx";
-// mui
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 export const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             Research and development spending measures how much a company invests in new products, technology, and innovation.
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 An upward trend in R&D spending indicates a strategic commitment to future growth, product differentiation, and technological advancement.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 A downward trend in R&D expenditure generally suggests that an organization is prioritizing short-term profitability over long-term growth or is facing financial pressure.  It may indicate a shift from a "growth" phase to a "maturity" or "harvesting" phase, where the focus is on maintaining existing products rather than developing new ones.
-            </Typography>
-        </Stack>
-    </Stack>
+            </p>
+        </div>
+    </div>
 );
 
 function ResearchAndDevelopmentGraph({ statement, period }) {

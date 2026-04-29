@@ -6,71 +6,52 @@ import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
 import Explanation from "./Explanation.jsx"
 import TimeRanges from "./TimeRanges.jsx"
-// mui
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 
 const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             Cash and Cash Equivalents At Carrying Value is liquid assets (things a company can easily convert to cash, such as cash on hand, bank accounts, marketable securities like stocks and bonds, and accounts receivable) the company owns.
-        </Typography>
-        <Typography variant="explanationText">
+        </p>
+        <p className="text-sm text-[var(--text-main)]">
             Debt is money borrowed and owed to others, typically with interest
-        </Typography>
-        <Typography variant="explanationTopic">Calculation</Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Calculation</p>
+        <p className="text-sm font-mono text-[var(--text-main)]">
             Cash = Cash + Current bank accounts + Short-Term, Liquid Securities
-        </Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
+        </p>
+        <p className="text-sm font-mono text-[var(--text-main)]">
             Debt = Short Term Debt + Long Term Debt
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Cash Uptrend is when a company is generating more cash than it is spending (positive cash flow) or raising funds through new investments/financing. This is usually a strong positive sign, indicating stability and resources for future growth.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Cash Downtrend is when a company is burning through its cash reserves faster than it is generating new cash (negative cash flow). This is often a warning sign of operational or liquidity issues, though it could also be a temporary result of a large strategic investment.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Debt Uptrend is wheb a company is taking on more debt. This can be a strategic positive if the money is used to fund profitable expansions, but it becomes a negative if the company cannot manage the increased interest payments or faces difficulty repaying the principal.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Debt Downtrend is when a company is paying down its existing debt. This is generally a very positive sign, as it reduces financial risk, lowers interest expenses, and improves long-term financial stability.
-            </Typography>
-        </Stack>
-    </Stack>
+            </p>
+        </div>
+    </div>
 )
-
 
 function CashVsDebtGraph({ statement, period }) {
     const [timeRange, setTimeRange] = useState("all");

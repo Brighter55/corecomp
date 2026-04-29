@@ -6,134 +6,99 @@ import GraphCard from "./GraphCard.jsx";
 import NoDataGraph from "./NoDataGraph.jsx";
 import Explanation from "./Explanation.jsx";
 import TimeRanges from "./TimeRanges.jsx";
-// mui
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-4">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             Cash Flow Trifecta combines operating, investing, and financing cash flows into one view so you can compare the full cash picture for each period.
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack spacing={2}>
-            <Stack spacing={1}>
-                <Typography variant="h6">Startup / Growth Stage</Typography>
-                <List sx={{ py: 0, pl: 2 }}>
-                    <ListItem sx={{ py: 0.5, display: 'list-item', pl: 0 }}>
-                        <Stack direction="row" sx={{ alignItems: 'flex-start', width: '100%' }}>
-                            <TrendingDownIcon sx={{ color: "#bc4749", bgcolor: "white", borderRadius: "10px", p: 0.5, mr: 1, flexShrink: 0 }} />
-                            <ListItemText 
-                                primary="OCF: Negative/low"
-                                secondary="Not profitable yet, high expenses"
-                                secondaryTypographyProps={{ variant: 'explanationText', color: "white", fontWeight: "normal" }}
-                            />
-                        </Stack>
-                    </ListItem>
-                    <ListItem sx={{ py: 0.5, display: 'list-item', pl: 0 }}>
-                        <Stack direction="row" sx={{ alignItems: 'flex-start', width: '100%' }}>
-                            <TrendingDownIcon sx={{ color: "#bc4749", bgcolor: "white", borderRadius: "10px", p: 0.5, mr: 1, flexShrink: 0 }} />
-                            <ListItemText 
-                                primary="ICF: Strongly negative"
-                                secondary="Heavy investment for growth"
-                                secondaryTypographyProps={{ variant: 'explanationText', color: "white", fontWeight: "normal" }}
-                            />
-                        </Stack>
-                    </ListItem>
-                    <ListItem sx={{ py: 0.5, display: 'list-item', pl: 0 }}>
-                        <Stack direction="row" sx={{ alignItems: 'flex-start', width: '100%' }}>
-                            <TrendingUpIcon sx={{ color: "#588157", bgcolor: "white", borderRadius: "10px", p: 0.5, mr: 1, flexShrink: 0 }} />
-                            <ListItemText 
-                                primary="CFF: Strongly positive"
-                                secondary="Raising cash (debt/equity) to fund losses"
-                                secondaryTypographyProps={{ variant: 'explanationText', color: "white", fontWeight: "normal" }}
-                            />
-                        </Stack>
-                    </ListItem>
-                </List>
-            </Stack>
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <p className="text-base font-semibold text-[var(--text-main)]">Startup / Growth Stage</p>
+                <div className="space-y-2 pl-2">
+                    <div className="flex items-start gap-2">
+                        <TrendingDown className="mt-0.5 w-10 flex-shrink-0 rounded-md text-red-600" />
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--text-main)]">OCF: Negative/low</p>
+                            <p className="text-sm text-[var(--text-main)]">Not profitable yet, high expenses</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <TrendingDown className="mt-0.5 w-10 flex-shrink-0 rounded-md text-red-600" />
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--text-main)]">ICF: Strongly negative</p>
+                            <p className="text-sm text-[var(--text-main)]">Heavy investment for growth</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <TrendingUp className="mt-0.5 w-10 flex-shrink-0 rounded-md text-green-600" />
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--text-main)]">CFF: Strongly positive</p>
+                            <p className="text-sm text-[var(--text-main)]">Raising cash (debt/equity) to fund losses</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <Stack spacing={1}>
-                <Typography variant="h6">Mature Stage</Typography>
-                <List sx={{ py: 0, pl: 2 }}>
-                    <ListItem sx={{ py: 0.5, display: 'list-item', pl: 0 }}>
-                        <Stack direction="row" sx={{ alignItems: 'flex-start', width: '100%' }}>
-                            <TrendingUpIcon sx={{ color: "#588157", bgcolor: "white", borderRadius: "10px", p: 0.5, mr: 1, flexShrink: 0 }} />
-                            <ListItemText 
-                                primary="OCF: Strong positive"
-                                secondary="Stable, cash-generating business"
-                                secondaryTypographyProps={{ variant: 'explanationText', color: "white", fontWeight: "normal" }}
-                            />
-                        </Stack>
-                    </ListItem>
-                    <ListItem sx={{ py: 0.5, display: 'list-item', pl: 0 }}>
-                        <Stack direction="row" sx={{ alignItems: 'flex-start', width: '100%' }}>
-                            <TrendingDownIcon sx={{ color: "#bc4749", bgcolor: "white", borderRadius: "10px", p: 0.5, mr: 1, flexShrink: 0 }} />
-                            <ListItemText 
-                                primary="ICF: Moderately negative"
-                                secondary="Maintenance + small investments"
-                                secondaryTypographyProps={{ variant: 'explanationText', color: "white", fontWeight: "normal" }}
-                            />
-                        </Stack>
-                    </ListItem>
-                    <ListItem sx={{ py: 0.5, display: 'list-item', pl: 0 }}>
-                        <Stack direction="row" sx={{ alignItems: 'flex-start', width: '100%' }}>
-                            <TrendingDownIcon sx={{ color: "#bc4749", bgcolor: "white", borderRadius: "10px", p: 0.5, mr: 1, flexShrink: 0 }} />
-                            <ListItemText 
-                                primary="CFF: Negative"
-                                secondary="Returning cash (dividends, buybacks, debt repayment)"
-                                secondaryTypographyProps={{ variant: 'explanationText', color: "white", fontWeight: "normal" }}
-                            />
-                        </Stack>
-                    </ListItem>
-                </List>
-            </Stack>
+            <div className="space-y-2">
+                <p className="text-base font-semibold text-[var(--text-main)]">Mature Stage</p>
+                <div className="space-y-2 pl-2">
+                    <div className="flex items-start gap-2">
+                        <TrendingUp className="mt-0.5 w-10 flex-shrink-0 rounded-md text-green-600" />
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--text-main)]">OCF: Strong positive</p>
+                            <p className="text-sm text-[var(--text-main)]">Stable, cash-generating business</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <TrendingDown className="mt-0.5 w-10 flex-shrink-0 rounded-md text-red-600" />
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--text-main)]">ICF: Moderately negative</p>
+                            <p className="text-sm text-[var(--text-main)]">Maintenance + small investments</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <TrendingDown className="mt-0.5 w-10 flex-shrink-0 rounded-md text-red-600" />
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--text-main)]">CFF: Negative</p>
+                            <p className="text-sm text-[var(--text-main)]">Returning cash (dividends, buybacks, debt repayment)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <Stack spacing={1}>
-                <Typography variant="h6">Declining Stage</Typography>
-                <List sx={{ py: 0, pl: 2 }}>
-                    <ListItem sx={{ py: 0.5, display: 'list-item', pl: 0 }}>
-                        <Stack direction="row" sx={{ alignItems: 'flex-start', width: '100%' }}>
-                            <TrendingDownIcon sx={{ color: "#bc4749", bgcolor: "white", borderRadius: "10px", p: 0.5, mr: 1, flexShrink: 0 }} />
-                            <ListItemText 
-                                primary="OCF: Weak/negative"
-                                secondary="Shrinking business"
-                                secondaryTypographyProps={{ variant: 'explanationText', color: "white", fontWeight: "normal" }}
-                            />
-                        </Stack>
-                    </ListItem>
-                    <ListItem sx={{ py: 0.5, display: 'list-item', pl: 0 }}>
-                        <Stack direction="row" sx={{ alignItems: 'flex-start', width: '100%' }}>
-                            <TrendingUpIcon sx={{ color: "#588157", bgcolor: "white", borderRadius: "10px", p: 0.5, mr: 1, flexShrink: 0 }} />
-                            <ListItemText 
-                                primary="ICF: Positive"
-                                secondary="Selling assets"
-                                secondaryTypographyProps={{ variant: 'explanationText', color: "white", fontWeight: "normal" }}
-                            />
-                        </Stack>
-                    </ListItem>
-                    <ListItem sx={{ py: 0.5, display: 'list-item', pl: 0 }}>
-                        <Stack direction="row" sx={{ alignItems: 'flex-start', width: '100%' }}>
-                            <TrendingDownIcon sx={{ color: "#bc4749", bgcolor: "white", borderRadius: "10px", p: 0.5, mr: 1, flexShrink: 0 }} />
-                            <ListItemText 
-                                primary="CFF: Mixed"
-                                secondary="Raising cash to survive or paying down remaining obligations"
-                                secondaryTypographyProps={{ variant: 'explanationText', color: "white", fontWeight: "normal" }}
-                            />
-                        </Stack>
-                    </ListItem>
-                </List>
-            </Stack>
-        </Stack>
-    </Stack>
+            <div className="space-y-2">
+                <p className="text-base font-semibold text-[var(--text-main)]">Declining Stage</p>
+                <div className="space-y-2 pl-2">
+                    <div className="flex items-start gap-2">
+                        <TrendingDown className="mt-0.5 w-10 flex-shrink-0 rounded-md text-red-600" />
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--text-main)]">OCF: Weak/negative</p>
+                            <p className="text-sm text-[var(--text-main)]">Shrinking business</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <TrendingUp className="mt-0.5 w-10 flex-shrink-0 rounded-md text-green-600" />
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--text-main)]">ICF: Positive</p>
+                            <p className="text-sm text-[var(--text-main)]">Selling assets</p>
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                        <TrendingDown className="mt-0.5 w-10 flex-shrink-0 rounded-md text-red-600" />
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--text-main)]">CFF: Mixed</p>
+                            <p className="text-sm text-[var(--text-main)]">Raising cash to survive or paying down remaining obligations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 );
-
 function CashFlowTrifectaGraph({ statement, period }) {
     const [timeRange, setTimeRange] = useState("all");
     const [graphClicked, setGraphClicked] = useState(false);

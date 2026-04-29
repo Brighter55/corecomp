@@ -4,42 +4,34 @@ import GraphCard from "./GraphCard.jsx"
 import GraphTitle from "./GraphTitle.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
-//mui
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             A dividend payout is the distribution of a portion of a company's earnings to its shareholders. Companies use dividends to reward investors, typically in cash, on a quarterly basis, though some pay monthly or annually. The amount received by a shareholder depends on the number of shares owned and the dividend declared per share.
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 A steady or increasing DPS suggests a company is generating strong profits and has the cash flow to distribute to its shareholders.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 A lower DPS might mean the company is prioritizing reinvesting its earnings back into the business to fuel future growth
-            </Typography>
-        </Stack>
-        <Typography variant="explanationText">
+            </p>
+        </div>
+        <p className="text-sm text-[var(--text-main)]">
             A history of consistent or growing DPS can indicate a reliable income source.
-        </Typography>
-        <Typography variant="explanationText">
+        </p>
+        <p className="text-sm text-[var(--text-main)]">
             A significant reduction or elimination of dividends can be a warning sign to financial hardship, declining profits, or a change in management's priorities.
-        </Typography>
-    </Stack>
+        </p>
+    </div>
 )
 
 function DividendsPayoutGraph({ statement, period }) {

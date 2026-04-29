@@ -580,9 +580,9 @@ function SymbolOverviewPage() {
                             contentStyle={{
                               borderRadius: "0.75rem",
                               border: "1px solid rgba(218,215,205,0.22)",
-                              backgroundColor: "var(--main-dust-grey)",
-                              color: "#f5f5f4",
+                              backgroundColor: "var(--bg-main)",
                             }}
+                            itemStyle={{ color: 'var(--text-main)' }}
                           />
                           <Pie
                             data={analystRows}

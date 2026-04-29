@@ -6,65 +6,49 @@ import GraphCard from "./GraphCard.jsx";
 import NoDataGraph from "./NoDataGraph.jsx";
 import Explanation from "./Explanation.jsx";
 import TimeRanges from "./TimeRanges.jsx";
-// mui
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 /*commonStock is APIC included */
 
 const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             Retained earnings are the cumulative net profits a company keeps and reinvests rather than distributing to shareholders as dividends.
-        </Typography>
-        <Typography variant="explanationText">
+        </p>
+        <p className="text-sm text-[var(--text-main)]">
             Paid-in Capital is the total amount of cash or assets a company receives from investors in exchange for stock
-        </Typography>
-        <Typography variant="explanationTopic">Calculation</Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Calculation</p>
+        <p className="text-sm font-mono text-[var(--text-main)]">
             Ending Retained Earnings = Beginning Retained Earnings + Net Income/Loss - Dividends
-        </Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
+        </p>
+        <p className="text-sm font-mono text-[var(--text-main)]">
             Paid-in Capital = Common Stock + Additional Paid-In Capital (APIC)
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Rising Retained Earnings: Indicates profitability and potential for reinvestment or future dividends, signifying a mature or growing company.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Negative/Falling Retained Earnings: Signals accumulated net losses or high dividend payouts exceeding earnings, often showing a startup phase or financial distress.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Rising Paid-in Capital (Step-ups): Usually represents new stock offerings or investment rounds. High, steady paid-in capital alongside low retained earnings suggests a startup or capital-intensive business.
-            </Typography>
-        </Stack>
-        <Typography variant="explanationText">
+            </p>
+        </div>
+        <p className="text-sm text-[var(--text-main)]">
             Widening Gap (Earnings &gt; Paid-in): Suggests the company is self-sustaining and creating value internally, rather than relying on external investors.
-        </Typography>
-    </Stack>
+        </p>
+    </div>
 );
 
 

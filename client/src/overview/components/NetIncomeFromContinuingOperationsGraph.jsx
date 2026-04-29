@@ -1,35 +1,27 @@
 import GeneralBarGraph from "./GeneralBarGraph.jsx";
-// mui
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 export const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             Net income from continuing operations is the profit a company generates from its core, ongoing business activities, excluding one-time events, discontinued segments, or accounting changes. It represents sustainable, recurring earnings, making it a critical metric for investors evaluating a company's true profitability and future performance potential. 
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 A rising trend indicates rising profitability from core products or services. it could be driven by high demand, strong sales volume, or improved pricing power.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 A falling trend suggests that the primary business activities are becoming less profitable.
-            </Typography>
-        </Stack>
-        <Typography variant="explanationText">Note: A downward trend might be temporary due to restructuring for long-term growth, while an upward trend might be driven by unsustainable, temporary market conditions.</Typography>
-    </Stack>
+            </p>
+        </div>
+        <p className="text-sm text-[var(--text-main)]">Note: A downward trend might be temporary due to restructuring for long-term growth, while an upward trend might be driven by unsustainable, temporary market conditions.</p>
+    </div>
 );
 
 function NetIncomeFromContinuingOperationsGraph({ statement, period }) {

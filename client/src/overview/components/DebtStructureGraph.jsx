@@ -4,32 +4,26 @@ import { filterReports, getPercentChange, formatToUnits } from "../../helpers/Gr
 import GraphTitle from "./GraphTitle.jsx";
 import GraphCard from "./GraphCard.jsx";
 import NoDataGraph from "./NoDataGraph.jsx";
-// mui
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
 
 
 const explanation = (
-	<Stack spacing={2}>
-		<Typography variant="explanationTopic">What is it?</Typography>
-		<Typography variant="explanationText">
+	<div className="space-y-3">
+		<p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+		<p className="text-sm text-[var(--text-main)]">
 			Debt structure shows how a company splits debt obligations between short-term debt and long-term debt.
-		</Typography>
-		<Typography variant="explanationTopic">Calculation</Typography>
-		<Typography
-			variant="explanationText"
-			sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-		>
+		</p>
+		<p className="text-sm font-bold text-[var(--text-main)]">Calculation</p>
+		<p className="text-sm font-mono text-[var(--text-main)]">
 			Total Debt = short-term debt + long-term debt
-		</Typography>
-		<Typography variant="explanationTopic">Interpretation</Typography>
-		<Typography variant="explanationText">
+		</p>
+		<p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+		<p className="text-sm text-[var(--text-main)]">
 			Large Short-Term Portion: Suggests high liquidity risk, as a significant amount is due soon. If this exceeds cash equivalents, the company may face solvency issues.
-		</Typography>
-		<Typography variant="explanationText">
+		</p>
+		<p className="text-sm text-[var(--text-main)]">
 			Large Long-Term Portion: Implies a more stable, long-term financing strategy (e.g., bonds), which is less urgent but still creates long-term interest burdens.
-		</Typography>
-	</Stack>
+		</p>
+	</div>
 );
 
 

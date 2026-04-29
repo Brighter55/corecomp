@@ -1,34 +1,26 @@
 import GeneralBarGraph from "./GeneralBarGraph.jsx";
-// mui
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             A dividend payout represents the actual cash a company pays to its shareholders from its profits.
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 A rising dividend payout usually signals strong and stable cash flow. It often means management is confident the business can keep generating enough money to support these payments. Common in mature, slow-growth companies.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 A declining or eliminated dividend can signal trouble (cash flow issues, declining profits) or a strategic shift (reinvesting money back into growth instead of paying shareholders).
-            </Typography>
-        </Stack>
-    </Stack>
+            </p>
+        </div>
+    </div>
 )
 
 function DividendPayoutCommonStockGraph({ statement, period }) {

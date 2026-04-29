@@ -1,39 +1,30 @@
 import GeneralBarGraph from "./GeneralBarGraph.jsx";
-// mui
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 export const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             Operating expenses are the day-to-day costs required to run the business, excluding direct production costs.
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 An upward trend indicates rising costs, which can signal growth or inefficiency
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 A downward trend indicates falling costs, suggesting improved efficiency or reduced business activity
-            </Typography>
-        </Stack>
-        <Typography variant="explanationText">
+            </p>
+        </div>
+        <p className="text-sm text-[var(--text-main)]">
                 Note: Growth and Expansion (Positive): If operating expenses are rising, but revenue is growing faster, it suggests the company is investing in growth (e.g., higher marketing spend, opening new locations, or increasing headcount).
                 Inefficiency and Declining Margins (Negative): If expenses rise while revenue is flat or declining, this indicates a dangerous increase in costs that reduces profitability.
-        </Typography>
-        
-    </Stack>
+        </p>
+    </div>
 );
 
 function OperatingExpensesGraph({ statement, period }) {

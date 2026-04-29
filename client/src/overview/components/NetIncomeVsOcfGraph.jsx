@@ -6,19 +6,16 @@ import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
 import Explanation from "./Explanation.jsx"
 import TimeRanges from "./TimeRanges.jsx"
-// mui
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+import { Card, CardContent } from "@/components/ui/card";
 
 const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             This grouped bar chart compares operating cash flow with net income for each period.
             It helps show whether accounting profit is supported by cash generated from core operations.
-        </Typography>
-    </Stack>
+        </p>
+    </div>
 )
 
 function TooltipContent({ active, payload, label }) {
@@ -30,25 +27,17 @@ function TooltipContent({ active, payload, label }) {
     const netIncome = Number(payload.find((item) => item.dataKey === "netIncome")?.value);
 
     return (
-        <Box
-            sx={{
-                bgcolor: "white",
-                border: "1px solid #A3B18A",
-                borderRadius: "6px",
-                p: 1,
-                minWidth: "12rem",
-            }}
-        >
-            <Typography variant="caption" sx={{ display: "block", mb: 0.5 }}>
+        <Card className="min-w-[12rem] rounded-md border border-[var(--main-dry-sage)] bg-[var(--bg-main)] p-2 shadow-none">
+            <CardContent className="space-y-1 p-0 text-sm">
                 {label}
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#588157" }}>
+                <p className="text-[#588157]">
                 Operating Cash Flow: {formatToUnits(operatingCashflow)}
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#bc4749" }}>
+                </p>
+                <p className="text-[#bc4749]">
                 Net Income: {formatToUnits(netIncome)}
-            </Typography>
-        </Box>
+                </p>
+            </CardContent>
+        </Card>
     );
 }
 

@@ -1,36 +1,32 @@
 import GeneralBarGraph from "./GeneralBarGraph.jsx";
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+ 
 
 const explanation = (
-  <Stack spacing={2}>
-      <Typography variant="explanationTopic">What is it?</Typography>
-      <Typography variant="explanationText">
+  <div className="space-y-3">
+      <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+      <p className="text-sm text-[var(--text-main)]">
           The quick ratio, or "acid-test ratio," measures a company’s ability to pay short-term liabilities (due within one year) using its most liquid assets—cash, marketable securities, and accounts receivable. It excludes inventories and prepaid expenses, providing a stricter liquidity test than the current ratio.
-      </Typography>
-      <Typography variant="explanationTopic">Calculation</Typography>
-      <Typography
-          variant="explanationText"
-          sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-      >
+      </p>
+      <p className="text-sm font-bold text-[var(--text-main)]">Calculation</p>
+      <p className="text-sm font-mono text-[var(--text-main)]">
           Quick Ratio = (Cash & Cash Equivalents + Short Term Investment + Current Net Receivables) / Total Current Liabilities
-      </Typography>
-      <Typography variant="explanationTopic">Interpretation</Typography>
-      <Stack direction="column" spacing={1}>
-          <Typography variant="explanationText">
+      </p>
+      <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+      <div className="space-y-1">
+          <p className="text-sm text-[var(--text-main)]">
               &gt; 1.0: The company has sufficient liquid assets to cover its current liabilities.
-          </Typography>
-          <Typography variant="explanationText">
+          </p>
+          <p className="text-sm text-[var(--text-main)]">
               &lt; 1.0: The company may struggle to pay immediate debts, suggesting potential cash flow issues.
-          </Typography>
-          <Typography variant="explanationText">
+          </p>
+          <p className="text-sm text-[var(--text-main)]">
               Too High Ratio (e.g., 7 or 8): May indicate an inefficient use of cash that could be used for growth.
-          </Typography>
-          <Typography variant="explanationText">
+          </p>
+          <p className="text-sm text-[var(--text-main)]">
               Trends: A decreasing ratio over time (e.g., 1.1 down to 0.9) suggests deteriorating liquidity.
-          </Typography>
-      </Stack>
-  </Stack>
+          </p>
+      </div>
+  </div>
 )
 
 
