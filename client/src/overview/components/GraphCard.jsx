@@ -1,33 +1,30 @@
-import { styled } from '@mui/material/styles';
-import Stack from '@mui/material/Stack';
+import { forwardRef } from "react";
 
-const GraphCard = styled(Stack)(({ graphClicked, theme }) => {
-    return graphClicked ? {
-        position: "fixed",
-        height: "80vh",
-        width: "90vw",
-        top: "10vh",
-        left: "5vw",
-        background: "var(--main-dust-grey)",
-        color: "var(--main-pine-teal)",
-        borderRadius: "10px",
-        zIndex: 3,
-        transition: "height .5s ease",
-        overflow: "auto",
-        "&::-webkit-scrollbar": {
-            display: "none",
-        }
-    } : {
-        height: "20rem",
-        width: "100%",
-        minWidth: "21rem",
-        background: "var(--main-dust-grey)",
-        borderRadius: "10px",
-        color: "var(--main-pine-teal)",
-        [theme.breakpoints.up("sm")]: {
-            height: "25rem"
-        },
-    };
+const GraphCard = forwardRef(function GraphCard(
+    { graphClicked = false, className = "", children, ...rest },
+    ref
+) {
+    const baseClasses =
+        "flex flex-col rounded-[10px] border border-white/10 bg-[var(--bg-main)] text-[var(--main-pine-teal)] transition-[height] duration-500 ease-in-out shadow-[3px_3px_3px_3px_rgba(0,0,0,0.1)]";
+    const clickedClasses =
+        "fixed left-[5vw] top-[10vh] z-[3] h-[80vh] w-[90vw] overflow-auto no-scrollbar";
+    const defaultClasses = "h-80 w-full min-w-[21rem] sm:h-[25rem]";
+
+    const combinedClassName = [
+        baseClasses,
+        graphClicked ? clickedClasses : defaultClasses,
+        className,
+    ]
+        .filter(Boolean)
+        .join(" ");
+
+    return (
+        <div ref={ref} className={combinedClassName} {...rest}>
+            {children}
+        </div>
+    );
 });
 
-export default GraphCard
+GraphCard.displayName = "GraphCard";
+
+export default GraphCard;

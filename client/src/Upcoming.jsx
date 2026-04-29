@@ -1,12 +1,21 @@
-import Typography from "@mui/material/Typography"
-import LandingHeader from "./headers/LandingHeader"
-import Stack from "@mui/material/Stack"
-import Footer from "./shared/Footer"
-import Container from "@mui/material/Container"
+import LandingHeader from "./headers/LandingHeader.tsx";
+import Footer from "./shared/Footer.tsx";
 
 const versions = [
     {
         name: "Current Version",
+        version: "0.7.0",
+        date: "04/29/2026",
+        updates: [
+            "Full migration on frontend code and design from Material UI to Tailwind, shadcn for better UI/UX",
+            "Implement dark/light theme",
+            "Search bar in header",
+            "Implement a close x button to replace outside-click closing on graphs.",
+            "Refactor frontend code to reduce code redundancy",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.6.0",
         date: "04/08/2026",
         updates: [
@@ -81,28 +90,30 @@ const versions = [
 
 function Upcoming() {
     return (
-        <Container maxWidth="lg">
-            <Stack spacing={10}>
-                <LandingHeader></LandingHeader>
-                <Stack spacing={3}>
-                    {versions.map((release) => (
-                        <Stack spacing={2} key={release.version}>
-                            <Typography variant="h5" fontWeight="bold">
-                                {release.name}: {release.version} ({release.date})
-                            </Typography>
-                            <Stack spacing={1}>
-                                {release.updates.map((item) => (
-                                    <Typography variant="body1" key={item}>
-                                        {` - ${item}`}
-                                    </Typography>
-                                ))}
-                            </Stack>
-                        </Stack>
-                    ))}
-                </Stack>
-                <Footer></Footer>
-            </Stack>
-        </Container>
+        <div className="min-h-screen pb-12">
+            <LandingHeader />
+            <div className="mx-auto max-w-6xl px-4">
+                <div className="space-y-10">
+                    <div className="space-y-6">
+                        {versions.map((release) => (
+                            <div className="space-y-2" key={release.version}>
+                                <h2 className="text-2xl font-bold">
+                                    {release.name}: {release.version} ({release.date})
+                                </h2>
+                                <div className="space-y-1">
+                                    {release.updates.map((item) => (
+                                        <p className="text-base" key={item}>
+                                            {` - ${item}`}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <Footer />
+                </div>
+            </div>
+        </div>
     )
 }
 

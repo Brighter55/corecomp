@@ -1,39 +1,15 @@
-import { useState } from "react"
-import LandingHeader from "./headers/LandingHeader.jsx"
-import { authenticatedClient } from "./helpers/api.js"
-// mui components
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import { styled } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
+import { useState } from "react";
+import { Mail } from "lucide-react";
+import LandingHeader from "./headers/LandingHeader.tsx";
+import { authenticatedClient } from "./helpers/api.js";
+import { Button } from "./components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
+import Footer from "./shared/Footer.tsx";
 
-
-const StyledStack = styled(Stack)(({ theme }) => ({
-    height: "30rem",
-    backgroundColor: "var(--main-dust-grey)",
-    color: "var(--main-pine-teal)",
-    borderRadius: "20px",
-    padding: "20px",
-    [theme.breakpoints.up("xs")]: {
-        width: "70%"
-    },
-    [theme.breakpoints.up("md")]: {
-        width: "50%"
-    },
-    [theme.breakpoints.up("lg")]: {
-        width: "40%"
-    },
-}));
-
-const formStyle = {
-    height: "40%",
-    display: "flex",
-    flexDirection: "column",
-    gap: "4rem",
-    alignItems: "end",
+function fieldToText(value) {
+  if (Array.isArray(value)) return value.join(" ");
+  if (value == null) return "";
+  return String(value);
 }
 
 function ResetPassword() {
@@ -44,64 +20,68 @@ function ResetPassword() {
     async function handleSubmit(event) {
         event.preventDefault();
         setEmailError("");
-        const payload = {email: email};
+        const payload = { email };
 
-        const response = await authenticatedClient({ endpoint: "/accounts/reset-password", payload: payload});
+        const response = await authenticatedClient({ endpoint: "/accounts/reset-password", payload });
         const data = await response.json();
         console.log(data);
 
         if (!response.ok) {
-            if (data.email) { // if email provided fails the test
-                setEmailError(data.email);
-            }
-
+            if (data.email) setEmailError(fieldToText(data.email));
             return;
         }
 
-        // runs only if not a bad request and no network issue
         setSuccess(true);
     }
 
     return (
-        <Container maxWidth="lg" disableGutters>
-            <LandingHeader></LandingHeader>
-            <Box sx={{ display: "flex", justifyContent: "center", height: "85%" }}>
-                <StyledStack spacing={4}>
-                    <Typography variant="h3" sx={{ fontWeight: "bold" }}>Reset your password</Typography>
-                    {success ? (
-                        <Typography variant="body1">Recovery email has been sent!</Typography>
-                    ) : (
-                        <Typography variant="body1">Enter your email and we will send you a recovery email</Typography>
-                    )}
-                    <form onSubmit={handleSubmit} style={formStyle}>
-                        <TextField
-                            value={email}
-                            onChange={(event) => {setEmail(event.target.value)}}
-                            label="email"
-                            variant="outlined"
-                            sx={{
-                                width: "100%",
-                                "& .MuiInputBase-root": {
-                                    backgroundColor: "lightgrey",
-                                },
-                                "& .MuiInputLabel-root.Mui-focused": {
-                                    color: "#3A5A40",
-                                },
-                                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                                    borderColor: "#3A5A40",
-                                },
-                                "& .MuiFormHelperText-root": {backgroundColor: "#DAD7CD", margin: "0"},
-                            }}
-                            error={emailError ? true : false}
-                            helperText={emailError ? emailError : " "}
-                        />
-                        <Button sx={{ width: "20%", backgroundColor: "#588157", color: "#DAD7CD"}} type="submit">send</Button>
-                    </form>
-                </StyledStack>
-            </Box>
-        </Container>
-    )
+        <div className="min-h-screen bg-[var(--bg-main)]">
+            <LandingHeader />
+
+            <main className="mx-auto flex w-full max-w-6xl items-center justify-center px-4 pb-14">
+                <Card className="w-full max-w-md rounded-[28px] border border-white/10 bg-white/5 text-[var(--text-main)] shadow-[0_16px_40px_rgba(0,0,0,0.25)] h-[25rem]">
+                    <CardHeader className="space-y-2 px-8 pt-9 text-center">
+                        <CardTitle className="font-display text-4xl font-semibold tracking-[-0.02em]">Reset your password</CardTitle>
+                        <CardDescription className="text-sm text-[var(--text-muted)]">
+                            {success ? "Recovery email has been sent!" : "Enter your email and we will send you a recovery email"}
+                        </CardDescription>
+                    </CardHeader>
+
+                    <CardContent className="px-8 pb-8">
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div>
+                                <label htmlFor="reset-email" className="mb-1 block text-sm">email</label>
+                                <div className="relative">
+                                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+                                    <input
+                                        id="reset-email"
+                                        value={email}
+                                        onChange={(event) => setEmail(event.target.value)}
+                                        className="h-12 w-full rounded-xl border border-[var(--line-muted)] bg-[var(--bg-main)] pl-10 pr-3 text-[var(--text-main)] outline-none ring-offset-[var(--bg-main)] placeholder:text-[var(--text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--line-muted)]"
+                                        placeholder="Enter your email"
+                                    />
+                                </div>
+                                <p className="mt-1 min-h-5 text-sm text-[var(--main-brick)]">{emailError || " "}</p>
+                            </div>
+
+                            <Button
+                                type="submit"
+                                variant="forest"
+                                className="h-12 w-full rounded-xl text-base font-semibold shadow-[0_10px_22px_rgba(0,0,0,0.25)]"
+                            >
+                                send
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
+            </main>
+
+            <div className="mx-auto w-full max-w-6xl px-4 pb-10">
+                <Footer />
+            </div>
+        </div>
+    );
 }
 
 
-export default ResetPassword
+export default ResetPassword;

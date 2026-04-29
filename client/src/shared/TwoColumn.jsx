@@ -1,13 +1,9 @@
-import { styled } from '@mui/material/styles';
-import Stack from "@mui/material/Stack"
-
-const TwoColumn = styled(Stack)(({ theme }) => ({
-    gap: "2rem",
-    [theme.breakpoints.up("sm")] : {
-        alignItems: "center",
-        flexDirection: "row",
-        justifyContent: "space-between",
-    },
-}));
+function TwoColumn({ children }) {
+    return (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+            {children}
+        </div>
+    );
+}
 
 export default TwoColumn

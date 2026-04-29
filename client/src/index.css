@@ -1,11 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --main-dust-grey: #DAD7CD;
-  --main-dry-sage: #A3B18A;
+  --main-dust-grey: #dad7cd;
+  --main-dry-sage: #a3b18a;
   --main-fern: #588157;
-  --main-hunter-green: #3A5A40;
-  --main-pine-teal: #344E41;
+  --main-hunter-green: #3a5a40;
+  --main-pine-teal: #344e41;
   --main-brown: #746355;
   --main-brick: #bc4749;
+
+  --bg-main: #36453B;
+  --text-main: #dad7cd;
+  --text-muted: #b9bbaf;
+  --surface-main: #746355;
+  --surface-soft: rgb(255 255 255 / 0.15);
+  --line-muted: rgba(218, 215, 205, 0.45);
+  --card-main: #f7f6f2;
+  --card-text: #2f3037;
+}
+
+:root.theme-light {
+  --main-dust-grey: #36453B;
+  --main-dry-sage: #5F865F;
+  --main-fern: #4A5D4E;
+  --main-hunter-green: #1A241E;
+  --main-pine-teal: #F6FBF4;
+  --main-brown: #D7DBD5;
+  --main-brick: #bc4749;
+
+  --bg-main: #F8F9F8;
+  --text-main: #36453B;
+  --text-muted: #36453B;
+  --surface-main: #FFFFFF;
+  --surface-soft: rgba(26, 36, 30, 0.1);
+  --line-muted: rgba(26, 36, 30, 0.1);
+  --card-main: #FFFFFF;
+  --card-text: #1A241E;
 }
 
 html, body, #root {
@@ -15,11 +47,56 @@ html, body, #root {
 }
 
 body {
-  background-color: #344E41;
-  color: #DAD7CD;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color 220ms ease, color 220ms ease;
 }
 
 #root {
   margin-left: auto;
   margin-right: auto;
+}
+
+@keyframes slide-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

@@ -1,71 +1,54 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useMemo } from "react";
+import { X } from "lucide-react";
 import { filterReports, getPercentChange, formatToUnits } from "../../helpers/GraphsHelper.js";
 import GraphCard from "./GraphCard.jsx";
 import NoDataGraph from "./NoDataGraph.jsx";
 import Explanation from "./Explanation.jsx";
 import TimeRanges from "./TimeRanges.jsx";
-// mui
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import Skeleton from '@mui/material/Skeleton';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 /*commonStock is APIC included */
 
 const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             Retained earnings are the cumulative net profits a company keeps and reinvests rather than distributing to shareholders as dividends.
-        </Typography>
-        <Typography variant="explanationText">
+        </p>
+        <p className="text-sm text-[var(--text-main)]">
             Paid-in Capital is the total amount of cash or assets a company receives from investors in exchange for stock
-        </Typography>
-        <Typography variant="explanationTopic">Calculation</Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Calculation</p>
+        <p className="text-sm font-mono text-[var(--text-main)]">
             Ending Retained Earnings = Beginning Retained Earnings + Net Income/Loss - Dividends
-        </Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
+        </p>
+        <p className="text-sm font-mono text-[var(--text-main)]">
             Paid-in Capital = Common Stock + Additional Paid-In Capital (APIC)
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Rising Retained Earnings: Indicates profitability and potential for reinvestment or future dividends, signifying a mature or growing company.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Negative/Falling Retained Earnings: Signals accumulated net losses or high dividend payouts exceeding earnings, often showing a startup phase or financial distress.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Rising Paid-in Capital (Step-ups): Usually represents new stock offerings or investment rounds. High, steady paid-in capital alongside low retained earnings suggests a startup or capital-intensive business.
-            </Typography>
-        </Stack>
-        <Typography variant="explanationText">
+            </p>
+        </div>
+        <p className="text-sm text-[var(--text-main)]">
             Widening Gap (Earnings &gt; Paid-in): Suggests the company is self-sustaining and creating value internally, rather than relying on external investors.
-        </Typography>
-    </Stack>
+        </p>
+    </div>
 );
 
 
@@ -73,26 +56,15 @@ function REarningsVsCStock({ statement, period }) {
     const [timeRange, setTimeRange] = useState("all");
     const [graphClicked, setGraphClicked] = useState(false);
 
-    const graphRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (graphRef.current && !graphRef.current.contains(event.target)) {
-                setGraphClicked(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
     const reports = useMemo(() => {
         if (!statement) return [];
         if (Array.isArray(statement) && statement.length === 0) return [];
 
-        return filterReports(statement[period === "annually" ? "annualReports" : "quarterlyReports"], timeRange, "fiscalDateEnding");
+        return filterReports(
+            statement[period === "annually" ? "annualReports" : "quarterlyReports"] ?? [],
+            timeRange,
+            "fiscalDateEnding"
+        );
     }, [statement, timeRange, period]);
 
     const retainedEarningsPercentChange = useMemo(() => {
@@ -110,51 +82,53 @@ function REarningsVsCStock({ statement, period }) {
     }, [reports]);
 
     if (statement === null) {
-        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }} />;
+        return (
+            <div className="flex-1">
+                <div className="h-80 w-full min-w-[21rem] animate-pulse rounded-[10px] bg-[rgba(163,177,138,0.25)] sm:h-[25rem]" />
+            </div>
+        );
     }
     if (Array.isArray(statement) && statement.length === 0) {
         return <NoDataGraph />;
     }
 
     return (
-        <Box sx={{ flex: 1 }}>
-            <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                <Stack direction="row" sx={{ alignItems: "center" }}>
-                    <Stack
-                        direction="row"
-                        sx={{ alignItems: "center", flexGrow: 1, justifyContent: "center" }}
-                        spacing={1}
-                    >
-                        <Typography variant="h6" textAlign="center">Retained Earnings vs Paid-in Capital</Typography>
+        <div className="flex-1">
+            <GraphCard graphClicked={graphClicked}>
+                <div className="flex flex-wrap items-center gap-3 px-2 pt-2 sm:flex-nowrap">
+                    <div className="flex min-w-0 flex-1 items-center justify-center gap-2 text-center">
+                        <h3 className="text-lg font-semibold text-[var(--text-main)]">Retained Earnings vs Paid-in Capital</h3>
                         <Explanation explanation={explanation} />
-                    </Stack>
-                    <Typography
-                        variant="h6"
-                        sx={{
-                            color: "var(--main-hunter-green)",
-                        }}
-                    >
+                    </div>
+                    <div className="ml-auto flex items-center gap-2">
+                        <p className="text-lg font-semibold text-[#588157]">
                         {isNaN(retainedEarningsPercentChange)
                             ? "N/A"
                             : (retainedEarningsPercentChange >= 0
                                 ? `+${retainedEarningsPercentChange}%`
                                 : `${retainedEarningsPercentChange}%`)}
-                    </Typography>
-                    <Typography
-                        variant="h6"
-                        sx={{
-                            color: "var(--main-brick)",
-                        }}
-                    >
+                        </p>
+                        <p className="text-lg font-semibold text-[#bc4749]">
                         {isNaN(commonStockPercentChange)
                             ? "N/A"
                             : (commonStockPercentChange >= 0
                                 ? `+${commonStockPercentChange}%`
                                 : `${commonStockPercentChange}%`)}
-                    </Typography>
-                    <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} />
-                </Stack>
-                <Box onClick={() => { setGraphClicked(true); }} sx={{ width: "100%", height: "100%" }}>
+                        </p>
+                        <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} />
+                        {graphClicked && (
+                            <button
+                                type="button"
+                                aria-label="Close graph"
+                                onClick={() => setGraphClicked(false)}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[var(--text-main)] transition-colors hover:bg-[var(--main-brick)]"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <div onClick={() => { setGraphClicked(true); }} className="min-h-0 w-full flex-1">
                     <ResponsiveContainer>
                         <LineChart
                             data={reports}
@@ -165,11 +139,11 @@ function REarningsVsCStock({ statement, period }) {
                                 bottom: 5,
                             }}
                         >
-                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A" />
-                            <XAxis dataKey="fiscalDateEnding" interval="equidistantPreserveStart" stroke="#344E41" tick={{ fontSize: 12 }} />
+                            <CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)" />
+                            <XAxis dataKey="fiscalDateEnding" interval="equidistantPreserveStart" stroke="var(--text-main)" tick={{ fontSize: 12 }} />
                             <YAxis
                                 tickFormatter={(value) => formatToUnits(value)}
-                                stroke="#344E41"
+                                stroke="var(--text-main)"
                                 domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}
                             />
                             <Tooltip formatter={(value) => formatToUnits(value)} />
@@ -194,9 +168,9 @@ function REarningsVsCStock({ statement, period }) {
                             />
                         </LineChart>
                     </ResponsiveContainer>
-                </Box>
+                </div>
             </GraphCard>
-        </Box>
+        </div>
     );
 }
 

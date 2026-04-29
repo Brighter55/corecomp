@@ -1,104 +1,71 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import {useState, useEffect, useRef, useMemo} from "react"
+import { useState, useMemo } from "react";
+import { X } from "lucide-react";
 import {filterReports, getPercentChange, formatToUnits} from "../../helpers/GraphsHelper.js"
 import GraphCard from "./GraphCard.jsx"
 import NoDataGraph from "./NoDataGraph.jsx"
 import Explanation from "./Explanation.jsx"
 import TimeRanges from "./TimeRanges.jsx"
-// mui
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import Skeleton from '@mui/material/Skeleton';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 
 const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             Cash and Cash Equivalents At Carrying Value is liquid assets (things a company can easily convert to cash, such as cash on hand, bank accounts, marketable securities like stocks and bonds, and accounts receivable) the company owns.
-        </Typography>
-        <Typography variant="explanationText">
+        </p>
+        <p className="text-sm text-[var(--text-main)]">
             Debt is money borrowed and owed to others, typically with interest
-        </Typography>
-        <Typography variant="explanationTopic">Calculation</Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Calculation</p>
+        <p className="text-sm font-mono text-[var(--text-main)]">
             Cash = Cash + Current bank accounts + Short-Term, Liquid Securities
-        </Typography>
-        <Typography
-            variant="explanationText"
-            sx={{ fontFamily: "'Times New Roman', Times, 'Segoe Ui', Arial, sans-serif" }}
-        >
+        </p>
+        <p className="text-sm font-mono text-[var(--text-main)]">
             Debt = Short Term Debt + Long Term Debt
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Cash Uptrend is when a company is generating more cash than it is spending (positive cash flow) or raising funds through new investments/financing. This is usually a strong positive sign, indicating stability and resources for future growth.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Cash Downtrend is when a company is burning through its cash reserves faster than it is generating new cash (negative cash flow). This is often a warning sign of operational or liquidity issues, though it could also be a temporary result of a large strategic investment.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Debt Uptrend is wheb a company is taking on more debt. This can be a strategic positive if the money is used to fund profitable expansions, but it becomes a negative if the company cannot manage the increased interest payments or faces difficulty repaying the principal.
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px",}}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 Debt Downtrend is when a company is paying down its existing debt. This is generally a very positive sign, as it reduces financial risk, lowers interest expenses, and improves long-term financial stability.
-            </Typography>
-        </Stack>
-    </Stack>
+            </p>
+        </div>
+    </div>
 )
-
 
 function CashVsDebtGraph({ statement, period }) {
     const [timeRange, setTimeRange] = useState("all");
     const [graphClicked, setGraphClicked] = useState(false);
 
-    const graphRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (graphRef.current && !graphRef.current.contains(event.target)) {
-                setGraphClicked(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
     const reports = useMemo(() => {
         if (!statement) return [];
         if (Array.isArray(statement) && statement.length === 0) return [];
 
-        const filteredReports = filterReports(statement[period === "annually" ? "annualReports" : "quarterlyReports"], timeRange, "fiscalDateEnding");
-        console.log("CashVsDebtGraph: ", filteredReports);
-        return filteredReports;
+        return filterReports(
+            statement[period === "annually" ? "annualReports" : "quarterlyReports"] ?? [],
+            timeRange,
+            "fiscalDateEnding"
+        );
     }, [statement, timeRange, period]);
 
     const cashPercentChange = useMemo(() => {
@@ -118,43 +85,45 @@ function CashVsDebtGraph({ statement, period }) {
     }, [reports]);
 
     if (statement === null) {
-        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }}/>;
+        return (
+            <div className="flex-1">
+                <div className="h-80 w-full min-w-[21rem] animate-pulse rounded-[10px] bg-[rgba(163,177,138,0.25)] sm:h-[25rem]" />
+            </div>
+        );
     }
     if (Array.isArray(statement) && statement.length === 0) {
         return <NoDataGraph />;
     }
 
     return (
-        <Box sx={{ flex: 1 }}>
-            <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                <Stack direction="row" sx={{ alignItems: "center" }}>
-                    <Stack
-                        direction="row"
-                        sx={{ alignItems: "center", flexGrow: 1, justifyContent: "center" }}
-                        spacing={1}
-                    >
-                        <Typography variant="h6" textAlign="center">Cash V Debt</Typography>
+        <div className="flex-1">
+            <GraphCard graphClicked={graphClicked}>
+                <div className="flex flex-wrap items-center gap-3 px-2 pt-2 sm:flex-nowrap">
+                    <div className="flex min-w-0 flex-1 items-center justify-center gap-2 text-center">
+                        <h3 className="text-lg font-semibold text-[var(--text-main)]">Cash V Debt</h3>
                         <Explanation explanation={explanation} />
-                    </Stack>
-                    <Typography
-                        variant="h6"
-                        sx={{
-                            color: "var(--main-hunter-green)",
-                        }}
-                    >
+                    </div>
+                    <div className="ml-auto flex items-center gap-2">
+                        <p className="text-lg font-semibold text-[#588157]">
                         {isNaN(cashPercentChange) ? "N/A" : (cashPercentChange >= 0 ? `+${cashPercentChange}%` : `${cashPercentChange}%`)}
-                    </Typography>
-                    <Typography
-                        variant="h6"
-                        sx={{
-                            color: "var(--main-brick)",
-                        }}
-                    >
+                        </p>
+                        <p className="text-lg font-semibold text-[#bc4749]">
                         {isNaN(debtPercentChange) ? "N/A" : (debtPercentChange >= 0 ? `+${debtPercentChange}%` : `${debtPercentChange}%`)}
-                    </Typography>
-                    <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} />
-                </Stack>
-                <Box onClick={() => {setGraphClicked(true);}} sx={{ width: "100%", height: "100%" }}>
+                        </p>
+                        <TimeRanges timeRange={timeRange} setTimeRange={setTimeRange} />
+                        {graphClicked && (
+                            <button
+                                type="button"
+                                aria-label="Close graph"
+                                onClick={() => setGraphClicked(false)}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[var(--text-main)] transition-colors hover:bg-[var(--main-brick)]"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <div onClick={() => {setGraphClicked(true);}} className="min-h-0 w-full flex-1">
                     <ResponsiveContainer>
                         <BarChart
                             data={reports}
@@ -165,11 +134,11 @@ function CashVsDebtGraph({ statement, period }) {
                             bottom: 5,
                             }}
                         >
-                            <CartesianGrid  strokeDasharray="" vertical={false} stroke="#A3B18A"/>
-                            <XAxis dataKey="fiscalDateEnding" stroke="#344E41" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
+                            <CartesianGrid  strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)"/>
+                            <XAxis dataKey="fiscalDateEnding" stroke="var(--text-main)" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
                             <YAxis 
                                 tickFormatter={(value) => formatToUnits(value)}
-                                stroke="#344E41"
+                                stroke="var(--text-main)"
                                 domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}
                             />
                             <Tooltip formatter={(value) => formatToUnits(value)}/>
@@ -178,9 +147,9 @@ function CashVsDebtGraph({ statement, period }) {
                             <Bar name="debt" dataKey="shortLongTermDebtTotal" stackId="b" fill="#bc4749" activeBar={{ fill: "#B35C5E", stroke: "#DAD7CD", strokeWidth: 2 }}/>
                         </BarChart>
                     </ResponsiveContainer>
-                </Box>
+                </div>
             </GraphCard>
-        </Box>
+        </div>
     )
 }
 

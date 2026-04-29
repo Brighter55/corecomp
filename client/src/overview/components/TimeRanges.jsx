@@ -1,44 +1,26 @@
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-
-
-const menuItemStyle = {
-    color: "#344E41",
-    fontFamily: "'Segoe Ui', Arial, sans-serif",
-}
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 function TimeRanges({ timeRange, setTimeRange }) {
-
-    function handleOptionClicked(event) {
-        setTimeRange(event.target.value);
-
-    }
-
     return (
-        <FormControl sx={{ m: 1, width: 80 }} >
-            <Select
-                value={timeRange}
-                onChange={handleOptionClicked}
-                MenuProps={{
-                    disablePortal: true,
-                }}
-                sx={{ color: "#344E41",
-                    fontFamily: "'Segoe Ui', Arial, sans-serif",
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: "#A3B18A",
-                    },
-                }}
-            >
-                <MenuItem value="YTD" sx={menuItemStyle}>YTD</MenuItem>
-                <MenuItem value="1Y" sx={menuItemStyle}>1Y</MenuItem>
-                <MenuItem value="5Y" sx={menuItemStyle}>5Y</MenuItem>
-                <MenuItem value="10Y" sx={menuItemStyle}>10Y</MenuItem>
-                <MenuItem value="all" sx={menuItemStyle}>all</MenuItem>
-            </Select>
-        </FormControl>
+        <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="h-9 w-[84px] border-[var(--line-muted)] bg-[var(--line-muted)] px-2 text-sm font-medium text-[--text-main]">
+                <SelectValue placeholder="Range" />
+            </SelectTrigger>
+            <SelectContent align="end" className="w-[84px] p-1 bg-[var(--bg-main)]">
+                <SelectItem value="YTD">YTD</SelectItem>
+                <SelectItem value="1Y">1Y</SelectItem>
+                <SelectItem value="5Y">5Y</SelectItem>
+                <SelectItem value="10Y">10Y</SelectItem>
+                <SelectItem value="all">all</SelectItem>
+            </SelectContent>
+        </Select>
     );
 }
 
-
-export default TimeRanges
+export default TimeRanges;

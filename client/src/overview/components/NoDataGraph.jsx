@@ -1,7 +1,5 @@
-import { useState, useRef, useEffect } from "react"
-import GraphCard from "./GraphCard.jsx"
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import { useState, useRef, useEffect } from "react";
+import GraphCard from "./GraphCard.jsx";
 
 function NoDataGraph() {
     const [graphClicked, setGraphClicked] = useState(false);
@@ -14,33 +12,27 @@ function NoDataGraph() {
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
 
     return (
-        <Box sx={{ flex: 1 }}>
+        <div className="flex-1">
             <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                <Box
-                    onClick={() => {setGraphClicked(true);}}
-                    sx={{
-                        width: "100%",
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
+                <button
+                    type="button"
+                    onClick={() => {
+                        setGraphClicked(true);
                     }}
+                    className="flex h-full w-full cursor-pointer items-center justify-center text-lg font-semibold text-[var(--main-pine-teal)]"
                 >
-                    <Typography variant="h6" sx={{ color: "var(--main-pine-teal)" }}>
-                        No data
-                    </Typography>
-                </Box>
+                    No data
+                </button>
             </GraphCard>
-        </Box>
-    )
+        </div>
+    );
 }
 
-export default NoDataGraph
+export default NoDataGraph;

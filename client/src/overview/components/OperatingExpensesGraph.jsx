@@ -1,123 +1,42 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import CustomBar from "./CustomBar.jsx";
-import CustomActiveBar from "./CustomActiveBar.jsx";
-import { useState, useEffect, useRef, useMemo } from "react";
-import { filterReports, getPercentChange, formatToUnits } from "../../helpers/GraphsHelper.js";
-import GraphTitle from "./GraphTitle.jsx";
-import GraphCard from "./GraphCard.jsx";
-import NoDataGraph from "./NoDataGraph.jsx";
-// mui
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import Skeleton from '@mui/material/Skeleton';
+import GeneralBarGraph from "./GeneralBarGraph.jsx";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 export const explanation = (
-    <Stack spacing={2}>
-        <Typography variant="explanationTopic">What is it?</Typography>
-        <Typography variant="explanationText">
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
             Operating expenses are the day-to-day costs required to run the business, excluding direct production costs.
-        </Typography>
-        <Typography variant="explanationTopic">Interpretation</Typography>
-        <Stack direction="row" spacing={1}>
-            <TrendingUpIcon
-                sx={{ color: "green", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 An upward trend indicates rising costs, which can signal growth or inefficiency
-            </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-            <TrendingDownIcon
-                sx={{ color: "red", bgcolor: "white", borderRadius: "10px" }}
-            />
-            <Typography variant="explanationText">
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
                 A downward trend indicates falling costs, suggesting improved efficiency or reduced business activity
-            </Typography>
-        </Stack>
-        <Typography variant="explanationText">
+            </p>
+        </div>
+        <p className="text-sm text-[var(--text-main)]">
                 Note: Growth and Expansion (Positive): If operating expenses are rising, but revenue is growing faster, it suggests the company is investing in growth (e.g., higher marketing spend, opening new locations, or increasing headcount).
                 Inefficiency and Declining Margins (Negative): If expenses rise while revenue is flat or declining, this indicates a dangerous increase in costs that reduces profitability.
-        </Typography>
-        
-    </Stack>
+        </p>
+    </div>
 );
 
 function OperatingExpensesGraph({ statement, period }) {
-    const [timeRange, setTimeRange] = useState("all");
-    const [graphClicked, setGraphClicked] = useState(false);
-
-    const graphRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (graphRef.current && !graphRef.current.contains(event.target)) {
-                setGraphClicked(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
-    const reports = useMemo(() => {
-        if (!statement) return [];
-        if (Array.isArray(statement) && statement.length === 0) return [];
-
-        const filteredReports = filterReports(statement[period === "annually" ? "annualReports" : "quarterlyReports"], timeRange, "fiscalDateEnding");
-        console.log("OperatingExpensesGraph: ", filteredReports);
-        return filteredReports;
-    }, [statement, timeRange, period]);
-
-    const percentChange = useMemo(() => {
-        if (reports.length === 0) {
-            return NaN;
-        }
-        return getPercentChange(reports, "operatingExpenses");
-    }, [reports]);
-
-    if (statement === null) {
-        return <Skeleton variant="rounded" sx={{ flex: 1, height: "20rem" }} />;
-    }
-    if (Array.isArray(statement) && statement.length === 0) {
-        return <NoDataGraph />;
-    }
-
     return (
-        <Box sx={{ flex: 1 }}>
-            <GraphCard ref={graphRef} graphClicked={graphClicked}>
-                <GraphTitle
-                    title="Operating Expenses"
-                    explanation={explanation}
-                    percentChange={percentChange}
-                    timeRange={timeRange}
-                    setTimeRange={setTimeRange}
-                />
-                <Box onClick={() => { setGraphClicked(true); }} sx={{ width: "100%", height: "100%" }}>
-                    <ResponsiveContainer>
-                        <BarChart
-                            data={reports}
-                            margin={{
-                                top: 5,
-                                right: 30,
-                                left: 20,
-                                bottom: 5,
-                            }}
-                        >
-                            <CartesianGrid strokeDasharray="" vertical={false} stroke="#A3B18A" />
-                            <XAxis dataKey="fiscalDateEnding" interval="equidistantPreserveStart" stroke="#344E41" tick={{ fontSize: 12 }} />
-                            <YAxis tickFormatter={(value) => formatToUnits(value)} stroke="#344E41" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]} />
-                            <Tooltip formatter={(value) => formatToUnits(value)} />
-                            <Bar name="Operating Expenses" dataKey="operatingExpenses" shape={<CustomBar></CustomBar>} activeBar={<CustomActiveBar></CustomActiveBar>} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </Box>
-            </GraphCard>
-        </Box>
+        <GeneralBarGraph
+            statement={statement}
+            period={period}
+            title="Operating Expenses"
+            barName="Operating Expenses"
+            dataKey="operatingExpenses"
+            explanation={explanation}
+        />
     );
 }
 

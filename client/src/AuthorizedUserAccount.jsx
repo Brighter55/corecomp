@@ -1,13 +1,8 @@
 import ProductHeader from "./headers/product-header/ProductHeader.jsx"
 import { authenticatedClient } from "./helpers/api.js"
-import StyledButton from "./shared/StyledButton.jsx"
 import { useAuth } from "./auth/AuthProvider.jsx"
-// mui components
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import Stack from "@mui/material/Stack"
 import TwoColumn from "./shared/TwoColumn.jsx";
-import Divider from "@mui/material/Divider";
+import { Button } from "./components/ui/button";
 
 
 function ArthorizedUserAccount() {
@@ -20,46 +15,44 @@ function ArthorizedUserAccount() {
     }
 
     return (
-        <Container maxWidth="lg">
-            <Stack spacing={4}>
-                <ProductHeader />
-                <TwoColumn>
-                    <Typography variant="h4">Username</Typography>
-                    <Typography varaint="h5">{user.username}</Typography>
-                </TwoColumn>
-                <Divider orientation="horizontal" flexItem sx={{ backgroundColor: "var(--main-dust-grey)" }}/>
-                <TwoColumn>
-                    <Typography variant="h4">email</Typography>
-                    <Typography varaint="h5">{user.email}</Typography>
-                </TwoColumn>
-                <Divider orientation="horizontal" flexItem sx={{ backgroundColor: "var(--main-dust-grey)" }}/>
-                <TwoColumn>
-                    <Typography variant="h4">Status</Typography>
-                    <Typography varaint="h5">{user.subscription_status}</Typography>
-                </TwoColumn>
-                <Divider orientation="horizontal" flexItem sx={{ backgroundColor: "var(--main-dust-grey)" }}/>
-                <TwoColumn>
-                    <Typography variant="h4">Period Start</Typography>
-                    <Typography varaint="h5">{user.current_period_start}</Typography>
-                </TwoColumn>
-                <Divider orientation="horizontal" flexItem sx={{ backgroundColor: "var(--main-dust-grey)" }}/>
-                <TwoColumn>
-                    <Typography variant="h4">Period End</Typography>
-                    <Typography varaint="h5">{user.current_period_end}</Typography>
-                </TwoColumn>
-                <Divider orientation="horizontal" flexItem sx={{ backgroundColor: "var(--main-dust-grey)" }}/>
-                <TwoColumn>
-                    <Typography variant="h4">Subscription</Typography>
-                    <StyledButton
-                        onClick={handleManageClicked}
-                        variant="contained"
-                    >
-                        Manage your billing
-                    </StyledButton>
-                </TwoColumn>
-            </Stack>
-
-        </Container>
+        <div className="min-h-screen">
+            <ProductHeader />
+            <div className="mx-auto max-w-6xl px-4 pb-12">
+                <div className="space-y-4">
+                    <TwoColumn>
+                        <h2 className="text-2xl font-semibold">Username</h2>
+                        <p className="text-lg">{user.username}</p>
+                    </TwoColumn>
+                    <hr className="border-[var(--line-muted)]" />
+                    <TwoColumn>
+                        <h2 className="text-2xl font-semibold">email</h2>
+                        <p className="text-lg">{user.email}</p>
+                    </TwoColumn>
+                    <hr className="border-[var(--line-muted)]" />
+                    <TwoColumn>
+                        <h2 className="text-2xl font-semibold">Status</h2>
+                        <p className="text-lg">{user.subscription_status}</p>
+                    </TwoColumn>
+                    <hr className="border-[var(--line-muted)]" />
+                    <TwoColumn>
+                        <h2 className="text-2xl font-semibold">Period Start</h2>
+                        <p className="text-lg">{user.current_period_start}</p>
+                    </TwoColumn>
+                    <hr className="border-[var(--line-muted)]" />
+                    <TwoColumn>
+                        <h2 className="text-2xl font-semibold">Period End</h2>
+                        <p className="text-lg">{user.current_period_end}</p>
+                    </TwoColumn>
+                    <hr className="border-[var(--line-muted)]" />
+                    <TwoColumn>
+                        <h2 className="text-2xl font-semibold">Subscription</h2>
+                        <Button onClick={handleManageClicked} variant="forest">
+                            Manage your billing
+                        </Button>
+                    </TwoColumn>
+                </div>
+            </div>
+        </div>
     )
 }
 
