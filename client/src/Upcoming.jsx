@@ -4,6 +4,18 @@ import Footer from "./shared/Footer.tsx";
 const versions = [
     {
         name: "Current Version",
+        version: "0.7.0",
+        date: "04/29/2026",
+        updates: [
+            "Full migration on frontend code and design from Material UI to Tailwind, shadcn for better UI/UX",
+            "Implement dark/light theme",
+            "Search bar in header",
+            "Implement a close x button to replace outside-click closing on graphs.",
+            "Refactor frontend code to reduce code redundancy",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.6.0",
         date: "04/08/2026",
         updates: [
