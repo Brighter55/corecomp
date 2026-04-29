@@ -48,12 +48,12 @@ function Landing() {
           <div className="space-y-5 text-center">
             <h2 className="text-4xl font-bold md:text-5xl">Pick a plan</h2>
             <p className="mx-auto w-[85%] text-[var(--text-muted)] md:w-[50%]">
-              By far the most affordable stock analysis app
+              Beta test
             </p>
             <div className="mx-auto !mt-20 w-[80%] max-w-sm rounded-[28px] border border-white/10 bg-white/5 p-8 text-left text-[var(--text-main)] shadow-[0_16px_40px_rgba(0,0,0,0.25)]">
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--text-muted)]">Basic</p>
               <div className="mt-4 flex items-baseline gap-3">
-                <span className="text-5xl font-semibold">$7</span>
+                <span className="text-5xl font-semibold">$0</span>
                 <span className="text-sm text-[var(--text-muted)]">/ month</span>
               </div>
               <div className="mt-6 space-y-3 text-sm text-[var(--text-muted)]">
