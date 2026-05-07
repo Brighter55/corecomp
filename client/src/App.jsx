@@ -14,10 +14,12 @@ import ConfirmResetPassword from "./ConfirmResetPassword.jsx"
 import PrivacyPolicy from "./PrivacyPolicy.jsx"
 import TermsOfService from "./TermsOfService.jsx"
 import Upcoming from "./Upcoming.jsx"
+import MaintenanceBanner from "./components/MaintenanceBanner.tsx"
 
 function App() {
   return (
     <BrowserRouter>
+      <MaintenanceBanner />
       <Routes>
         <Route path="/" element={<Landing></Landing>} />
         <Route path="/sign-in" element={<SignIn></SignIn>} />
