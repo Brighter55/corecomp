@@ -38,10 +38,10 @@ function LandingHeader() {
           <Button variant="ghost" onClick={toggleTheme} aria-label="Toggle theme" size="icon">
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
-          <Button variant="ghost" onClick={() => handleNavigate("/sign-in")}>
+          <Button variant="ghost" onClick={() => handleNavigate("/login")}>
             Sign in
           </Button>
-          <Button onClick={() => handleNavigate("/sign-up")}>Sign Up</Button>
+          <Button onClick={() => handleNavigate("/login")}>Sign Up</Button>
         </div>
 
         <div className="ml-auto flex items-center gap-2 md:hidden">
@@ -90,10 +90,10 @@ function LandingHeader() {
           >
             Upcoming
           </a>
-          <Button className="w-full" variant="ghost" onClick={() => handleNavigate("/sign-in")}>
+          <Button className="w-full" variant="ghost" onClick={() => handleNavigate("/login")}>
             Sign in
           </Button>
-          <Button className="w-full" onClick={() => handleNavigate("/sign-up")}>
+          <Button className="w-full" onClick={() => handleNavigate("/login")}>
             Sign Up
           </Button>
         </div>

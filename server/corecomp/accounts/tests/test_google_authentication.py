@@ -11,7 +11,7 @@ url = reverse("google_authentication")
 @pytest.mark.django_db
 @patch("accounts.views.verify_google_token")
 def test_valid_google_sign_in(mock_verify, api_client):
-    user = User.objects.create_user(username="test@gmail.com", is_active=True, email="test@gmail.com", account_type="google")
+    user = User.objects.create_user(username="test@gmail.com", is_active=True, email="test@gmail.com")
     payload = {"JWTToken": "invalid token"}
     mock_verify.return_value = {
         "sub": "123",
@@ -35,7 +35,6 @@ def test_valid_google_sign_up(mock_verify, api_client):
     user = User.objects.get(email="test@gmail.com")
     assert user.email == "test@gmail.com"
     assert user.is_active == True
-    assert user.account_type == "google"
     assert response.status_code == 200
 
 # test for invalid sign up when user provide incorrect JWTToken

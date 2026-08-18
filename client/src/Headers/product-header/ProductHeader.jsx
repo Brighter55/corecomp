@@ -18,7 +18,7 @@ import { useTheme } from "../../theme/ThemeContext.jsx";
 
 function ProductHeader() {
     const navigate = useNavigate();
-    const { setUser } = useAuth();
+    const { user, setUser } = useAuth();
     const { theme, toggleTheme } = useTheme();
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -49,7 +49,7 @@ function ProductHeader() {
         await authenticatedClient({ endpoint: "/accounts/sign-out" });
         handleCloseNavMenu();
         setUser(null);
-        navigate("/sign-in");
+        navigate("/login");
     }
 
     return (
@@ -94,23 +94,38 @@ function ProductHeader() {
                     <Button type="button" variant="ghost" onClick={toggleTheme} aria-label="Toggle theme" size="icon">
                         {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                     </Button>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        className="rounded-xl text-[var(--text-muted)] hover:bg-transparent hover:text-[var(--text-main)]"
-                        onClick={() => {
-                            handleItemClicked("/account");
-                        }}
-                    >
-                        <UserCircle2 className="h-6 w-6" />
-                    </Button>
-                    <Button
-                        onClick={handleSignoutClicked}
-                        variant="closeOut"
-                        className="rounded-xl"
-                    >
-                        Sign Out
-                    </Button>
+                    {user ? (
+                        <>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="rounded-xl text-[var(--text-muted)] hover:bg-transparent hover:text-[var(--text-main)]"
+                                onClick={() => {
+                                    handleItemClicked("/account");
+                                }}
+                            >
+                                <UserCircle2 className="h-6 w-6" />
+                            </Button>
+                            <Button
+                                onClick={handleSignoutClicked}
+                                variant="closeOut"
+                                className="rounded-xl"
+                            >
+                                Sign Out
+                            </Button>
+                        </>
+                    ) : (
+                        <Button
+                            type="button"
+                            variant="forest"
+                            className="rounded-xl"
+                            onClick={() => {
+                                handleItemClicked("/login");
+                            }}
+                        >
+                            Sign In
+                        </Button>
+                    )}
                 </div>
 
                 <div className="ml-auto flex items-center gap-2 md:hidden">
@@ -155,25 +170,40 @@ function ProductHeader() {
                         >
                             Features
                         </Button>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            className="mb-1 flex w-full justify-start rounded-xl text-[var(--text-main)]"
-                            onClick={() => {
-                                handleItemClicked("/account");
-                            }}
-                        >
-                            <UserCircle2 className="mr-2 h-5 w-5" />
-                            Account
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="closeOut"
-                            className="w-full justify-start rounded-xl"
-                            onClick={handleSignoutClicked}
-                        >
-                            Sign Out
-                        </Button>
+                        {user ? (
+                            <>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="mb-1 flex w-full justify-start rounded-xl text-[var(--text-main)]"
+                                    onClick={() => {
+                                        handleItemClicked("/account");
+                                    }}
+                                >
+                                    <UserCircle2 className="mr-2 h-5 w-5" />
+                                    Account
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="closeOut"
+                                    className="w-full justify-start rounded-xl"
+                                    onClick={handleSignoutClicked}
+                                >
+                                    Sign Out
+                                </Button>
+                            </>
+                        ) : (
+                            <Button
+                                type="button"
+                                variant="forest"
+                                className="w-full justify-start rounded-xl"
+                                onClick={() => {
+                                    handleItemClicked("/login");
+                                }}
+                            >
+                                Sign In
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>

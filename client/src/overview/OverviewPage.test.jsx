@@ -1,16 +1,16 @@
 import OverviewPage from "./OverviewPage.tsx";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
-const { mockAuthenticatedClientWithRetry } = vi.hoisted(() => ({
-  mockAuthenticatedClientWithRetry: vi.fn(),
+const { mockNavigate } = vi.hoisted(() => ({
+  mockNavigate: vi.fn(),
 }));
 
-vi.mock("../helpers/api.js", async () => {
-  const actual = await vi.importActual("../helpers/api.js");
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
-    authenticatedClientWithRetry: mockAuthenticatedClientWithRetry,
+    useNavigate: () => mockNavigate,
   };
 });
 
@@ -34,10 +34,6 @@ vi.mock("../shared/SymbolSearch.jsx", () => ({
 describe("OverviewPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAuthenticatedClientWithRetry.mockResolvedValue({
-      status: 200,
-      json: async () => ({ annualReports: [], quarterlyReports: [] }),
-    });
   });
 
   test("loads up properly", () => {
@@ -52,7 +48,7 @@ describe("OverviewPage", () => {
     expect(screen.getByText("Trending Stocks")).toBeInTheDocument();
   });
 
-  test("handles search submit, renders sentiment module, and issues section fetches", async () => {
+  test("handles search submit by navigating to the symbol overview", () => {
     render(
       <MemoryRouter>
         <OverviewPage />
@@ -61,29 +57,6 @@ describe("OverviewPage", () => {
 
     fireEvent.keyDown(screen.getByTestId("symbol-search"), { key: "Enter" });
 
-    await waitFor(() => {
-      expect(screen.getByText("Market Fear Index")).toBeInTheDocument();
-    });
-
-    expect(screen.getByText("Queued for Tune Pass")).toBeInTheDocument();
-    expect(screen.getByText("Company Snapshot")).toBeInTheDocument();
-    expect(screen.getByText("Data Health")).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(mockAuthenticatedClientWithRetry).toHaveBeenCalledTimes(13);
-    });
-
-    const calledEndpoints = mockAuthenticatedClientWithRetry.mock.calls.map((call) => call[0]);
-    expect(calledEndpoints).toEqual(
-      expect.arrayContaining([
-        "/pages/pricing",
-        "/pages/dividends",
-        "/pages/earnings",
-        "/pages/income-statement",
-        "/pages/cash-flow",
-        "/pages/balance-sheet",
-        "/pages/composite",
-      ])
-    );
+    expect(mockNavigate).toHaveBeenCalledWith("/overview/AAPL");
   });
 });

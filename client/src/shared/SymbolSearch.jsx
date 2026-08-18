@@ -54,6 +54,7 @@ export default function SymbolSearch({
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const query = inputValue.trim();
@@ -64,9 +65,11 @@ export default function SymbolSearch({
       setLoading(false);
       setOpen(false);
       setSelectedIndex(-1);
+      setError(null);
       return undefined;
     }
 
+    setError(null);
     setLoading(true);
     const requestId = requestRef.current + 1;
     requestRef.current = requestId;
@@ -78,13 +81,23 @@ export default function SymbolSearch({
           payload: { symbol: query },
         });
         const data = await response.json();
-        const normalizedOptions = Array.isArray(data)
-          ? data.map(normalizeSuggestion).filter(Boolean)
-          : [];
 
         if (requestRef.current !== requestId) {
           return;
         }
+
+        if (!response.ok) {
+          const detail = data && typeof data === "object" ? data.detail : null;
+          setOptions([]);
+          setSelectedIndex(-1);
+          setError(detail === "quota_exceeded" ? "Free search limit reached — sign in to continue." : "Search unavailable right now. Try again.");
+          setOpen(true);
+          return;
+        }
+
+        const normalizedOptions = Array.isArray(data)
+          ? data.map(normalizeSuggestion).filter(Boolean)
+          : [];
 
         setOptions(normalizedOptions);
         setSelectedIndex(-1);
@@ -92,8 +105,9 @@ export default function SymbolSearch({
       } catch {
         if (requestRef.current === requestId) {
           setOptions([]);
-          setOpen(true);
           setSelectedIndex(-1);
+          setError("Search unavailable right now. Try again.");
+          setOpen(true);
         }
       } finally {
         if (requestRef.current === requestId) {
@@ -122,6 +136,7 @@ export default function SymbolSearch({
     setInputValue(nextSymbol);
     setOpen(false);
     setSelectedIndex(-1);
+    setError(null);
     submitSearch(event, nextSymbol);
   }
 
@@ -134,6 +149,7 @@ export default function SymbolSearch({
 
     setOpen(false);
     setSelectedIndex(-1);
+    setError(null);
     submitSearch(event, trimmed);
   }
 
@@ -178,7 +194,7 @@ export default function SymbolSearch({
     }
   }
 
-  const shouldShowDropdown = open && (loading || options.length > 0 || inputValue.trim().length > 0);
+  const shouldShowDropdown = open && (loading || options.length > 0 || !!error || inputValue.trim().length > 0);
 
   return (
     <div className={cn("relative", className)}>
@@ -253,7 +269,8 @@ export default function SymbolSearch({
                 </CommandGroup>
               ) : null}
 
-              {!loading && options.length === 0 ? <CommandEmpty>No matching symbols found.</CommandEmpty> : null}
+              {!loading && error ? <CommandEmpty>{error}</CommandEmpty> : null}
+              {!loading && !error && options.length === 0 ? <CommandEmpty>No matching symbols found.</CommandEmpty> : null}
             </CommandList>
           </Command>
         </PopoverContent>

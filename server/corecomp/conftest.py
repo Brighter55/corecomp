@@ -17,10 +17,11 @@ def authenticated_user():
     user = User.objects.create_user(username="test", password="12345678", is_active=True)
     return user
 
-# represent authorized_user in database
+# represent authorized_user in database (kept for test compatibility;
+# every authenticated user is now fully authorized)
 @pytest.fixture
 def authorized_user():
-    user = User.objects.create_user(username="test", password="12345678", is_active=True, subscription_status="active")
+    user = User.objects.create_user(username="test", password="12345678", is_active=True)
     return user
 
 # represent authenticated request

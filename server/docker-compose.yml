@@ -1,41 +1,16 @@
-version: "3.9"
-
+# Local development only — Redis runs in Docker (no official native Windows
+# build). Postgres runs natively on your machine (Windows service
+# postgresql-x64-17, localhost:5432). Django runs on your machine:
+#     cd server && pipenv run python corecomp/manage.py runserver
+#
+# Production runs on Render with no Docker at all — see render.yaml at the repo root.
 services:
-  web:
-    build: .
-    container_name: corecomp-backend
-    command: >
-      sh -c "
-      python manage.py migrate &&
-      gunicorn corecomp.wsgi:application --bind 0.0.0.0:8000
-      "
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-      - redis
-
-  postgres:
-    image: postgres:15
-    container_name: corecomp-postgres
-    restart: always
-    environment:
-      POSTGRES_DB: corecomp
-      POSTGRES_USER: corecomp
-      POSTGRES_PASSWORD: corecomp
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
   redis:
-    image: redis:7
-    container_name: corecomp-redis
-    restart: always
+    image: redis:7-alpine
     ports:
       - "6379:6379"
+    volumes:
+      - corecomp_redisdata:/data
 
 volumes:
-  postgres_data:
+  corecomp_redisdata:

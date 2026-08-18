@@ -13,13 +13,11 @@ export function AuthProvider({ children }) {
             if (!response.ok) {
                 setUser(null);
                 setLoading(false);
-                console.log("user is null");
                 return;
             }
             const data = await response.json();
             setUser(data);
             setLoading(false);
-            console.log(data);
         }
 
         

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url
 import os
 from datetime import timedelta
 
@@ -30,7 +31,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.getenv("DEBUG") == "True" else False
 
-ALLOWED_HOSTS = [os.getenv("ALLOWED_HOSTS")]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
 
 
 # Application definition
@@ -47,7 +48,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "accounts",
-    "billings",
     "pages",
 ]
 
@@ -109,19 +109,27 @@ FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL")
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv("DATABASE_NAME"),
-        'USER': os.getenv("DATABASE_USER"),
-        'PASSWORD': os.getenv("DATABASE_PASSWORD"),
-        'HOST': os.getenv("DATABASE_HOST"),
-        'PORT': os.getenv("DATABASE_PORT"),
-        'OPTIONS': {
-            'sslmode': os.getenv("SSLMODE"),
-        },
+# Render injects a single DATABASE_URL connection string (via render.yaml
+# fromDatabase). Local development keeps using the individual DATABASE_* vars.
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600),
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv("DATABASE_NAME"),
+            'USER': os.getenv("DATABASE_USER"),
+            'PASSWORD': os.getenv("DATABASE_PASSWORD"),
+            'HOST': os.getenv("DATABASE_HOST"),
+            'PORT': os.getenv("DATABASE_PORT"),
+            'OPTIONS': {
+                'sslmode': os.getenv("SSLMODE"),
+            },
+        }
+    }
 
 
 # Password validation
@@ -190,6 +198,21 @@ CORS_ALLOWED_ORIGINS = expand_origins(cors_origins)
 
 CORS_EXPOSE_HEADERS = [
     "Retry-After",
+]
+
+# django-cors-headers defaults plus the anonymous-session header the
+# frontend sends on every request (AllowAnonymousWithQuota quota tracking).
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "x-anonymous-session",
 ]
 
 CSRF_COOKIE_SAMESITE = os.getenv("CSRF_COOKIE_SAMESITE")

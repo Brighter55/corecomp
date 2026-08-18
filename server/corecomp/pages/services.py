@@ -2,12 +2,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from pages.utils import fetchAlphaVantage
 from dotenv import load_dotenv
+from pathlib import Path
 import os
 import json
 
 
 load_dotenv()
 api_key = os.getenv("ALPHAVANTAGE_API_KEY")
+
+# Mock sample data lives next to this file — resolve relative to the file,
+# not the working directory, so the server runs from anywhere.
+SAMPLES_DIR = Path(__file__).resolve().parent / "statement_samples"
 
 
 class FinancialDataService:
@@ -53,49 +58,49 @@ class FinancialDataService:
            
 class MockFinancialDataService:
     def get_current_price(self, symbol):
-        path = "pages/statement_samples/global_quote.json"
+        path = SAMPLES_DIR / "global_quote.json"
         with open(path, 'r') as file:
             data = json.load(file)
         return data
-    
+
     def get_overview(self, symbol):
-        path = "pages/statement_samples/overview.json"
+        path = SAMPLES_DIR / "overview.json"
         with open(path, 'r') as file:
             data = json.load(file)
         return data
-    
+
     def get_income_statement(self, symbol):
-        path = "pages/statement_samples/income_statement.json"
+        path = SAMPLES_DIR / "income_statement.json"
         with open(path, 'r') as file:
             data = json.load(file)
         return data
-    
+
     def get_cash_flow(self, symbol):
-        path = "pages/statement_samples/cashflow.json"
+        path = SAMPLES_DIR / "cashflow.json"
         with open(path, 'r') as file:
             data = json.load(file)
         return data
-        
+
     def get_balance_sheet(self, symbol):
-        path = "pages/statement_samples/balance_sheet.json"
+        path = SAMPLES_DIR / "balance_sheet.json"
         with open(path, 'r') as file:
             data = json.load(file)
         return data
-    
+
     def get_earnings(self, symbol):
-        path = "pages/statement_samples/earnings.json"
+        path = SAMPLES_DIR / "earnings.json"
         with open(path, 'r') as file:
             data = json.load(file)
         return data
-    
+
     def get_dividends(self, symbol):
-        path = "pages/statement_samples/dividends.json"
+        path = SAMPLES_DIR / "dividends.json"
         with open(path, 'r') as file:
             data = json.load(file)
         return data
-    
+
     def get_pricing(self, symbol):
-        path = "pages/statement_samples/pricing.json"
+        path = SAMPLES_DIR / "pricing.json"
         with open(path, 'r') as file:
             data = json.load(file)
         return data

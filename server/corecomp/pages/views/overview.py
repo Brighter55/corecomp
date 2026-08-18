@@ -1,4 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import get_user_model
@@ -22,7 +23,7 @@ from pages.utils import (
 from django.core.cache import cache
 from django_redis import get_redis_connection
 # permission
-from accounts.permissions import IsSubscribed
+from accounts.permissions import AllowAnonymousWithQuota
 # serializer
 from pages.serializers import SymbolSerializer
 from pages.serializers import CompositeGraphSerializer
@@ -38,7 +39,7 @@ api_key = os.getenv("ALPHAVANTAGE_API_KEY")
 
 
 @api_view(["POST"])
-@permission_classes([IsSubscribed])
+@permission_classes([AllowAnonymousWithQuota])
 def current_price(request):
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
@@ -69,7 +70,7 @@ def current_price(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(["POST"])
-@permission_classes([IsSubscribed])
+@permission_classes([AllowAnonymousWithQuota])
 def info(request):
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
@@ -140,7 +141,7 @@ def info(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
-@permission_classes([IsSubscribed])
+@permission_classes([AllowAnonymousWithQuota])
 def income_statement(request):
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
@@ -174,7 +175,7 @@ def income_statement(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
-@permission_classes([IsSubscribed])
+@permission_classes([AllowAnonymousWithQuota])
 def cash_flow(request):
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
@@ -209,7 +210,7 @@ def cash_flow(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsSubscribed])
+@permission_classes([AllowAnonymousWithQuota])
 def balance_sheet(request):
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
@@ -245,7 +246,7 @@ def balance_sheet(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
-@permission_classes([IsSubscribed])
+@permission_classes([AllowAnonymousWithQuota])
 def earnings(request):
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
@@ -277,7 +278,7 @@ def earnings(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
-@permission_classes([IsSubscribed])
+@permission_classes([AllowAnonymousWithQuota])
 def dividends(request):
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
@@ -309,7 +310,7 @@ def dividends(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
-@permission_classes([IsSubscribed])
+@permission_classes([AllowAnonymousWithQuota])
 def pricing(request):
     serializer = SymbolSerializer(data=request.data)
     if serializer.is_valid():
@@ -340,7 +341,7 @@ def pricing(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
-@permission_classes([IsSubscribed])
+@permission_classes([AllowAnonymousWithQuota])
 def composite(request):
     symbol_serializer = SymbolSerializer(data=request.data)
     composite_graph_serializer = CompositeGraphSerializer(data=request.data)
@@ -439,11 +440,10 @@ def composite(request):
         return Response(data, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
-@permission_classes([IsSubscribed])
+@permission_classes([AllowAny])
 def symbol_search(request):
     identifier = request.data["symbol"]
     include_identifier = Q(name__icontains=identifier) | Q(symbol__icontains=identifier)
     symbols_queryset = Symbol.objects.filter(include_identifier)[:20]
     symbols = list(symbols_queryset.values("name", "symbol"))
-    print(symbols)
     return Response(symbols, status=status.HTTP_200_OK)

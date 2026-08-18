@@ -4,6 +4,7 @@ from unittest.mock import patch
 from pages.models import Symbol
 from rest_framework.response import Response
 from rest_framework import status
+from pathlib import Path
 import json
 
 
@@ -20,7 +21,7 @@ def test_info(mock_get_overview, authorized_client):
     )
     symbol.save()
 
-    path = "pages/statement_samples/overview.json"
+    path = Path(__file__).resolve().parent.parent / "statement_samples" / "overview.json"
     with open(path, 'r') as file:
         return_value = json.load(file)
 

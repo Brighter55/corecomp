@@ -37,17 +37,18 @@ def test_get_price(mock_get_current_price, authorized_client):
     assert response.status_code == 200
     assert response.json()["price"] == "302.47"
 
-# test for authenticated request
+# test for authenticated request — no paywall anymore, missing symbol is a validation error
 @pytest.mark.django_db
 def test_authenticated_user(authenticated_client):
     response = authenticated_client.post(url)
-    assert response.status_code == 403
+    assert response.status_code == 400
+    assert "symbol" in response.json()
 
-# test for unauthenticated request
+# test for anonymous request without a session id — blocked by the quota gate
 @pytest.mark.django_db
 def test_browser(api_client):
     response = api_client.post(url)
-    assert response.status_code == 401
+    assert response.status_code == 403
 
 # test for invalid symbol where the symbol is not in the database
 @pytest.mark.django_db

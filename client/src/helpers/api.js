@@ -1,14 +1,31 @@
 const backendBaseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
 
+// persistent anonymous session id so the server can enforce the free-trial quota
+function getAnonymousSessionId() {
+  let id = localStorage.getItem("corecomp_anonymous_session_id");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("corecomp_anonymous_session_id", id);
+  }
+  return id;
+}
+
+function buildHeaders(extra = {}) {
+  return {
+    "X-Anonymous-Session": getAnonymousSessionId(),
+    ...extra,
+  };
+}
+
 // for protected endpoint
 export async function authenticatedClient({ endpoint = null, payload = null} = {}) {
     if (payload) {
         const response = await fetch(`${backendBaseUrl}${endpoint}`, {
             method: "POST",
-            headers: {
+            headers: buildHeaders({
                 "Content-Type": "application/json",
                 "X-CSRFToken": getCookie("csrftoken"),
-            },
+            }),
             credentials: "include",
             body: JSON.stringify(payload),
         });
@@ -17,6 +34,7 @@ export async function authenticatedClient({ endpoint = null, payload = null} = {
 
     const response = await fetch(`${backendBaseUrl}${endpoint}`, {
         method: "GET",
+        headers: buildHeaders(),
         credentials: "include",
     });
     return response
@@ -26,33 +44,43 @@ export async function authenticatedClientWithRetry(endpoint, payload, isActive, 
     const response = await fetch(`${backendBaseUrl}${endpoint}`, {
         method: "POST",
         credentials: "include",
-        headers: {
+        headers: buildHeaders({
             "Content-Type": "application/json",
             "X-CSRFToken": getCookie("csrftoken"),
-        },
+        }),
         body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-        if (response.status === 403) { /*Unauthorized user, aka, don't have permission to use*/
-            navigate("/account");
+        if (response.status === 403) { /*free-trial quota exceeded*/
+            let detail = null;
+            try {
+                if (typeof response.clone === "function") {
+                    detail = (await response.clone().json()).detail;
+                }
+            } catch {
+                detail = null;
+            }
+            if (detail === "quota_exceeded") {
+                navigate("/login", { state: { message: "You've used all 5 free searches for this month. Sign in to continue." } });
+            } else {
+                navigate("/login");
+            }
         } else if (response.status === 401) {
-            navigate("/sign-up");
+            navigate("/login");
         } else if (response.status == 400) {
             setSymbol("");
         } else if (response.status == 503 && isActive()) {
             // retry again after the "Retry-After"
             const retryAfter = response.headers.get('Retry-After');
-            console.log("retryAfter:", retryAfter);
             if (retryAfter) {
                 const delay = parseInt(retryAfter);
-                console.log("retrying...")
                 await new Promise(resolve => setTimeout(resolve, delay));
                 return authenticatedClientWithRetry(endpoint, payload, isActive, navigate, setSymbol)
             }
         }
     }
-    
+
     return response;
 }
 

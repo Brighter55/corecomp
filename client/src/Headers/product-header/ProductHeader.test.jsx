@@ -42,11 +42,16 @@ describe('ProductHeader', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseAuth.mockReturnValue({
+      user: null,
       setUser: mockSetUser,
     });
   });
 
   test('sign out makes request to server when clicked', async () => {
+    mockUseAuth.mockReturnValue({
+      user: { username: "test", email: "test@gmail.com" },
+      setUser: mockSetUser,
+    });
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -67,7 +72,7 @@ describe('ProductHeader', () => {
 		);
 	});
 
-    expect(mockNavigate).toHaveBeenCalledWith("/sign-in");
+    expect(mockNavigate).toHaveBeenCalledWith("/login");
     expect(mockSetUser).toHaveBeenCalledWith(null);
 
 	fireEvent.click(signOutButtons[1]);
@@ -82,8 +87,17 @@ describe('ProductHeader', () => {
 		);
 	});
 
-    expect(mockNavigate).toHaveBeenCalledWith("/sign-in");
+    expect(mockNavigate).toHaveBeenCalledWith("/login");
     expect(mockSetUser).toHaveBeenCalledWith(null);
+  });
+
+  test('shows sign in button for anonymous users', () => {
+    render(<ProductHeader />);
+
+    const signInButton = screen.getAllByText(/sign in/i)[0];
+    fireEvent.click(signInButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/login");
   });
 
   test('theme toggle button calls toggleTheme', () => {

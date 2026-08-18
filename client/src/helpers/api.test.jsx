@@ -14,7 +14,7 @@ vi.mock("react-router-dom", async () => {
 const payload = {test: "test"};
 
 describe("authenticatedClientWithRetry", () => {
-    
+
     beforeEach(() => {
         vi.clearAllMocks();
     });
@@ -36,7 +36,10 @@ describe("authenticatedClientWithRetry", () => {
             "http://localhost:8000/test/server",
             expect.objectContaining({
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: expect.objectContaining({
+                    "Content-Type": "application/json",
+                    "X-Anonymous-Session": expect.any(String),
+                }),
                 credentials: "include",
                 body: JSON.stringify(payload),
             }),
@@ -45,7 +48,26 @@ describe("authenticatedClientWithRetry", () => {
         expect(await response.json()).toEqual({message: "good"});
     });
 
-    test("should navigate to /account if 403", async () => {
+    test("should navigate to /login if 403 with quota_exceeded", async () => {
+        mockFetch.mockResolvedValueOnce({
+            ok: false,
+            status: 403,
+            clone: () => ({
+                json: async () => ({ detail: "quota_exceeded" }),
+            }),
+        });
+
+        let isActive = true;
+
+        const response = await authenticatedClientWithRetry("/test/server", payload, () => isActive, mockNavigate, mockSetSymbol);
+
+        expect(response.status).toBe(403);
+        expect(mockNavigate).toHaveBeenCalledWith("/login", {
+            state: { message: "You've used all 5 free searches for this month. Sign in to continue." },
+        });
+    });
+
+    test("should navigate to /login if 403 without quota detail", async () => {
         mockFetch.mockResolvedValueOnce({
             ok: false,
             status: 403,
@@ -56,10 +78,10 @@ describe("authenticatedClientWithRetry", () => {
         const response = await authenticatedClientWithRetry("/test/server", payload, () => isActive, mockNavigate, mockSetSymbol);
 
         expect(response.status).toBe(403);
-        expect(mockNavigate).toHaveBeenCalledWith("/account");
+        expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
 
-    test("should navigate to /sign-up if 401", async () => {
+    test("should navigate to /login if 401", async () => {
         mockFetch.mockResolvedValueOnce({
             ok: false,
             status: 401,
@@ -70,7 +92,7 @@ describe("authenticatedClientWithRetry", () => {
         const response = await authenticatedClientWithRetry("/test/server", payload, () => isActive, mockNavigate, mockSetSymbol);
 
         expect(response.status).toBe(401);
-        expect(mockNavigate).toHaveBeenCalledWith("/sign-up");
+        expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
 
     test("should setSymbol if 400", async () => {
