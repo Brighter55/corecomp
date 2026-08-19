@@ -47,8 +47,9 @@ def fetch_wisesheets(endpoint, params):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
     try:
+        # NOTE: the WiseSheets API 404s on trailing slashes (spike-verified)
         response = requests.get(
-            f"{BASE_URL}/{endpoint}/",
+            f"{BASE_URL}/{endpoint}",
             params=params,
             headers={"Authorization": f"Bearer {api_key}"},
             timeout=REQUEST_TIMEOUT,
@@ -207,17 +208,18 @@ INCOME_STATEMENT_SOURCES = {
     "operatingIncome": ["operating_income"],
     "sellingGeneralAndAdministrative": ["selling_general_and_administrative", "selling_general_and_admin"],
     "researchAndDevelopment": ["research_and_development"],
-    "operatingExpenses": ["operating_expenses"],
+    "operatingExpenses": ["total_operating_expenses", "operating_expenses"],
     "interestIncome": ["interest_income"],
     "interestExpense": ["interest_expense"],
     "netInterestIncome": ["net_interest_income", "interest_income_net"],
+    "nonInterestIncome": ["noninterest_income"],
     "depreciation": ["depreciation"],
     "depreciationAndAmortization": ["depreciation_and_amortization"],
-    "incomeBeforeTax": ["income_before_tax", "pretax_income"],
+    "incomeBeforeTax": ["pretax_income", "income_before_tax"],
     "incomeTaxExpense": ["income_tax_expense"],
     "netIncomeFromContinuingOperations": [
-        "net_income_continuing_operations",
         "net_income_from_continuing_operations",
+        "net_income_continuing_operations",
     ],
     "comprehensiveIncomeNetOfTax": ["comprehensive_income_net_of_tax", "comprehensive_income"],
     "ebit": ["ebit", "earnings_before_interest_and_taxes"],
@@ -244,6 +246,7 @@ CASH_FLOW_KEYS = [
 
 CASH_FLOW_SOURCES = {
     "operatingCashflow": [
+        "net_cash_from_operating_activities",
         "operating_cash_flow",
         "net_cash_provided_by_operating_activities",
         "operating_cashflow",
@@ -261,12 +264,14 @@ CASH_FLOW_SOURCES = {
     "changeInInventory": ["change_in_inventory", "inventory_change"],
     "profitLoss": ["profit_loss"],
     "cashflowFromInvestment": [
+        "net_cash_from_investing_activities",
         "cash_from_investing",
         "cash_flow_from_investing_activities",
         "net_cash_used_for_investing_activities",
         "investing_cash_flow",
     ],
     "cashflowFromFinancing": [
+        "net_cash_from_financing_activities",
         "cash_from_financing",
         "cash_flow_from_financing_activities",
         "net_cash_used_provided_by_financing_activities",
@@ -277,11 +282,12 @@ CASH_FLOW_SOURCES = {
         "short_term_debt_repayments",
     ],
     "paymentsForRepurchaseOfCommonStock": [
+        "common_stock_repurchased",
         "stock_repurchases",
         "payments_for_repurchase_of_common_stock",
-        "common_stock_repurchased",
     ],
     "paymentsForRepurchaseOfEquity": [
+        "common_stock_repurchased",
         "stock_repurchases",
         "payments_for_repurchase_of_equity",
     ],
@@ -289,14 +295,14 @@ CASH_FLOW_SOURCES = {
         "preferred_stock_repurchased",
         "payments_for_repurchase_of_preferred_stock",
     ],
-    "dividendPayout": ["dividends_paid", "cash_dividends_paid", "dividend_payout"],
+    "dividendPayout": ["common_dividends_paid", "total_dividends_paid", "dividends_paid"],
     "dividendPayoutCommonStock": [
+        "common_dividends_paid",
+        "total_dividends_paid",
         "dividends_paid",
-        "common_stock_dividends_paid",
-        "dividend_payout_common_stock",
     ],
     "dividendPayoutPreferredStock": [
-        "preferred_stock_dividends_paid",
+        "preferred_dividends_paid",
         "dividend_payout_preferred_stock",
     ],
     "proceedsFromIssuanceOfCommonStock": [
@@ -304,6 +310,7 @@ CASH_FLOW_SOURCES = {
         "common_stock_issued",
     ],
     "proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet": [
+        "long_term_debt_issuance",
         "proceeds_from_issuance_of_long_term_debt",
         "long_term_debt_issued",
     ],
@@ -312,13 +319,14 @@ CASH_FLOW_SOURCES = {
         "preferred_stock_issued",
     ],
     "proceedsFromRepurchaseOfEquity": [
+        "common_stock_repurchased",
         "stock_repurchases",
         "proceeds_from_repurchase_of_equity",
     ],
     "proceedsFromSaleOfTreasuryStock": ["proceeds_from_sale_of_treasury_stock"],
     "changeInCashAndCashEquivalents": [
-        "change_in_cash_and_cash_equivalents",
         "net_change_in_cash",
+        "change_in_cash_and_cash_equivalents",
     ],
     "changeInExchangeRate": [
         "change_in_exchange_rate",
@@ -352,7 +360,7 @@ BALANCE_SHEET_SOURCES = {
     "inventory": ["inventory"],
     "currentNetReceivables": ["net_receivables", "receivables", "current_net_receivables"],
     "totalNonCurrentAssets": ["total_non_current_assets"],
-    "propertyPlantEquipment": ["property_plant_equipment", "net_ppe"],
+    "propertyPlantEquipment": ["property_plant_equipment_net", "property_plant_equipment", "net_ppe"],
     "accumulatedDepreciationAmortizationPPE": ["accumulated_depreciation"],
     "intangibleAssets": ["intangible_assets"],
     "intangibleAssetsExcludingGoodwill": ["intangible_assets_excluding_goodwill"],
@@ -366,29 +374,34 @@ BALANCE_SHEET_SOURCES = {
     "totalCurrentLiabilities": ["total_current_liabilities"],
     "currentAccountsPayable": ["accounts_payable", "current_accounts_payable"],
     "deferredRevenue": ["deferred_revenue"],
-    "currentDebt": ["current_debt"],
-    "currentLongTermDebt": ["current_long_term_debt"],
-    "shortTermDebt": ["short_term_debt"],
+    "currentDebt": ["current_debt", "commercial_paper"],
+    "currentLongTermDebt": ["long_term_debt_current", "current_long_term_debt"],
+    "shortTermDebt": ["commercial_paper", "short_term_debt", "long_term_debt_current"],
     "totalNonCurrentLiabilities": ["total_non_current_liabilities"],
-    "capitalLeaseObligations": ["capital_lease_obligations"],
-    "longTermDebt": ["long_term_debt"],
+    "capitalLeaseObligations": [
+        "capital_lease_obligations_non_current",
+        "capital_lease_obligations_current",
+        "capital_lease_obligations",
+    ],
+    "longTermDebt": ["long_term_debt", "long_term_debt_noncurrent", "capital_lease_obligations_non_current"],
     "longTermDebtNoncurrent": ["long_term_debt_noncurrent", "long_term_debt"],
     "otherCurrentLiabilities": ["other_current_liabilities"],
     "otherNonCurrentLiabilities": ["other_non_current_liabilities"],
     "shortLongTermDebtTotal": ["total_debt", "short_long_term_debt_total"],
     "totalShareholderEquity": [
-        "shareholders_equity",
-        "total_shareholders_equity",
         "total_stockholders_equity",
+        "stockholders_equity",
+        "total_equity",
+        "shareholders_equity",
     ],
     "treasuryStock": ["treasury_stock"],
     "retainedEarnings": ["retained_earnings"],
     "commonStock": ["common_stock"],
     "commonStockSharesOutstanding": [
-        "common_stock_shares_outstanding",
         "shares_outstanding",
-        "weighted_average_shares_outstanding",
-        "shares",
+        "basic_shares_outstanding",
+        "diluted_shares_outstanding",
+        "common_stock_shares_outstanding",
     ],
 }
 
@@ -420,12 +433,44 @@ def _build_delta_map(payload, candidates):
     return deltas
 
 
-def _reports_from_statements(payload, statement_name, av_keys, av_sources):
+def _computed_ebitda(values):
+    """EBITDA isn't a statement line -- derive from operating income + D&A."""
+    operating = _safe_float(_value(values, ["operating_income"]))
+    d_and_a = _safe_float(_value(values, ["depreciation_and_amortization"]))
+    if operating is None or d_and_a is None:
+        return None
+    return str(round(operating + d_and_a, 2))
+
+
+def _computed_total_debt(values):
+    """No total-debt line -- sum the debt components present.
+
+    Short-term borrowings may be reported as commercial_paper or
+    short_term_debt (first present wins, avoids double counting), plus the
+    current portion of long-term debt and long-term debt itself.
+    """
+    short_term = _safe_float(_value(values, ["commercial_paper"]))
+    if short_term is None:
+        short_term = _safe_float(_value(values, ["short_term_debt"]))
+    parts = [
+        short_term,
+        _safe_float(_value(values, ["long_term_debt_current"])),
+        _safe_float(_value(values, ["long_term_debt"])),
+    ]
+    if all(part is None for part in parts):
+        return None
+    return str(round(sum(part for part in parts if part is not None), 2))
+
+
+def _reports_from_statements(payload, statement_name, av_keys, av_sources, computed=None):
     """AV-style report list from one /statements/ payload (one frequency).
 
     Sorted most-recent-first, matching the AV fixtures and the ordering the
-    compute_* functions assume (index i+1 = previous period).
+    compute_* functions assume (index i+1 = previous period). `computed` maps
+    AV keys to fns receiving the normalized metric map, used as fallbacks when
+    no direct line exists.
     """
+    computed = computed or {}
     deltas = {}
     if statement_name == "cash_flow":
         deltas = {
@@ -455,6 +500,12 @@ def _reports_from_statements(payload, statement_name, av_keys, av_sources):
             if report.get(av_key) in (None, "None", "") and period_end in delta_map:
                 report[av_key] = delta_map[period_end] or "None"
 
+        for av_key, compute_fn in computed.items():
+            if report.get(av_key) in (None, "None", ""):
+                computed_value = compute_fn(values)
+                if computed_value is not None:
+                    report[av_key] = computed_value
+
         reports.append(report)
 
     reports.sort(key=lambda r: r["fiscalDateEnding"], reverse=True)
@@ -462,11 +513,13 @@ def _reports_from_statements(payload, statement_name, av_keys, av_sources):
 
 
 def _get_statements(symbol, frequency):
-    params = {"frequency": frequency, "period": "last5y"}
+    # "last5y" is annual-only; quarterly takes "last8q" (spike-verified)
+    period = "last5y" if frequency == "annual" else "last8q"
+    params = {"frequency": frequency, "period": period}
     return fetch_wisesheets(f"statements/{symbol}", params)
 
 
-def get_statements_av(symbol, statement_name, av_keys, av_sources):
+def get_statements_av(symbol, statement_name, av_keys, av_sources, computed=None):
     """AV-shaped {symbol, annualReports, quarterlyReports} for one statement."""
     annual = _upstream(f"statements:{symbol}:annual", lambda: _get_statements(symbol, "annual"))
     quarterly = _upstream(f"statements:{symbol}:quarterly", lambda: _get_statements(symbol, "quarterly"))
@@ -478,8 +531,8 @@ def get_statements_av(symbol, statement_name, av_keys, av_sources):
         return {}
     return {
         "symbol": symbol.upper(),
-        "annualReports": _reports_from_statements(annual, statement_name, av_keys, av_sources),
-        "quarterlyReports": _reports_from_statements(quarterly, statement_name, av_keys, av_sources),
+        "annualReports": _reports_from_statements(annual, statement_name, av_keys, av_sources, computed),
+        "quarterlyReports": _reports_from_statements(quarterly, statement_name, av_keys, av_sources, computed),
     }
 
 
@@ -542,10 +595,12 @@ def get_earnings_av(symbol):
 
 
 def _eod_params(symbol, cursor=None):
-    five_years_ago = (date.today() - timedelta(days=5 * 365)).isoformat()
+    # The free plan caps history at 5 calendar years counted inclusively, so a
+    # 4-year span stays safely inside the window (spike-verified).
+    start = (date.today() - timedelta(days=4 * 365)).isoformat()
     params = {
         "tickers": symbol,
-        "period": f"{five_years_ago}..{date.today().isoformat()}",
+        "period": f"{start}..{date.today().isoformat()}",
         "fields": "close,adjClose",
         "limit": 10000,
     }
@@ -779,6 +834,9 @@ def get_overview_av(symbol):
         return profile
     if not profile:
         return {}  # unknown symbol -> info view 400
+    profile = profile.get("data") or {}  # /companies/{ticker} wraps in "data"
+    if not profile:
+        return {}
 
     live = get_live_row(symbol)
     if isinstance(live, Response):
@@ -795,12 +853,14 @@ def get_overview_av(symbol):
         "income_statement",
         INCOME_STATEMENT_KEYS,
         INCOME_STATEMENT_SOURCES,
+        computed={"ebitda": _computed_ebitda},
     )
     balance = _reports_from_statements(
         quarterly_payload if quarterly_payload else {},
         "balance_sheet",
         BALANCE_SHEET_KEYS,
         BALANCE_SHEET_SOURCES,
+        computed={"shortLongTermDebtTotal": _computed_total_debt},
     )
 
     dividends_av = get_dividends_av(symbol)

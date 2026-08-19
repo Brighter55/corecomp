@@ -176,6 +176,20 @@ class TestFetchWisesheets:
 
 
 class TestStatementMapping:
+    def test_periods_per_frequency(self, monkeypatch):
+        monkeypatch.setenv("WISESHEETS_API_KEY", "wsh_live_test")
+        seen = {}
+
+        def fake_fetch(endpoint, params):
+            seen[params.get("frequency")] = params.get("period")
+            return _statements_payload([])
+
+        monkeypatch.setattr(wisesheets, "fetch_wisesheets", fake_fetch)
+        wisesheets._get_statements("TEST", "annual")
+        wisesheets._get_statements("TEST", "quarterly")
+        # spike-verified: last5y is annual-only, quarterly takes last8q
+        assert seen == {"annual": "last5y", "quarterly": "last8q"}
+
     def test_maps_all_keys_and_sorts_most_recent_first(self, monkeypatch):
         monkeypatch.setenv("WISESHEETS_API_KEY", "wsh_live_test")
 
@@ -261,6 +275,51 @@ class TestStatementMapping:
         assert annual[0]["capitalExpenditures"] == "100"
         assert annual[0]["cashflowFromInvestment"] == "-150"
         assert annual[0]["dividendPayoutCommonStock"] == "30"
+
+    def test_ebitda_computed_from_operating_income_plus_da(self, monkeypatch):
+        monkeypatch.setenv("WISESHEETS_API_KEY", "wsh_live_test")
+
+        def fake_fetch(endpoint, params):
+            if "annual" in params.get("frequency", ""):
+                return _statements_payload([
+                    _statement_entry("2024-12-31", {
+                        "income_statement": {"lines": _income_lines(ebitda=None)},  # no ebitda line
+                    }),
+                ])
+            return _statements_payload([])
+
+        monkeypatch.setattr(wisesheets, "fetch_wisesheets", fake_fetch)
+        result = wisesheets.get_statements_av(
+            "TEST", "income_statement",
+            wisesheets.INCOME_STATEMENT_KEYS, wisesheets.INCOME_STATEMENT_SOURCES,
+            computed={"ebitda": wisesheets._computed_ebitda},
+        )
+        # operating_income 250 + depreciation_and_amortization 50
+        assert result["annualReports"][0]["ebitda"] == "300.0"
+
+    def test_total_debt_computed_from_components(self, monkeypatch):
+        monkeypatch.setenv("WISESHEETS_API_KEY", "wsh_live_test")
+
+        def fake_fetch(endpoint, params):
+            if "annual" in params.get("frequency", ""):
+                return _statements_payload([
+                    _statement_entry("2024-12-31", {
+                        "balance_sheet": {"lines": _balance_lines(
+                            # no total_debt line; components present
+                            total_debt=None,
+                        )},
+                    }),
+                ])
+            return _statements_payload([])
+
+        monkeypatch.setattr(wisesheets, "fetch_wisesheets", fake_fetch)
+        result = wisesheets.get_statements_av(
+            "TEST", "balance_sheet",
+            wisesheets.BALANCE_SHEET_KEYS, wisesheets.BALANCE_SHEET_SOURCES,
+            computed={"shortLongTermDebtTotal": wisesheets._computed_total_debt},
+        )
+        # balance lines: short_term_debt 200 + long_term_debt 600 = 800
+        assert result["annualReports"][0]["shortLongTermDebtTotal"] == "800.0"
 
     def test_unknown_symbol_returns_empty(self, monkeypatch):
         monkeypatch.setenv("WISESHEETS_API_KEY", "wsh_live_test")
@@ -455,11 +514,11 @@ def _quarterly_payload():
 
 def _overview_fake_fetch(endpoint, params):
     if endpoint.startswith("companies/"):
-        return {
+        return {"data": {
             "ticker": "TEST", "cik": "0000000001", "name": "Test Corp",
             "exchange": "NYSE", "sic": "3571", "sicDescription": "Electronic Computers",
             "fiscalYearEnd": "0926",
-        }
+        }}
     if endpoint == "prices/live":
         return {"data": [{
             "symbol": "TEST", "price": "100", "marketCap": "1000000",
@@ -541,7 +600,7 @@ class TestOverview:
 
         def sparse_fetch(endpoint, params):
             if endpoint.startswith("companies/"):
-                return {"ticker": "TEST", "name": "Test Corp", "exchange": "NYSE"}
+                return {"data": {"ticker": "TEST", "name": "Test Corp", "exchange": "NYSE"}}
             if endpoint == "prices/live":
                 return {"data": [{"symbol": "TEST", "price": "100"}]}  # no marketCap/pe
             if endpoint == "dividends":

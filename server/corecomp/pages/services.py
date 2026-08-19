@@ -37,6 +37,7 @@ class FinancialDataService:
         return wisesheets.get_statements_av(
             symbol, "income_statement",
             wisesheets.INCOME_STATEMENT_KEYS, wisesheets.INCOME_STATEMENT_SOURCES,
+            computed={"ebitda": wisesheets._computed_ebitda},
         )
 
     def get_cash_flow(self, symbol):
@@ -49,6 +50,7 @@ class FinancialDataService:
         return wisesheets.get_statements_av(
             symbol, "balance_sheet",
             wisesheets.BALANCE_SHEET_KEYS, wisesheets.BALANCE_SHEET_SOURCES,
+            computed={"shortLongTermDebtTotal": wisesheets._computed_total_debt},
         )
 
     def get_earnings(self, symbol):
