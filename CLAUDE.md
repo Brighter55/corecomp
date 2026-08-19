@@ -2,9 +2,11 @@
 
 Stock fundamentals visualization app (React + Django). Business model: **free, no subscriptions** (Stripe removed). **Google-only login**; public users get **5 free symbol views/month**, logged-in users unlimited. Deployment is **Render only — no Docker in production**.
 
+Data provider: **WiseSheets API** (free plan: 5,000 req/month, 5y history, SEC EDGAR-sourced). All Alpha Vantage→WiseSheets shape mapping lives in `server/corecomp/pages/wisesheets.py`; `FinancialDataService` (pages/services.py) returns AV-shaped dicts so views/computators stay provider-agnostic.
+
 ## Repo layout
 
-- `server/` — Django 5.2 + DRF + SimpleJWT (httpOnly-cookie auth), PostgreSQL, Redis, Alpha Vantage. Python managed with **pipenv** (`Pipfile` + `requirements.txt`).
+- `server/` — Django 5.2 + DRF + SimpleJWT (httpOnly-cookie auth), PostgreSQL, Redis, WiseSheets. Python managed with **pipenv** (`Pipfile` + `requirements.txt`).
 - `client/` — React 19 + Vite 7 + Tailwind 3 + shadcn/ui + Recharts. Mixed `.jsx`/`.tsx`. npm.
 - `render.yaml` — Render blueprint (API, static frontend, managed Postgres, Key-Value/Redis).
 
@@ -15,7 +17,7 @@ Stock fundamentals visualization app (React + Django). Business model: **free, n
 - **Backend**: `pipenv run python corecomp/manage.py runserver` (from `server/`) → :8000
 - **Frontend**: `npm run dev` (from `client/`) → :5173
 - To bring up everything: run the `/run-app` skill.
-- `server/.env` is gitignored; `MOCK=True` locally (mock Alpha Vantage data).
+- `server/.env` is gitignored; `MOCK=True` locally (mock data fixtures). `WISESHEETS_API_KEY` is set in `.env` (dev) and the Render dashboard (prod); `MOCK=False` for live data.
 
 ## Auth & anonymous quota (core of the free model)
 

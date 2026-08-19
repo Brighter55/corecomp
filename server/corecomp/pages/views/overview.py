@@ -3,8 +3,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from dotenv import load_dotenv
-import os
 from pages.utils import (
     annotate_profit_margin,
     annotate_free_cash_flow,
@@ -33,9 +31,7 @@ from pages.models import Symbol
 # services
 from services import financial_data_service
 
-load_dotenv()
 User = get_user_model() # Get model listed in settings.py: AUTH_USER_MODEL = 'api.CustomUser'
-api_key = os.getenv("ALPHAVANTAGE_API_KEY")
 
 
 @api_view(["POST"])
@@ -87,27 +83,22 @@ def info(request):
         if isinstance(data, Response):
             return data
 
-        # check if alphavantage returns {} for invalid symbol or symbol with no data
+        # check if the data provider returns {} for invalid symbol or symbol with no data
         if not data:
             return Response({"error": "invalid symbol"}, status=status.HTTP_400_BAD_REQUEST)
 
         report = {
-            "description": data["Description"],
             "sector": data["Sector"],
             "industry": data["Industry"],
             "country": data["Country"],
             "exchange": data["Exchange"],
-            "website": data["OfficialSite"],
-            "address": data["Address"],
             "fiscalYearEnd": data["FiscalYearEnd"],
             "marketCapitalization": data["MarketCapitalization"],
             "peRatio": data["PERatio"],
-            "pegRatio": data["PEGRatio"],
             "priceToSalesRatioTtm": data["PriceToSalesRatioTTM"],
             "priceToBookRatio": data["PriceToBookRatio"],
             "evToRevenue": data["EVToRevenue"],
             "evToEbitda": data["EVToEBITDA"],
-            "beta": data["Beta"],
             "sharesOutstanding": data["SharesOutstanding"],
             "ebitda": data["EBITDA"],
             "eps": data["EPS"],
@@ -129,12 +120,6 @@ def info(request):
             "dividendYield": data["DividendYield"],
             "dividendDate": data["DividendDate"],
             "exDividendDate": data["ExDividendDate"],
-            "analystTargetPrice": data["AnalystTargetPrice"],
-            "analystRatingStrongBuy": data["AnalystRatingStrongBuy"],
-            "analystRatingBuy": data["AnalystRatingBuy"],
-            "analystRatingHold": data["AnalystRatingHold"],
-            "analystRatingSell": data["AnalystRatingSell"],
-            "analystRatingStrongSell": data["AnalystRatingStrongSell"],
         }
         cache.set(key, report, timeout=604800)
         return Response(report, status=status.HTTP_200_OK)
@@ -330,9 +315,12 @@ def pricing(request):
 
             data = financial_data_service.get_pricing(symbol)
 
-            if isinstance(data, Response): # Alpha Vantage returns invalid symbol error as "Error Message" for pricing endpoint
-                return data            
-            
+            if isinstance(data, Response):
+                return data
+
+            if not data:
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
             data = transform_pricing(data)
 
             cache.set(key, data, timeout=86400)

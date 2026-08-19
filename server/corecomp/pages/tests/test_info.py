@@ -30,22 +30,17 @@ def test_info(mock_get_overview, authorized_client):
     response = authorized_client.post(url, payload, format="json")
     assert response.status_code == 200
     assert response.json() == {
-        "description": return_value["Description"],
         "sector": return_value["Sector"],
         "industry": return_value["Industry"],
         "country": return_value["Country"],
         "exchange": return_value["Exchange"],
-        "website": return_value["OfficialSite"],
-        "address": return_value["Address"],
         "fiscalYearEnd": return_value["FiscalYearEnd"],
         "marketCapitalization": return_value["MarketCapitalization"],
         "peRatio": return_value["PERatio"],
-        "pegRatio": return_value["PEGRatio"],
         "priceToSalesRatioTtm": return_value["PriceToSalesRatioTTM"],
         "priceToBookRatio": return_value["PriceToBookRatio"],
         "evToRevenue": return_value["EVToRevenue"],
         "evToEbitda": return_value["EVToEBITDA"],
-        "beta": return_value["Beta"],
         "sharesOutstanding": return_value["SharesOutstanding"],
         "ebitda": return_value["EBITDA"],
         "eps": return_value["EPS"],
@@ -67,12 +62,6 @@ def test_info(mock_get_overview, authorized_client):
         "dividendYield": return_value["DividendYield"],
         "dividendDate": return_value["DividendDate"],
         "exDividendDate": return_value["ExDividendDate"],
-        "analystTargetPrice": return_value["AnalystTargetPrice"],
-        "analystRatingStrongBuy": return_value["AnalystRatingStrongBuy"],
-        "analystRatingBuy": return_value["AnalystRatingBuy"],
-        "analystRatingHold": return_value["AnalystRatingHold"],
-        "analystRatingSell": return_value["AnalystRatingSell"],
-        "analystRatingStrongSell": return_value["AnalystRatingStrongSell"],
     }
 
 # test for invalid symbol where the symbol is not in the database

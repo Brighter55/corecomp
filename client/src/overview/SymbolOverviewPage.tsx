@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { PieChart, Pie, Sector, ResponsiveContainer, Tooltip, Label, Cell } from "recharts";
 import ProductHeader from "../headers/product-header/ProductHeader.jsx";
 import { authenticatedClientWithRetry } from "../helpers/api.js";
 import { StockHeaderProvider } from "./StockHeaderContext.jsx";
@@ -78,11 +77,6 @@ function formatValue(value: string | number | null | undefined) {
   return value ?? "--";
 }
 
-function parseCount(value: string | number | null | undefined) {
-  const parsed = Number.parseInt(String(value ?? ""), 10);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function SymbolOverviewPage() {
   const navigate = useNavigate();
   const { symbol } = useParams();
@@ -106,7 +100,6 @@ function SymbolOverviewPage() {
 
   const [heroData, setHeroData] = useState<HeroState>(null);
   const [infoData, setInfoData] = useState<InfoState>(null);
-  const [hoveredAnalystLabel, setHoveredAnalystLabel] = useState<string | null>(null);
 
   const decodedSymbol = useMemo(() => {
     if (!symbol) {
@@ -380,8 +373,6 @@ function SymbolOverviewPage() {
     { label: "Industry", value: infoData?.industry },
     { label: "Country", value: infoData?.country },
     { label: "Exchange", value: infoData?.exchange },
-    { label: "Website", value: infoData?.website },
-    { label: "Address", value: infoData?.address },
     { label: "Fiscal Year End", value: infoData?.fiscalYearEnd },
   ];
 
@@ -392,12 +383,10 @@ function SymbolOverviewPage() {
         { label: "Market Cap", value: infoData?.marketCapitalization },
         { label: "Shares Outstanding", value: infoData?.sharesOutstanding },
         { label: "PE Ratio", value: infoData?.peRatio },
-        { label: "PEG Ratio", value: infoData?.pegRatio },
         { label: "Price To Sales Ratio TTM", value: infoData?.priceToSalesRatioTtm },
         { label: "Price To Book Ratio", value: infoData?.priceToBookRatio },
         { label: "EV To Revenue", value: infoData?.evToRevenue },
         { label: "EV To EBITDA", value: infoData?.evToEbitda },
-        { label: "Beta", value: infoData?.beta },
       ],
     },
     {
@@ -446,29 +435,6 @@ function SymbolOverviewPage() {
     },
   ];
 
-  const analystRows = [
-    { label: "Strong Buy", value: parseCount(infoData?.analystRatingStrongBuy), color: "#36453B" },
-    { label: "Buy", value: parseCount(infoData?.analystRatingBuy), color: "#5F865F" },
-    { label: "Hold", value: parseCount(infoData?.analystRatingHold), color: "#D7DBD5" },
-    { label: "Sell", value: parseCount(infoData?.analystRatingSell), color: "#9E2F31" },
-    { label: "Strong Sell", value: parseCount(infoData?.analystRatingStrongSell), color: "#6B2D2D" },
-  ];
-  const totalAnalysts = analystRows.reduce((total, row) => total + row.value, 0);
-  const activeAnalystIndex = useMemo(
-    () => (hoveredAnalystLabel ? analystRows.findIndex((item) => item.label === hoveredAnalystLabel) : -1),
-    [analystRows, hoveredAnalystLabel]
-  );
-  const activeAnalyst = activeAnalystIndex >= 0 ? analystRows[activeAnalystIndex] : null;
-
-  const betaNumber = Number.parseFloat(String(infoData?.beta ?? ""));
-  const hasBeta = Number.isFinite(betaNumber);
-  const clampedBeta = hasBeta ? Math.max(-1, Math.min(3, betaNumber)) : 0;
-  const betaProgress = ((clampedBeta + 1) / 4) * 100;
-
-  const renderPieActiveShape = ({ outerRadius = 0, ...props }: { outerRadius?: number } & Record<string, unknown>) => (
-    <Sector {...props} outerRadius={outerRadius + 10} />
-  );
-
   return (
     <div className="min-h-screen pb-10">
       <ProductHeader />
@@ -514,33 +480,15 @@ function SymbolOverviewPage() {
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {aboutRows.map((row) => {
-                const isWebsite = row.label === "Website";
                 const value = formatValue(row.value);
                 return (
                   <div key={row.label} className="rounded-md border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] p-3 backdrop-blur-md">
                     <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-muted)]">{row.label}</p>
-                    {isWebsite && row.value ? (
-                      <a
-                        href={String(row.value)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="break-all text-sm font-medium text-[var(--text-main)] underline-offset-4 hover:underline"
-                      >
-                        {value}
-                      </a>
-                    ) : (
-                      <p className="break-words text-sm font-medium text-[var(--text-main)]">{value}</p>
-                    )}
+                    <p className="break-words text-sm font-medium text-[var(--text-main)]">{value}</p>
                   </div>
                 );
               })}
             </div>
-
-            <Card className="border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] text-[var(--text-main)] backdrop-blur-md">
-              <CardContent className="pt-6">
-                <p className="text-sm leading-6 sm:text-base">{formatValue(infoData?.description)}</p>
-              </CardContent>
-            </Card>
 
             <div className="grid gap-4 lg:grid-cols-2">
               {sections.map((section) => (
@@ -561,123 +509,6 @@ function SymbolOverviewPage() {
                   </CardContent>
                 </Card>
               ))}
-            </div>
-
-            <div className="grid gap-4 lg:grid-cols-2">
-              <Card className="border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] text-[var(--text-main)] backdrop-blur-md">
-                <CardHeader>
-                  <CardTitle className="text-center text-xl">Ratings by {totalAnalysts} analysts</CardTitle>
-                  <p className="text-center text-sm text-[var(--text-muted)]">Target Price: {formatValue(infoData?.analystTargetPrice)}</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-
-                  <div className="grid gap-4 md:grid-cols-[1.05fr_0.95fr] md:items-center">
-                    <div className="mx-auto h-[280px] w-full max-w-[320px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Tooltip
-                            formatter={(value: number) => [`${value}`, "Analysts"]}
-                            contentStyle={{
-                              borderRadius: "0.75rem",
-                              border: "1px solid rgba(218,215,205,0.22)",
-                              backgroundColor: "var(--bg-main)",
-                            }}
-                            itemStyle={{ color: 'var(--text-main)' }}
-                          />
-                          <Pie
-                            data={analystRows}
-                            dataKey="value"
-                            nameKey="label"
-                            innerRadius={58}
-                            outerRadius={92}
-                            stroke="rgba(255,255,255,0.12)"
-                            strokeWidth={3}
-                            activeShape={renderPieActiveShape}
-                            isAnimationActive={true}
-                            animationDuration={450}
-                            animationEasing="ease-in-out"
-                            onMouseEnter={(_, index) => setHoveredAnalystLabel(analystRows[index]?.label ?? null)}
-                            onMouseLeave={() => setHoveredAnalystLabel(null)}
-                          >
-                            {analystRows.map((entry) => (
-                              <Cell key={entry.label} fill={entry.color} />
-                            ))}
-                            <Label
-                              content={({ viewBox }) => {
-                                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                                  return (
-                                    <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                                      <tspan x={viewBox.cx} y={viewBox.cy} className="fill-[var(--text-main)] text-3xl font-semibold">
-                                        {activeAnalyst?.value ?? totalAnalysts}
-                                      </tspan>
-                                      <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 24} className="fill-[var(--text-muted)] text-xs">
-                                        {activeAnalyst?.label ?? "Total Analysts"}
-                                      </tspan>
-                                    </text>
-                                  );
-                                }
-                                return null;
-                              }}
-                            />
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-
-                    <div className="space-y-2">
-                      {analystRows.map((row) => {
-                        const percent = totalAnalysts > 0 ? (row.value / totalAnalysts) * 100 : 0;
-                        const isActive = row.label === activeAnalyst?.label;
-                        return (
-                          <button
-                            key={row.label}
-                            type="button"
-                            className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm transition ${
-                              isActive
-                                ? "border-[var(--main-dry-sage)] bg-[rgba(163,177,138,0.2)]"
-                                : "border-[var(--line-muted)] bg-[rgba(218,215,205,0.04)] hover:bg-[rgba(218,215,205,0.09)]"
-                            }`}
-                          >
-                            <span className="flex items-center gap-2">
-                              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: row.color }} />
-                              {row.label}
-                            </span>
-                            <span className="text-[var(--text-muted)]">
-                              {row.value} ({percent.toFixed(1)}%)
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] text-[var(--text-main)] backdrop-blur-md">
-                <CardHeader>
-                  <CardTitle className="text-center text-xl">Beta Coefficient</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-center text-4xl font-semibold">{hasBeta ? betaNumber.toFixed(2) : "--"}</p>
-                  <div className="space-y-2">
-                    <div className="relative h-3 rounded-full bg-gradient-to-r from-blue-400 via-[var(--main-dry-sage)] to-red-500">
-                      <div
-                        className="absolute top-1/2 h-5 w-0.5 -translate-y-1/2 bg-[var(--text-main)]"
-                        style={{ left: `calc(${betaProgress}% - 1px)` }}
-                      />
-                    </div>
-                    <div className="flex justify-between text-xs text-[var(--text-muted)]">
-                      <span>-1</span>
-                      <span>1</span>
-                      <span>3</span>
-                    </div>
-                  </div>
-                  <div className="space-y-1 text-sm text-[var(--text-muted)]">
-                    <p>Beta measures a stock&apos;s sensitivity relative to the broader market.</p>
-                    <p>Below 1 is less volatile, above 1 is more volatile, and below 0 can move opposite the market.</p>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </section>
 

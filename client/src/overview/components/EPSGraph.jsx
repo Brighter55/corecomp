@@ -56,46 +56,6 @@ function EPSGraph({ statement, period }) {
     }, [reports]);
 
 
-    /*CustomTooltip*/
-    function CustomTooltip(props) {
-        const report = {
-            color: "black",
-        };
-
-        const {active, payload, label} = props;
-        const isVisible = active && payload && payload.length;
-        return (
-            <div style={{ visibility: isVisible ? 'visible' : 'hidden',
-                backgroundColor: "white",
-                padding: "10px",
-            }}>
-                {isVisible && (
-                    <>
-                        <p>{`Year: ${label}`}</p>
-                        <p style={report}>{`${payload[1].name}: ${payload[1].value}`}</p>
-                        <p style={report}>{`${payload[0].name}: ${payload[0].value}`}</p>
-                        <p style={report}>
-                            {payload[0].payload.surprisePercentage >= 0 ? "beat by" : "missed by"}: 
-                            <span style={ payload[0].payload.surprisePercentage >= 0 ? {color: "green"} : {color: "red"} }>{parseFloat(payload[0].payload.surprisePercentage).toFixed(2)}%</span>
-                        </p>
-                    </>
-                )}
-            </div>
-        );
-    }
-
-    function CustomDot(props) {
-        const { cx, cy, stroke, payload, value } = props;
-        const color = payload.surprisePercentage >= 0 ? "#588157" : "#bc4749";
-        return <circle cx={cx} cy={cy} payload={payload} value={value} fill={color} r={5}></circle>
-    }
-
-    function CustomActiveDot(props) {
-        const { cx, cy, stroke, payload, value } = props;
-        const color = payload.surprisePercentage >= 0 ? "#588157" : "#bc4749";
-        return <circle cx={cx} cy={cy} stroke={stroke} payload={payload} value={value} fill={color} r={8} strokeWidth={1}></circle>
-    }
-
     if (statement === null) {
         return (
             <div className="flex-1">
@@ -134,10 +94,9 @@ function EPSGraph({ statement, period }) {
                             <CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)"/>
                             <XAxis dataKey="fiscalDateEnding" stroke="var(--text-main)" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
                             <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="var(--text-main)" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
-                            <Tooltip content={<CustomTooltip></CustomTooltip>} />
+                            <Tooltip formatter={(value) => `$${value}`}/>
                             <Legend />
-                            <Line name="estimated EPS" type="monotone" dataKey="estimatedEPS" stroke="grey" strokeWidth={0} dot={{ fill: "grey", fillOpacity: 0.3, r: 5}} activeDot={{ r: 8, strokeWidth: 1}} legendType="circle"/>
-                            <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={<CustomDot></CustomDot>} activeDot={<CustomActiveDot></CustomActiveDot>} legendType="circle" />
+                            <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>

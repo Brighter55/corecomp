@@ -1,14 +1,12 @@
 from rest_framework.response import Response
 from rest_framework import status
-from pages.utils import fetchAlphaVantage
 from dotenv import load_dotenv
 from pathlib import Path
-import os
 import json
+from pages import wisesheets
 
 
 load_dotenv()
-api_key = os.getenv("ALPHAVANTAGE_API_KEY")
 
 # Mock sample data lives next to this file — resolve relative to the file,
 # not the working directory, so the server runs from anywhere.
@@ -16,46 +14,52 @@ SAMPLES_DIR = Path(__file__).resolve().parent / "statement_samples"
 
 
 class FinancialDataService:
+    """Live data provider backed by the WiseSheets API.
+
+    Every method returns an Alpha Vantage-shaped dict (the contract the views,
+    annotators and computators in pages/utils.py consume) or a DRF Response for
+    errors. The mapping from WiseSheets responses lives in pages/wisesheets.py.
+    """
+
     def get_current_price(self, symbol):
-        url = f'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={api_key}'
-        data = fetchAlphaVantage(url) # --> dict or Response object
-        return data
-    
+        live = wisesheets.get_live_row(symbol)
+        if isinstance(live, Response):
+            return live
+        price = live.get("price")
+        if not price:
+            return {"Global Quote": {}}  # invalid symbol -> view 400
+        return {"Global Quote": {"05. price": price}}
+
     def get_overview(self, symbol):
-        url = f'https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}'
-        data = fetchAlphaVantage(url)
-        return data
-    
+        return wisesheets.get_overview_av(symbol)
+
     def get_income_statement(self, symbol):
-        url = f"https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol={symbol}&apikey={api_key}"
-        data = fetchAlphaVantage(url)
-        return data
-    
+        return wisesheets.get_statements_av(
+            symbol, "income_statement",
+            wisesheets.INCOME_STATEMENT_KEYS, wisesheets.INCOME_STATEMENT_SOURCES,
+        )
+
     def get_cash_flow(self, symbol):
-        url = f"https://www.alphavantage.co/query?function=CASH_FLOW&symbol={symbol}&apikey={api_key}"
-        data = fetchAlphaVantage(url)
-        return data
-    
+        return wisesheets.get_statements_av(
+            symbol, "cash_flow",
+            wisesheets.CASH_FLOW_KEYS, wisesheets.CASH_FLOW_SOURCES,
+        )
+
     def get_balance_sheet(self, symbol):
-        url = f"https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol={symbol}&apikey={api_key}"
-        data = fetchAlphaVantage(url)
-        return data
-    
+        return wisesheets.get_statements_av(
+            symbol, "balance_sheet",
+            wisesheets.BALANCE_SHEET_KEYS, wisesheets.BALANCE_SHEET_SOURCES,
+        )
+
     def get_earnings(self, symbol):
-        url = f"https://www.alphavantage.co/query?function=EARNINGS&symbol={symbol}&apikey={api_key}"
-        data = fetchAlphaVantage(url)
-        return data
-    
+        return wisesheets.get_earnings_av(symbol)
+
     def get_dividends(self, symbol):
-        url = f"https://www.alphavantage.co/query?function=DIVIDENDS&symbol={symbol}&apikey={api_key}"
-        data = fetchAlphaVantage(url)
-        return data
-    
+        return wisesheets.get_dividends_av(symbol)
+
     def get_pricing(self, symbol):
-        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY_ADJUSTED&symbol={symbol}&apikey={api_key}"
-        data = fetchAlphaVantage(url)
-        return data
-           
+        return wisesheets.get_pricing_av(symbol)
+
 class MockFinancialDataService:
     def get_current_price(self, symbol):
         path = SAMPLES_DIR / "global_quote.json"
@@ -104,7 +108,7 @@ class MockFinancialDataService:
         with open(path, 'r') as file:
             data = json.load(file)
         return data
-    
+
     def get_rate_limit_error(self):
         # invalid case 503 rate limit
         return Response(
@@ -112,7 +116,7 @@ class MockFinancialDataService:
             status=status.HTTP_503_SERVICE_UNAVAILABLE,
             headers={"Retry-After":  "10000"}
         )
-    
+
     def get_invalid_request(self):
         return Response(
             {"error": "invalid api call issue"},

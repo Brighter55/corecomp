@@ -26,6 +26,10 @@ client/*.sw?
 # builds
 client/dist
 
+# python
+__pycache__/
+*.pyc
+
 # samples
 server/corecomp/pages/statement_samples
 

@@ -73,6 +73,22 @@ def test_exceeds_rate_limit(mock_get_pricing, authorized_client):
     assert response.headers.get("Retry-After") == "60000"
     assert response.json()["error"] == "rate limit issue"
 
+# test for invalid case where the provider has no data for the symbol
+@patch("pages.views.overview.financial_data_service.get_pricing")
+@pytest.mark.django_db
+def test_symbol_not_in_provider(mock_get_pricing, authorized_client):
+    symbol = Symbol(
+        symbol="IBM",
+        name="International Business Machines Corp",
+        type="Stock"
+    )
+    symbol.save()
+    payload = {"symbol": "IBM"}
+
+    mock_get_pricing.return_value = {}
+    response = authorized_client.post(url, payload, format="json")
+    assert response.status_code == 204
+
 # test for invalid case where the symbol is invalid
 @patch("pages.views.overview.financial_data_service.get_pricing")
 @pytest.mark.django_db

@@ -18,6 +18,8 @@ services:
     envVars:
       - key: DJANGO_SECRET_KEY
         sync: false
+      - key: WISESHEETS_API_KEY
+        sync: false
       - key: ALPHAVANTAGE_API_KEY
         sync: false
       - key: GOOGLE_CLIENT_ID
