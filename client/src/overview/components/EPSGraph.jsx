@@ -55,6 +55,20 @@ function EPSGraph({ statement, period }) {
         return percentChange;
     }, [reports]);
 
+    // Drop reports with no usable EPS so the Y-axis domain never sees NaN/"None"
+    // (which would crash `value.toFixed(2)` in the tick formatter).
+    const chartData = useMemo(
+        () =>
+            reports.filter((report) => {
+                const raw = report.reportedEPS;
+                if (raw === null || raw === undefined) return false;
+                if (typeof raw === "string" && (raw.trim().toLowerCase() === "none" || raw.trim() === "")) {
+                    return false;
+                }
+                return Number.isFinite(Number(raw));
+            }),
+        [reports]
+    );
 
     if (statement === null) {
         return (
@@ -64,6 +78,9 @@ function EPSGraph({ statement, period }) {
         );
     }
     if (Array.isArray(statement) && statement.length === 0) {
+        return <NoDataGraph />;
+    }
+    if (chartData.length === 0) {
         return <NoDataGraph />;
     }
 
@@ -83,7 +100,7 @@ function EPSGraph({ statement, period }) {
                     <div onClick={() => {setGraphClicked(true);}} className="min-h-0 w-full flex-1">
                         <ResponsiveContainer>
                             <LineChart
-                            data={reports}
+                            data={chartData}
                             margin={{
                                 top: 5,
                                 right: 30,
@@ -93,7 +110,7 @@ function EPSGraph({ statement, period }) {
                             >
                             <CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)"/>
                             <XAxis dataKey="fiscalDateEnding" stroke="var(--text-main)" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                            <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="var(--text-main)" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                            <YAxis tickFormatter={(value) => (Number.isFinite(value) ? `$${value.toFixed(2)}` : "--")} stroke="var(--text-main)" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
                             <Tooltip formatter={(value) => `$${value}`}/>
                             <Legend />
                             <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />
@@ -117,7 +134,7 @@ function EPSGraph({ statement, period }) {
                     <div onClick={() => {setGraphClicked(true);}} className="min-h-0 w-full flex-1">
                         <ResponsiveContainer>
                             <LineChart
-                            data={reports}
+                            data={chartData}
                             margin={{
                                 top: 5,
                                 right: 30,
@@ -127,7 +144,7 @@ function EPSGraph({ statement, period }) {
                             >
                             <CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)"/>
                             <XAxis dataKey="fiscalDateEnding" stroke="var(--text-main)" interval="equidistantPreserveStart" tick={{fontSize: 12}} />
-                            <YAxis tickFormatter={(value) => `$${value.toFixed(2)}`} stroke="var(--text-main)" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
+                            <YAxis tickFormatter={(value) => (Number.isFinite(value) ? `$${value.toFixed(2)}` : "--")} stroke="var(--text-main)" domain={[dataMin => dataMin * 0.95, dataMax => dataMax * 1.05]}/>
                             <Tooltip formatter={(value) => `$${value}`}/>
                             <Legend />
                             <Line name="reported EPS" type="monotone" dataKey="reportedEPS" stroke="#588157" strokeWidth={0} dot={{ fill: "#588157", r: 5}} activeDot={{ r: 8, fill: "#A3B18A"}} legendType="circle" />

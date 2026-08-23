@@ -84,18 +84,45 @@ export function getPercentChange(reports, value) {
 
     const newValue = parseFloat(reports[reports.length - 1][value]);
     const oldValue = parseFloat(reports[0][value]);
+    // NaN when either value is missing or the base is 0, so the header shows "N/A"
+    // instead of "NaN%" or "Infinity%".
+    if (!Number.isFinite(newValue) || !Number.isFinite(oldValue) || oldValue === 0) {
+        return NaN;
+    }
     const percentChange = ( (newValue - oldValue) / Math.abs(oldValue) ) * 100;
     return parseFloat(percentChange.toFixed(2));
 }
 // receive string integer
 export function formatToUnits(value) {
     const integerValue = parseInt(value);
+    // Missing / unparseable values ("None", null, undefined, NaN) -> "--", never "$None".
+    if (!Number.isFinite(integerValue)) {
+        return "--";
+    }
     if (integerValue >= 1_000_000_000 || integerValue <= -1_000_000_000) {
         return `$${(integerValue / 1_000_000_000).toFixed(2)}B`;
     }
     if (integerValue >= 1_000_000 || integerValue <= -1_000_000) {
         return `$${(integerValue / 1_000_000).toFixed(2)}M`;
     }
-    
+
     return `$${value}`;
+}
+
+// True when any report has a real (non-empty, non-"None", numeric) value for dataKey.
+// Used to hide graphs whose selected period has no usable data.
+export function hasAnyValue(reports, dataKey) {
+    return reports.some((report) => {
+        const raw = report[dataKey];
+        if (raw === null || raw === undefined) {
+            return false;
+        }
+        if (typeof raw === "string") {
+            const trimmed = raw.trim().toLowerCase();
+            if (trimmed === "" || trimmed === "none") {
+                return false;
+            }
+        }
+        return Number.isFinite(Number(raw));
+    });
 }

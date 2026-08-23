@@ -1,5 +1,5 @@
 
-import { filterReports, formatToUnits, getEndIndex, getPercentChange } from './GraphsHelper.js';
+import { filterReports, formatToUnits, getEndIndex, getPercentChange, hasAnyValue } from './GraphsHelper.js';
 
 describe("formatValue", () => {
     // positive value
@@ -27,6 +27,23 @@ describe("formatValue", () => {
 
     test('value greater than a negative million', () => {
         expect(formatToUnits("-12345")).toBe("$-12345");
+    });
+
+    // missing / unparseable values
+    test('"None" renders as "--"', () => {
+        expect(formatToUnits("None")).toBe("--");
+    });
+
+    test('null renders as "--"', () => {
+        expect(formatToUnits(null)).toBe("--");
+    });
+
+    test('undefined renders as "--"', () => {
+        expect(formatToUnits(undefined)).toBe("--");
+    });
+
+    test('empty string renders as "--"', () => {
+        expect(formatToUnits("")).toBe("--");
     });
 });
 
@@ -263,5 +280,43 @@ describe("getPercentChange", () => {
     });
     test("return correct percent change for 1Y range", () => {
         expect(getPercentChange(filteredReportsWithDecimalsDecreasingTrend.slice(filteredReportsWithDecimalsDecreasingTrend.length - 2), "eps")).toBe(-26.28);
+    });
+
+    // base of zero must not produce Infinity
+    test("return NaN when the base value is zero", () => {
+        expect(getPercentChange([
+            { fiscalDateEnding: '2023-12-31', totalRevenue: "0" },
+            { fiscalDateEnding: '2024-12-31', totalRevenue: "100" },
+        ], "totalRevenue")).toBe(NaN);
+    });
+
+    test("return NaN when a value is missing", () => {
+        expect(getPercentChange([
+            { fiscalDateEnding: '2023-12-31', totalRevenue: "None" },
+            { fiscalDateEnding: '2024-12-31', totalRevenue: "100" },
+        ], "totalRevenue")).toBe(NaN);
+    });
+});
+
+describe("hasAnyValue", () => {
+    const withData = [
+        { fiscalDateEnding: "2023-12-31", eps: "None" },
+        { fiscalDateEnding: "2024-12-31", eps: "10.42" },
+    ];
+    const allMissing = [
+        { fiscalDateEnding: "2023-12-31", eps: "None" },
+        { fiscalDateEnding: "2024-12-31", eps: null },
+    ];
+
+    test("true when at least one report has a numeric value", () => {
+        expect(hasAnyValue(withData, "eps")).toBe(true);
+    });
+
+    test("false when every report value is missing/None", () => {
+        expect(hasAnyValue(allMissing, "eps")).toBe(false);
+    });
+
+    test("false for an empty array", () => {
+        expect(hasAnyValue([], "eps")).toBe(false);
     });
 });

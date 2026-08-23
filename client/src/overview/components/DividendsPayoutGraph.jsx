@@ -53,6 +53,20 @@ function DividendsPayoutGraph({ statement, period }) {
         return percentChange;
     }, [reports]);
 
+    // Keep only rows with a usable dividend amount so non-payers (empty "data" or
+    // all-"None" amounts) render a "No data" card instead of a hollow chart.
+    const chartData = useMemo(
+        () =>
+            reports.filter((report) => {
+                const raw = report.amount;
+                if (raw === null || raw === undefined) return false;
+                if (typeof raw === "string" && (raw.trim().toLowerCase() === "none" || raw.trim() === "")) {
+                    return false;
+                }
+                return Number.isFinite(Number(raw));
+            }),
+        [reports]
+    );
 
     if (statement === null) {
         return (
@@ -62,6 +76,9 @@ function DividendsPayoutGraph({ statement, period }) {
         );
     }
     if (Array.isArray(statement) && statement.length === 0) {
+        return <NoDataGraph />;
+    }
+    if (chartData.length === 0) {
         return <NoDataGraph />;
     }
 
@@ -80,7 +97,7 @@ function DividendsPayoutGraph({ statement, period }) {
                 <div onClick={() => {setGraphClicked(true);}} className="min-h-0 w-full flex-1">
                     <ResponsiveContainer>
                         <BarChart
-                            data={reports}
+                            data={chartData}
                             margin={{
                             top: 5,
                             right: 30,
@@ -90,8 +107,8 @@ function DividendsPayoutGraph({ statement, period }) {
                         >
                             <CartesianGrid strokeDasharray="" vertical={false} stroke="var(--main-dry-sage)" />
                             <XAxis dataKey="ex_dividend_date" interval="equidistantPreserveStart" stroke="var(--text-main)" tick={{fontSize: 12}}/>
-                            <YAxis stroke="var(--text-main)" tickFormatter={(value) => `$${value}`}/>
-                            <Tooltip formatter={(value) => `$${value}`}/>
+                            <YAxis stroke="var(--text-main)" tickFormatter={(value) => (Number.isFinite(Number(value)) ? `$${value}` : "--")}/>
+                            <Tooltip formatter={(value) => (Number.isFinite(Number(value)) ? `$${value}` : "--")}/>
                             <Bar dataKey="amount" fill="#588157" activeBar={<Rectangle fill="#A3B18A"/>}/>
                         </BarChart>
                     </ResponsiveContainer>

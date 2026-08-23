@@ -5,7 +5,7 @@ import GraphCard from "./GraphCard.jsx";
 import NoDataGraph from "./NoDataGraph.jsx";
 import CustomBar from "./CustomBar.jsx";
 import CustomActiveBar from "./CustomActiveBar.jsx";
-import { filterReports, getPercentChange, formatToUnits } from "../../helpers/GraphsHelper.js";
+import { filterReports, getPercentChange, formatToUnits, hasAnyValue } from "../../helpers/GraphsHelper.js";
 
 const defaultDomain = [
   (dataMin) => dataMin * 0.95,
@@ -53,6 +53,8 @@ export default function GeneralBarGraph({
     return getPercentChange(reports, dataKey);
   }, [reports, dataKey]);
 
+  const hasData = useMemo(() => hasAnyValue(reports, dataKey), [reports, dataKey]);
+
   if (statement === null) {
     return (
       <div className="flex-1">
@@ -62,6 +64,10 @@ export default function GeneralBarGraph({
   }
 
   if (Array.isArray(statement) && statement.length === 0) {
+    return <NoDataGraph />;
+  }
+
+  if (!hasData) {
     return <NoDataGraph />;
   }
 

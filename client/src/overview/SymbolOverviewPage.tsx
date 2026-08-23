@@ -13,29 +13,24 @@ import {
   ChangeInInventoryGraph,
   CostOfRevenueGraph,
   CurrentRatioGraph,
-  DebtStructureGraph,
   DebtEquityRatioGraph,
   DepreciationAndAmortizationGraph,
   DividendPayoutCommonStockGraph,
   DividendsPayoutGraph,
   EPSGraph,
   EbitdaGraph,
-  EbitGraph,
   FreeCashflowGraph,
   GrossProfitGraph,
   MarketCapGraph,
-  NetIncomeFromContinuingOperationsGraph,
   NetIncomeGraph,
   NetIncomeVsOcfGraph,
   OperatingCashflowGraph,
-  OperatingExpensesGraph,
   PBRatioGraph,
   PERatioGraph,
   PFCFRatioGraph,
   PSRatioGraph,
   PricingGraph,
   ProfitMarginGraph,
-  QuickRatioGraph,
   REarningsVsCStockGraph,
   ROEGraph,
   ResearchAndDevelopmentGraph,
@@ -70,11 +65,23 @@ function GraphGrid({ children }: { children: ReactNode }) {
   return <div className="grid gap-4 lg:grid-cols-2">{children}</div>;
 }
 
+function isMissing(value: string | number | null | undefined) {
+  return (
+    value === null ||
+    value === undefined ||
+    value === "" ||
+    String(value).trim().toLowerCase() === "none"
+  );
+}
+
 function formatValue(value: string | number | null | undefined) {
+  if (isMissing(value)) {
+    return "--";
+  }
   if (value === 0) {
     return "0";
   }
-  return value ?? "--";
+  return value;
 }
 
 function SymbolOverviewPage() {
@@ -435,6 +442,13 @@ function SymbolOverviewPage() {
     },
   ];
 
+  // Drop rows/tiles whose value is missing (e.g. the whole Dividends section for
+  // non-dividend payers), instead of showing "--" or the literal "None".
+  const visibleAboutRows = aboutRows.filter((row) => !isMissing(row.value));
+  const visibleSections = sections
+    .map((section) => ({ ...section, rows: section.rows.filter((row) => !isMissing(row.value)) }))
+    .filter((section) => section.rows.length > 0);
+
   return (
     <div className="min-h-screen pb-10">
       <ProductHeader />
@@ -479,7 +493,7 @@ function SymbolOverviewPage() {
             <h2 className="text-3xl font-semibold text-[var(--text-main)]">About</h2>
 
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {aboutRows.map((row) => {
+              {visibleAboutRows.map((row) => {
                 const value = formatValue(row.value);
                 return (
                   <div key={row.label} className="rounded-md border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] p-3 backdrop-blur-md">
@@ -491,7 +505,7 @@ function SymbolOverviewPage() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">
-              {sections.map((section) => (
+              {visibleSections.map((section) => (
                 <Card key={section.title} className="border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] text-[var(--text-main)] backdrop-blur-md">
                   <CardHeader>
                     <CardTitle className="text-center text-xl">{section.title}</CardTitle>
@@ -560,12 +574,9 @@ function SymbolOverviewPage() {
                 <GraphGrid>
                   <TotalRevenueGraph statement={incomeStatement} period={period} />
                   <NetIncomeGraph statement={incomeStatement} period={period} />
-                  <NetIncomeFromContinuingOperationsGraph statement={incomeStatement} period={period} />
                   <GrossProfitGraph statement={incomeStatement} period={period} />
                   <CostOfRevenueGraph statement={incomeStatement} period={period} />
                   <ResearchAndDevelopmentGraph statement={incomeStatement} period={period} />
-                  <OperatingExpensesGraph statement={incomeStatement} period={period} />
-                  <EbitGraph statement={incomeStatement} period={period} />
                   <EbitdaGraph statement={incomeStatement} period={period} />
                 </GraphGrid>
               </AccordionContent>
@@ -596,7 +607,6 @@ function SymbolOverviewPage() {
                   <TotalAssetsGraph statement={balanceSheetStatement} period={period} />
                   <SharesOutstandingGraph statement={balanceSheetStatement} period={period} />
                   <CashVsDebtGraph statement={balanceSheetStatement} period={period} />
-                  <DebtStructureGraph statement={balanceSheetStatement} period={period} />
                   <REarningsVsCStockGraph statement={balanceSheetStatement} period={period} />
                 </GraphGrid>
               </AccordionContent>
@@ -639,7 +649,6 @@ function SymbolOverviewPage() {
               <AccordionContent>
                 <GraphGrid>
                   <CurrentRatioGraph statement={balanceSheetStatement} period={period} />
-                  <QuickRatioGraph statement={balanceSheetStatement} period={period} />
                   <DebtEquityRatioGraph statement={balanceSheetStatement} period={period} />
                 </GraphGrid>
               </AccordionContent>
