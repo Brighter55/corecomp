@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import LandingHeader from "../headers/LandingHeader.tsx";
 import FAQ from "./components/FAQ.tsx";
+import DataSection from "./components/DataSection.tsx";
 import Footer from "../shared/Footer.tsx";
 import { Button } from "../components/ui/button";
 
@@ -43,6 +44,8 @@ function Landing() {
       </section>
 
       <div className="mx-auto mt-3 max-w-6xl space-y-20 px-4">
+
+        <DataSection />
 
         <section id="pricing">
           <div className="space-y-5 text-center">
