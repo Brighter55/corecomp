@@ -17,15 +17,25 @@ function buildHeaders(extra = {}) {
   };
 }
 
+// POST headers: only send X-CSRFToken when a csrftoken cookie actually exists
+// (never send the literal string "undefined").
+function buildPostHeaders() {
+  const headers = buildHeaders({
+    "Content-Type": "application/json",
+  });
+  const csrfToken = getCookie("csrftoken");
+  if (csrfToken) {
+    headers["X-CSRFToken"] = csrfToken;
+  }
+  return headers;
+}
+
 // for protected endpoint
 export async function authenticatedClient({ endpoint = null, payload = null} = {}) {
     if (payload) {
         const response = await fetch(`${backendBaseUrl}${endpoint}`, {
             method: "POST",
-            headers: buildHeaders({
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
-            }),
+            headers: buildPostHeaders(),
             credentials: "include",
             body: JSON.stringify(payload),
         });
@@ -44,10 +54,7 @@ export async function authenticatedClientWithRetry(endpoint, payload, isActive, 
     const response = await fetch(`${backendBaseUrl}${endpoint}`, {
         method: "POST",
         credentials: "include",
-        headers: buildHeaders({
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
-        }),
+        headers: buildPostHeaders(),
         body: JSON.stringify(payload),
     });
 

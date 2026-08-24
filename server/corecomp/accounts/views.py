@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
+from django.middleware.csrf import get_token, rotate_token
 import json
 from dotenv import load_dotenv
 from .utils import verify_google_token
@@ -46,6 +47,13 @@ def google_authentication(request): #decodes the JWT to get user's info and crea
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
+
+        # issue a fresh CSRF cookie with this response so the browser always has
+        # a readable csrftoken (same-site double-submit for authenticated POSTs);
+        # CsrfViewMiddleware.process_response sets the cookie from these flags
+        rotate_token(request)
+        get_token(request)
+
         response = Response({"access": access_token, "refresh": refresh_token}, status=status.HTTP_200_OK)
 
         response.set_cookie(

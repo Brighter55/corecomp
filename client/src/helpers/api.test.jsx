@@ -19,6 +19,25 @@ describe("authenticatedClientWithRetry", () => {
         vi.clearAllMocks();
     });
 
+    test("should not send X-CSRFToken when no csrftoken cookie exists", async () => {
+        mockFetch.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            json: async () => ({ message: "good" }),
+        });
+
+        const response = await authenticatedClientWithRetry("/test/server", payload, () => true, mockNavigate, mockSetSymbol);
+
+        expect(response.status).toBe(200);
+        expect(mockFetch).toHaveBeenCalledWith(
+            "http://localhost:8000/test/server",
+            expect.objectContaining({
+                method: "POST",
+                headers: expect.not.objectContaining({ "X-CSRFToken": expect.any(String) }),
+            }),
+        );
+    });
+
     test("should return success with the correct symbol", async () => {
         const mockResponse = {message: "good"};
 
