@@ -4,6 +4,18 @@ import Footer from "./shared/Footer.tsx";
 const versions = [
     {
         name: "Current Version",
+        version: "0.8.0",
+        date: "08/24/2026",
+        updates: [
+            "Migrate data provider from Alpha Vantage to WiseSheets API (SEC EDGAR-sourced data)",
+            "Switch to Google-only login",
+            "Add free tier: 5 symbol views/month for anonymous users, unlimited for logged-in users",
+            "Redesign landing page with \"Data you can trust\" section",
+            "Align graph coverage with WiseSheets data availability",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.7.0",
         date: "04/29/2026",
         updates: [

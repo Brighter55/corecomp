@@ -8,12 +8,10 @@ import Account from "./Account.jsx"
 import PrivacyPolicy from "./PrivacyPolicy.jsx"
 import TermsOfService from "./TermsOfService.jsx"
 import Upcoming from "./Upcoming.jsx"
-import MaintenanceBanner from "./components/MaintenanceBanner.tsx"
 
 function App() {
   return (
     <BrowserRouter>
-      <MaintenanceBanner />
       <Routes>
         <Route path="/" element={<Landing></Landing>} />
         <Route path="/login" element={<Login />} />
