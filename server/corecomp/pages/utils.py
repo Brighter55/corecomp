@@ -166,7 +166,9 @@ def annotate_debt_equity_ratio(data):
 def transform_pricing(data):
     records = data["Monthly Adjusted Time Series"]
     transformed_data = []
-    for date in records:
+    # Newest first, matching the order of the other statement endpoints (and the
+    # frontend filterReports contract, which reverses into chronological order).
+    for date in sorted(records, reverse=True):
         transformed_data.append(
             {
                 "date": date,
