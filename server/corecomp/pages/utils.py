@@ -3,20 +3,31 @@ def safe_int(value):
     if value is None:
         return None
 
-    if value.strip().lower() in ("none", ""):
+    if isinstance(value, str) and value.strip().lower() in ("none", ""):
         return None
-    
-    return int(value)
+
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        # statement values can arrive as decimal strings like "57383000000.0"
+        try:
+            return int(float(value))
+        except (TypeError, ValueError):
+            return None
+
 
 def safe_float(value):
     # return None if value is "None"
     if value is None:
         return None
-    
-    if value.strip().lower() in ("none", ""):
+
+    if isinstance(value, str) and value.strip().lower() in ("none", ""):
         return None
-    
-    return float(value)
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def annotate_profit_margin(data):
