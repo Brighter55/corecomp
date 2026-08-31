@@ -626,7 +626,9 @@ def get_pricing_av(symbol):
         rows.extend(page["data"])
         cursor = (page.get("meta") or {}).get("nextCursor")
 
-    # Last row per calendar month, ascending by date (AV series convention).
+    # Last row per calendar month. Series is built ascending (AV series
+    # convention); transform_pricing normalizes the API output to newest-first
+    # to match the other statement endpoints.
     last_by_month = {}
     for row in rows:
         day = row.get("date")

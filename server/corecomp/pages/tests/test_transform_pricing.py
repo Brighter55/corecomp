@@ -2,17 +2,9 @@ from pages.utils import transform_pricing
 
 
 def test_transform_pricing():
+    # Input is ascending (oldest first), as the provider/fixture produce it.
     data = {
         "Monthly Adjusted Time Series": {
-            "2026-01-16": {
-                "1. open": "297.5600",
-                "2. high": "312.8100",
-                "3. low": "289.0000",
-                "4. close": "305.6700",
-                "5. adjusted close": "305.6700",
-                "6. volume": "45209571",
-                "7. dividend amount": "0.0000"
-            },
             "2025-12-31": {
                 "1. open": "306.5050",
                 "2. high": "315.3454",
@@ -22,8 +14,18 @@ def test_transform_pricing():
                 "6. volume": "78385471",
                 "7. dividend amount": "0.0000"
             },
+            "2026-01-16": {
+                "1. open": "297.5600",
+                "2. high": "312.8100",
+                "3. low": "289.0000",
+                "4. close": "305.6700",
+                "5. adjusted close": "305.6700",
+                "6. volume": "45209571",
+                "7. dividend amount": "0.0000"
+            },
         }
     }
+    # Output must be newest first, matching the other statement endpoints.
     transformed_data = [
         {"date": "2026-01-16", "adjustedClose": "305.67", "close": "305.67"},
         {"date": "2025-12-31", "adjustedClose": "296.21", "close": "296.21"},
