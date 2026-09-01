@@ -16,6 +16,10 @@ def test_annotate_debt_equity_ratio():
                 "shortLongTermDebtTotal": "300",
                 "totalShareholderEquity": "0",
             },
+            {
+                "shortLongTermDebtTotal": "800.0",
+                "totalShareholderEquity": "200",
+            },
         ],
         "quarterlyReports": [
             {
@@ -37,6 +41,7 @@ def test_annotate_debt_equity_ratio():
     assert tested_data["annualReports"][0]["DebtEquityRatio"] == "2.0"
     assert tested_data["annualReports"][1]["DebtEquityRatio"] is None
     assert tested_data["annualReports"][2]["DebtEquityRatio"] is None
+    assert tested_data["annualReports"][3]["DebtEquityRatio"] == "4.0"
 
     assert tested_data["quarterlyReports"][0]["DebtEquityRatio"] == "3.0"
     assert tested_data["quarterlyReports"][1]["DebtEquityRatio"] is None
