@@ -3,7 +3,6 @@ import { useState, useMemo } from "react";
 import { X } from "lucide-react";
 import { filterReports, getPercentChange, formatToUnits } from "../../helpers/GraphsHelper.js";
 import GraphCard from "./GraphCard.jsx";
-import NoDataGraph from "./NoDataGraph.jsx";
 import Explanation from "./Explanation.jsx";
 import TimeRanges from "./TimeRanges.jsx";
 import { TrendingUp, TrendingDown } from "lucide-react";
@@ -89,7 +88,7 @@ function REarningsVsCStock({ statement, period }) {
         );
     }
     if (Array.isArray(statement) && statement.length === 0) {
-        return <NoDataGraph />;
+        return null;
     }
 
     return (

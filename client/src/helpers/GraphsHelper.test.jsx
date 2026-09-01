@@ -1,5 +1,5 @@
 
-import { filterReports, formatToUnits, getEndIndex, getPercentChange, hasAnyValue } from './GraphsHelper.js';
+import { filterReports, formatToUnits, getEndIndex, getPercentChange, hasAnyValue, hasStatementContent } from './GraphsHelper.js';
 
 describe("formatValue", () => {
     // positive value
@@ -318,5 +318,61 @@ describe("hasAnyValue", () => {
 
     test("false for an empty array", () => {
         expect(hasAnyValue([], "eps")).toBe(false);
+    });
+});
+
+describe("hasStatementContent", () => {
+    const statement = {
+        annualReports: [{ fiscalDateEnding: "2023-12-31", totalRevenue: "100" }],
+        quarterlyReports: [],
+    };
+    const dividendsStatement = {
+        data: [{ ex_dividend_date: "2024-01-01", amount: "1.2" }],
+    };
+    const dividendsEmpty = {
+        data: [{ ex_dividend_date: "2024-01-01", amount: "None" }],
+    };
+    const earningsStatement = {
+        annualEarnings: [{ fiscalDateEnding: "2023-12-31", reportedEPS: "5" }],
+        quarterlyEarnings: [],
+    };
+
+    test("true while the statement is still loading (null)", () => {
+        expect(hasStatementContent(null, "annually", "totalRevenue")).toBe(true);
+    });
+
+    test("false for an empty statement (204 response)", () => {
+        expect(hasStatementContent([], "annually", "totalRevenue")).toBe(false);
+    });
+
+    test("true for a plain array with data (pricing shape)", () => {
+        expect(hasStatementContent([{ date: "2024-01-01", adjustedClose: "100" }], "annually", null)).toBe(true);
+    });
+
+    test("true when the selected period has a usable value", () => {
+        expect(hasStatementContent(statement, "annually", "totalRevenue")).toBe(true);
+    });
+
+    test("false when the selected period has no usable value", () => {
+        expect(hasStatementContent(statement, "quarterly", "totalRevenue")).toBe(false);
+    });
+
+    test("false when every value for the metric is missing", () => {
+        expect(hasStatementContent({ annualReports: [{ fiscalDateEnding: "2023-12-31", totalRevenue: "None" }], quarterlyReports: [] }, "annually", "totalRevenue")).toBe(false);
+    });
+
+    test("dividends source reads statement.data.amount", () => {
+        expect(hasStatementContent(dividendsStatement, "annually", "amount", "dividends")).toBe(true);
+        expect(hasStatementContent(dividendsEmpty, "annually", "amount", "dividends")).toBe(false);
+    });
+
+    test("earnings source reads annualEarnings/quarterlyEarnings", () => {
+        expect(hasStatementContent(earningsStatement, "annually", "reportedEPS", "earnings")).toBe(true);
+        expect(hasStatementContent(earningsStatement, "quarterly", "reportedEPS", "earnings")).toBe(false);
+    });
+
+    test("statement source counts any non-empty object as content", () => {
+        expect(hasStatementContent({ annualReports: [], quarterlyReports: [] }, "annually", null, "statement")).toBe(true);
+        expect(hasStatementContent([], "annually", null, "statement")).toBe(false);
     });
 });

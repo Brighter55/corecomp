@@ -73,15 +73,9 @@ describe("PricingGraph", () => {
         expect(mockGetPercentChange).toHaveBeenCalledTimes(2);
     });
 
-    test("renders NoDataGraph if statement has no data", async () => {
-        render(
-            <MemoryRouter>
-                <PricingGraph statement={[]} period="annually"></PricingGraph>
-            </MemoryRouter>
-        );
-
-        expect(await screen.findByText(/No Data/i)).toBeInTheDocument();
-        }
-    )
+    test("renders nothing when statement is empty", () => {
+        const { container } = render(<MemoryRouter><PricingGraph statement={[]} period="annually" /></MemoryRouter>);
+        expect(container).toBeEmptyDOMElement();
+    });
 
 });

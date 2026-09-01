@@ -3,7 +3,6 @@ import { useState, useMemo } from "react";
 import { filterReports, getPercentChange, formatToUnits } from "../../helpers/GraphsHelper.js";
 import GraphTitle from "./GraphTitle.jsx";
 import GraphCard from "./GraphCard.jsx";
-import NoDataGraph from "./NoDataGraph.jsx";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 
@@ -63,7 +62,7 @@ function TotalAssets({ statement, period }) {
 		);
 	}
 	if (Array.isArray(statement) && statement.length === 0) {
-		return <NoDataGraph />;
+		return null;
 	}
 
 	return (

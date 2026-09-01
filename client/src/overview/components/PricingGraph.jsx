@@ -4,7 +4,6 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
-import NoDataGraph from "./NoDataGraph.jsx"
 
 
 const explanation = (
@@ -72,7 +71,7 @@ function PricingGraph({ statement, period }) {
         );
     }
     if (Array.isArray(statement) && statement.length === 0) {
-        return <NoDataGraph />;
+        return null;
     }
 
     return (

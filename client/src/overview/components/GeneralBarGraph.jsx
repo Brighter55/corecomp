@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import GraphTitle from "./GraphTitle.jsx";
 import GraphCard from "./GraphCard.jsx";
-import NoDataGraph from "./NoDataGraph.jsx";
 import CustomBar from "./CustomBar.jsx";
 import CustomActiveBar from "./CustomActiveBar.jsx";
 import { filterReports, getPercentChange, formatToUnits, hasAnyValue } from "../../helpers/GraphsHelper.js";
@@ -64,11 +63,11 @@ export default function GeneralBarGraph({
   }
 
   if (Array.isArray(statement) && statement.length === 0) {
-    return <NoDataGraph />;
+    return null;
   }
 
   if (!hasData) {
-    return <NoDataGraph />;
+    return null;
   }
 
   return (

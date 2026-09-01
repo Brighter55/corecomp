@@ -126,3 +126,23 @@ export function hasAnyValue(reports, dataKey) {
         return Number.isFinite(Number(raw));
     });
 }
+
+// True when a graph fed by `statement` would render something: a chart, or a
+// loading skeleton while the fetch is still in flight (statement === null).
+// Sections that end up with no visible graphs (e.g. a 204 "no content" dividends
+// response) are hidden entirely by SymbolOverviewPage.
+export function hasStatementContent(statement, period, dataKey, source = "standard") {
+    if (statement === null) return true; // loading — keep the section to show skeletons
+    if (Array.isArray(statement)) return statement.length > 0; // [] → 204 empty; plain array (pricing) → content
+    if (source === "statement") return true; // custom graphs that only hide on 204
+    if (!dataKey) return true; // defensive — the standard branch always passes a key
+    const sourceReports =
+        source === "dividends"
+            ? statement["data"] ?? []
+            : source === "earnings"
+                ? statement[period === "annually" ? "annualEarnings" : "quarterlyEarnings"] ?? []
+                : statement[period === "annually" ? "annualReports" : "quarterlyReports"] ?? [];
+    const dateField = source === "dividends" ? "ex_dividend_date" : "fiscalDateEnding";
+    const reports = filterReports(sourceReports, "all", dateField);
+    return hasAnyValue(reports, dataKey);
+}

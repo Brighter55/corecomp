@@ -3,7 +3,6 @@ import { useState, useMemo } from "react";
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import GraphTitle from "./GraphTitle.jsx"
 import GraphCard from "./GraphCard.jsx"
-import NoDataGraph from "./NoDataGraph.jsx"
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 const explanation = (
@@ -78,10 +77,10 @@ function EPSGraph({ statement, period }) {
         );
     }
     if (Array.isArray(statement) && statement.length === 0) {
-        return <NoDataGraph />;
+        return null;
     }
     if (chartData.length === 0) {
-        return <NoDataGraph />;
+        return null;
     }
 
     return (
