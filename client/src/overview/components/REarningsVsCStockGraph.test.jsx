@@ -96,13 +96,8 @@ describe("REarningsVsCStock", () => {
     expect(mockGetPercentChange).toHaveBeenCalledTimes(4);
   });
 
-  test("renders NoDataGraph if statement is empty", async () => {
-    render(
-      <MemoryRouter>
-        <REarningsVsCStock statement={[]} period="annually" />
-      </MemoryRouter>
-    );
-
-    expect(await screen.findByText(/No Data/i)).toBeInTheDocument();
-  });
+  test("renders nothing when statement is empty", () => {
+  const { container } = render(<MemoryRouter><REarningsVsCStock statement={[]} period="annually" /></MemoryRouter>);
+  expect(container).toBeEmptyDOMElement();
+});
 });

@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import ProductHeader from "../headers/product-header/ProductHeader.jsx";
 import { authenticatedClientWithRetry } from "../helpers/api.js";
+import { hasStatementContent } from "../helpers/GraphsHelper.js";
 import { StockHeaderProvider } from "./StockHeaderContext.jsx";
 import {
   CapitalExpendituresGraph,
@@ -449,6 +450,50 @@ function SymbolOverviewPage() {
     .map((section) => ({ ...section, rows: section.rows.filter((row) => !isMissing(row.value)) }))
     .filter((section) => section.rows.length > 0);
 
+  // Render an accordion section only when at least one of its graphs has content
+  // (or is still loading). Sections whose data came back empty (e.g. a 204 for
+  // dividends) are hidden instead of showing "No data" placeholders.
+  const pricingHasGraphs =
+    hasStatementContent(pricingStatement, period, null) ||
+    hasStatementContent(marketCapStatement, period, "marketCap");
+  const earningsHasGraphs = hasStatementContent(earningsStatement, period, "reportedEPS", "earnings");
+  const incomeHasGraphs = [
+    "totalRevenue",
+    "netIncome",
+    "grossProfit",
+    "costOfRevenue",
+    "researchAndDevelopment",
+    "ebitda",
+  ].some((key) => hasStatementContent(incomeStatement, period, key));
+  const cashFlowHasGraphs =
+    [
+      "operatingCashflow",
+      "capitalExpenditures",
+      "freeCashFlow",
+      "cashflowFromInvestment",
+      "cashflowFromFinancing",
+      "depreciationDepletionAndAmortization",
+      "dividendPayoutCommonStock",
+      "changeInInventory",
+    ].some((key) => hasStatementContent(cashFlowStatement, period, key)) ||
+    hasStatementContent(cashFlowStatement, period, null, "statement");
+  const balanceSheetHasGraphs =
+    hasStatementContent(balanceSheetStatement, period, "commonStockSharesOutstanding") ||
+    hasStatementContent(balanceSheetStatement, period, null, "statement");
+  const dividendsHasGraphs = hasStatementContent(dividendsStatement, period, "amount", "dividends");
+  const profitabilityHasGraphs =
+    hasStatementContent(roeStatement, period, "ROEPercentage") ||
+    hasStatementContent(roaStatement, period, "ROAPercentage") ||
+    hasStatementContent(incomeStatement, period, "profitMarginPercent");
+  const priceRatiosHasGraphs =
+    hasStatementContent(peStatement, period, "PERatio") ||
+    hasStatementContent(pbStatement, period, "PBRatio") ||
+    hasStatementContent(psStatement, period, "PSRatio") ||
+    hasStatementContent(pfcfStatement, period, "PFCFRatio");
+  const otherRatiosHasGraphs =
+    hasStatementContent(balanceSheetStatement, period, "CurrentRatio") ||
+    hasStatementContent(balanceSheetStatement, period, "DebtEquityRatio");
+
   return (
     <div className="min-h-screen pb-10">
       <ProductHeader />
@@ -549,6 +594,7 @@ function SymbolOverviewPage() {
 
           <StockHeaderProvider symbol={routeSymbol} logoUrl={logoUrl}>
             <Accordion type="multiple" defaultValue={["income"]} className="space-y-4">
+            {pricingHasGraphs && (
             <AccordionItem value="pricing" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Pricing</AccordionTrigger>
               <AccordionContent>
@@ -558,7 +604,9 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
+            )}
 
+            {earningsHasGraphs && (
             <AccordionItem value="earnings" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Earnings History</AccordionTrigger>
               <AccordionContent>
@@ -567,7 +615,9 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
+            )}
 
+            {incomeHasGraphs && (
             <AccordionItem value="income" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Income Statement</AccordionTrigger>
               <AccordionContent>
@@ -581,7 +631,9 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
+            )}
 
+            {cashFlowHasGraphs && (
             <AccordionItem value="cash-flow" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Cash Flow Statement</AccordionTrigger>
               <AccordionContent>
@@ -599,7 +651,9 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
+            )}
 
+            {balanceSheetHasGraphs && (
             <AccordionItem value="balance-sheet" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Balance Sheet</AccordionTrigger>
               <AccordionContent>
@@ -611,7 +665,9 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
+            )}
 
+            {dividendsHasGraphs && (
             <AccordionItem value="dividends" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Dividends</AccordionTrigger>
               <AccordionContent>
@@ -620,7 +676,9 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
+            )}
 
+            {profitabilityHasGraphs && (
             <AccordionItem value="profitability-ratios" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Profitability Ratios</AccordionTrigger>
               <AccordionContent>
@@ -631,7 +689,9 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
+            )}
 
+            {priceRatiosHasGraphs && (
             <AccordionItem value="price-ratios" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Price Ratios</AccordionTrigger>
               <AccordionContent>
@@ -643,7 +703,9 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
+            )}
 
+            {otherRatiosHasGraphs && (
             <AccordionItem value="other-ratios" className="rounded-xl border border-[var(--line-muted)] bg-[rgba(218,215,205,0.08)] px-4">
               <AccordionTrigger className="text-xl text-[var(--text-main)] hover:no-underline">Other Ratios</AccordionTrigger>
               <AccordionContent>
@@ -653,6 +715,7 @@ function SymbolOverviewPage() {
                 </GraphGrid>
               </AccordionContent>
             </AccordionItem>
+            )}
             
             </Accordion>
           </StockHeaderProvider>

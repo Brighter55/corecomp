@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import GraphCard from "./GraphCard.jsx"
 import GraphTitle from "./GraphTitle.jsx"
-import NoDataGraph from "./NoDataGraph.jsx"
 import {filterReports, getPercentChange} from "../../helpers/GraphsHelper.js"
 import { TrendingUp, TrendingDown } from "lucide-react";
 
@@ -76,10 +75,10 @@ function DividendsPayoutGraph({ statement, period }) {
         );
     }
     if (Array.isArray(statement) && statement.length === 0) {
-        return <NoDataGraph />;
+        return null;
     }
     if (chartData.length === 0) {
-        return <NoDataGraph />;
+        return null;
     }
 
     return (

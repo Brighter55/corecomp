@@ -70,13 +70,8 @@ describe("CashflowFromFinancingGraph", () => {
     expect(mockFilterReports).toHaveBeenCalledTimes(2);
   });
 
-  test("renders NoDataGraph if statement is empty", async () => {
-    render(
-      <MemoryRouter>
-        <CashflowFromFinancingGraph statement={[]} period="annually" />
-      </MemoryRouter>
-    );
-
-    expect(await screen.findByText(/No Data/i)).toBeInTheDocument();
-  });
+  test("renders nothing when statement is empty", () => {
+  const { container } = render(<MemoryRouter><CashflowFromFinancingGraph statement={[]} period="annually" /></MemoryRouter>);
+  expect(container).toBeEmptyDOMElement();
+});
 });
