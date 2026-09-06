@@ -4,6 +4,16 @@ import Footer from "./shared/Footer.tsx";
 const versions = [
     {
         name: "Current Version",
+        version: "0.8.1",
+        date: "08/31/2026",
+        updates: [
+            "Hide graphs and accordion sections that have no data for the selected company",
+            "Fix balance sheet and composite ratios when figures arrive as decimal strings",
+            "Fix historical pricing chart so dates render in the correct order",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.8.0",
         date: "08/24/2026",
         updates: [
