@@ -4,6 +4,17 @@ import Footer from "./shared/Footer.tsx";
 const versions = [
     {
         name: "Current Version",
+        version: "0.8.2",
+        date: "09/08/2026",
+        updates: [
+            "Turn the landing page \"Data you can trust\" section into real, interactive charts (no more placeholder images)",
+            "Sample each statement category (income, balance sheet, cash flow, metrics, price) with live WiseSheets data",
+            "Show real company logos on landing page charts",
+            "Fix fullscreen chart expand inside the landing page \"Data you can trust\" panel",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.8.1",
         date: "08/31/2026",
         updates: [

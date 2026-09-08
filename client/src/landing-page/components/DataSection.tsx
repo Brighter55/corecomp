@@ -7,6 +7,18 @@ import SymbolSearch from "../../shared/SymbolSearch.jsx";
 import { Card, CardContent } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { cn } from "../../lib/utils.ts";
+import {
+  NetIncomeGraph,
+  TotalAssetsGraph,
+  CashFlowTrifectaGraph,
+  ProfitMarginGraph,
+  PricingGraph,
+} from "../../overview/index.js";
+import { StockHeaderProvider } from "../../overview/StockHeaderContext.jsx";
+import sampleData from "../sample-data/sampleData.json";
+
+// Same real-company-logo source the /overview page uses (logo.dev).
+const sampleLogoUrl = `https://img.logo.dev/ticker/${sampleData.symbol}?token=${import.meta.env.VITE_LOGO_DEV_PUBLISHABLE_KEY}&size=450`;
 
 type CategoryKey = "income" | "balance-sheet" | "cash-flow" | "metrics" | "price";
 
@@ -30,19 +42,23 @@ const CARD_TITLE: Record<CategoryKey, string> = {
 
 type SymbolSubmitHandler = (event: FormEvent<HTMLElement> | KeyboardEvent, symbolFromChild: string) => void;
 
-// TODO: replace with the graph image the user will provide.
-function GraphPlaceholder({ label }: { label: string }) {
-  return (
-    <div
-      role="img"
-      aria-label={`${label} graph`}
-      className="flex h-80 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[var(--line-muted)] bg-[var(--surface-soft)] text-center"
-    >
-      <FileCheck2 className="h-8 w-8 text-[var(--main-dry-sage)]" />
-      <p className="text-sm font-medium text-[var(--text-main)]">{label} graph</p>
-      <p className="max-w-xs text-xs text-[var(--text-muted)]">Graph image coming soon.</p>
-    </div>
-  );
+// Renders the product's real graph component for whichever category tab is active,
+// fed by a locally-inlined sample statement (no backend call).
+function ActiveCategoryChart({ category }: { category: CategoryKey }) {
+  switch (category) {
+    case "income":
+      return <NetIncomeGraph statement={sampleData.income} period="annually" />;
+    case "balance-sheet":
+      return <TotalAssetsGraph statement={sampleData.balanceSheet} period="annually" />;
+    case "cash-flow":
+      return <CashFlowTrifectaGraph statement={sampleData.cashFlow} period="annually" />;
+    case "metrics":
+      return <ProfitMarginGraph statement={sampleData.metrics} period="annually" />;
+    case "price":
+      return <PricingGraph statement={sampleData.pricing} period="annually" />;
+    default:
+      return null;
+  }
 }
 
 function DataSection() {
@@ -101,8 +117,10 @@ function DataSection() {
           })}
         </div>
 
-        {/* Right card */}
-        <Card className="bg-white/5 backdrop-blur-md lg:col-span-8">
+        {/* Right card. Note: no backdrop-blur here — backdrop-filter on an ancestor turns
+            into a containing block for the graphs' position:fixed fullscreen overlay, which
+            would break click-to-expand. The page background is flat, so the drop is invisible. */}
+        <Card className="bg-white/5 lg:col-span-8">
           <CardContent
             role="tabpanel"
             id="data-panel"
@@ -127,7 +145,14 @@ function DataSection() {
               ) : null}
             </div>
 
-            <GraphPlaceholder label={CARD_TITLE[activeCategory]} />
+            <StockHeaderProvider symbol={sampleData.symbol} logoUrl={sampleLogoUrl}>
+              <div
+                key={activeCategory}
+                className="w-full rounded-[10px] ring-1 ring-[var(--line-muted)]"
+              >
+                <ActiveCategoryChart category={activeCategory} />
+              </div>
+            </StockHeaderProvider>
           </CardContent>
         </Card>
       </div>
