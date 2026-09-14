@@ -118,4 +118,15 @@ describe('ProductHeader', () => {
 
     expect(mockNavigate).toHaveBeenCalledWith("/overview/MSFT");
   });
+
+  test('dip finder nav entry navigates to the dip page', () => {
+    render(<ProductHeader />);
+
+    // The desktop entry sits inside Radix's NavigationMenuContent, which only
+    // mounts once the menu is opened; the mobile menu renders inline, so assert
+    // against that one rather than driving the portal.
+    fireEvent.click(screen.getAllByText(/dip finder/i)[0]);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/dip");
+  });
 });
