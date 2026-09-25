@@ -14,27 +14,78 @@ export const DEFAULT_SMA_WINDOW = "200";
 export const VARIANCE_DOMAIN = [-30, 15];
 export const VARIANCE_TICKS = [15, 10, 5, 0, -5, -10, -15, -20, -25, -30];
 
-// The design colours columns in three bands rather than the app's usual
-// positive/negative pair: the deepest dips shout in red, moderate dips sit in a
-// muted sage, and anything at or above the average reads as light cream.
-export const DEEP_DIP_THRESHOLD = -20;
-
-export const BAR_COLORS = {
-  deepDip: "#9E2F31",
-  dip: "#8A9489",
-  neutral: "#E4E9E0",
+// Columns are coloured on a diverging ramp: red below the moving average, green
+// above it, deepening with distance from it. The scale is the fixed value axis
+// above rather than the data on screen, so a -10% dip keeps the same colour no
+// matter which tickers are on the watchlist.
+//
+// The anchors live here rather than as custom properties in index.css because
+// the colour is interpolated per column, and a custom property cannot be read
+// back out of CSS without getComputedStyle. Fixed steps -- five to an arm, or
+// any number -- put neighbouring columns in the same band and hand them the same
+// tone, which on a watchlist clustered near the top of the axis is most of them.
+//
+// Each arm holds one hue, borrowed from the app's own --main-brick (OKLCH H 22)
+// and --main-fern (H 144). Anchor 1 sits next to the zero line, anchor 5 at the
+// axis extreme. The dark set climbs in lightness towards the loud end, away from
+// the card; the light set runs darker instead, because on a near-white surface
+// contrast comes from depth rather than brightness. Every anchor clears 2:1 on
+// its own card.
+const RAMP_ANCHORS = {
+  dark: {
+    neg: ["#936461", "#ae6462", "#c86361", "#e36061", "#fe5b5f"],
+    pos: ["#5f7b5c", "#588e54", "#4da148", "#3ab536", "#00c807"],
+  },
+  light: {
+    neg: ["#ce9c9a", "#ca8481", "#c46c69", "#bd5252", "#b4343a"],
+    pos: ["#95b594", "#7aa379", "#5f925e", "#438144", "#246f27"],
+  },
 };
 
-export function barColorFor(variance) {
-  if (variance <= DEEP_DIP_THRESHOLD) {
-    return BAR_COLORS.deepDip;
+const [DIP_FLOOR, DIP_CEILING] = VARIANCE_DOMAIN;
+
+export const DEFAULT_THEME_MODE = "dark";
+
+function hexToRgb(hex) {
+  const value = parseInt(hex.slice(1), 16);
+
+  return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+}
+
+function mix(from, to, ratio) {
+  const channels = hexToRgb(from).map((channel, index) => {
+    const target = hexToRgb(to)[index];
+
+    return Math.round(channel + (target - channel) * ratio);
+  });
+
+  return `#${channels.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
+}
+
+// Straight sRGB between neighbouring anchors. They sit ~0.04 apart in OKLCH
+// lightness, close enough that interpolating in a perceptual space would not
+// move any rendered channel by a visible amount.
+function rampColor(arm, t, mode) {
+  const anchors = (RAMP_ANCHORS[mode] ?? RAMP_ANCHORS[DEFAULT_THEME_MODE])[arm];
+  const span = (anchors.length - 1) * Math.min(1, Math.max(0, t));
+  const index = Math.min(anchors.length - 2, Math.floor(span));
+
+  return mix(anchors[index], anchors[index + 1], span - index);
+}
+
+export function barColorFor(variance, mode = DEFAULT_THEME_MODE) {
+  if (!Number.isFinite(variance)) {
+    return rampColor("pos", 0, mode);
   }
 
+  // DIP_FLOOR is negative, so the quotient is already positive below the average.
+  // rampColor clamps it, which keeps a variance past the axis -- a -42% crash --
+  // on the deepest step instead of running off the end of the anchors.
   if (variance < 0) {
-    return BAR_COLORS.dip;
+    return rampColor("neg", variance / DIP_FLOOR, mode);
   }
 
-  return BAR_COLORS.neutral;
+  return rampColor("pos", variance / DIP_CEILING, mode);
 }
 
 // The design renders values bare -- "-27.40%", "0.00%", "12.71%" -- with no leading

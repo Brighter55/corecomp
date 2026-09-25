@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
 import {
-    BAR_COLORS,
     barColorFor,
     buildDipRows,
     buildSymbolEntries,
@@ -30,19 +29,51 @@ describe("buildDipRows", () => {
 });
 
 describe("barColorFor", () => {
-    test("gives the deepest dips the alert colour", () => {
-        expect(barColorFor(-27)).toBe(BAR_COLORS.deepDip);
-        expect(barColorFor(-20)).toBe(BAR_COLORS.deepDip);
+    const redChannel = (hex) => parseInt(hex.slice(1, 3), 16);
+    const greenChannel = (hex) => parseInt(hex.slice(3, 5), 16);
+
+    test("starts both arms at their quietest tone on the zero line", () => {
+        expect(barColorFor(0)).toBe("#5f7b5c");
+        expect(barColorFor(0, "light")).toBe("#95b594");
     });
 
-    test("shows moderate dips in the muted tone", () => {
-        expect(barColorFor(-19)).toBe(BAR_COLORS.dip);
-        expect(barColorFor(-1)).toBe(BAR_COLORS.dip);
+    test("reaches the arm's full-strength colour only at the axis extreme", () => {
+        expect(barColorFor(-30)).toBe("#fe5b5f");
+        expect(barColorFor(15)).toBe("#00c807");
+        expect(barColorFor(-30, "light")).toBe("#b4343a");
+        expect(barColorFor(15, "light")).toBe("#246f27");
     });
 
-    test("treats flat and positive the same", () => {
-        expect(barColorFor(0)).toBe(BAR_COLORS.neutral);
-        expect(barColorFor(12)).toBe(BAR_COLORS.neutral);
+    // The bug this replaced: five fixed steps put neighbouring columns in the
+    // same band, so the best performer and the next one down came out identical.
+    test("gives every distinct variance its own tone, with no banding", () => {
+        const greens = [0, 1, 3, 6, 9, 12, 15].map((v) => greenChannel(barColorFor(v)));
+        const reds = [-1, -5, -10, -15, -20, -25, -30].map((v) => redChannel(barColorFor(v)));
+
+        expect(new Set(greens).size).toBe(greens.length);
+        expect(new Set(reds).size).toBe(reds.length);
+    });
+
+    test("deepens in one direction along each arm", () => {
+        const greens = [0, 1, 3, 6, 9, 12, 15].map((v) => greenChannel(barColorFor(v)));
+        const reds = [-1, -5, -10, -15, -20, -25, -30].map((v) => redChannel(barColorFor(v)));
+
+        expect(greens).toEqual([...greens].sort((a, b) => a - b));
+        expect(reds).toEqual([...reds].sort((a, b) => a - b));
+    });
+
+    test("keeps the two themes on their own sets of tones", () => {
+        expect(barColorFor(7.5, "light")).not.toBe(barColorFor(7.5, "dark"));
+    });
+
+    test("clamps a variance past the fixed axis to the deepest tone", () => {
+        expect(barColorFor(-42)).toBe("#fe5b5f");
+        expect(barColorFor(90)).toBe("#00c807");
+    });
+
+    test("falls back to the quietest tone for a missing value", () => {
+        expect(barColorFor(Number.NaN)).toBe("#5f7b5c");
+        expect(barColorFor(undefined)).toBe("#5f7b5c");
     });
 });
 

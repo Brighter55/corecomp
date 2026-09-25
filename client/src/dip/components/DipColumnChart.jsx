@@ -17,6 +17,7 @@ import {
     formatVariance,
     formatVarianceTick,
 } from "../dipChartHelpers.js";
+import { useTheme } from "../../theme/ThemeContext.jsx";
 
 // Every column is anchored on the zero line, so a negative variance hangs below
 // it and a positive one rises above. Recharts' built-in label positions can only
@@ -48,6 +49,11 @@ function EndOfColumnLabel(props) {
 }
 
 function DipColumnChart({ rows }) {
+    // The column fill is computed per row rather than taken from a custom
+    // property, so the theme has to be named here. Everything else on the chart
+    // still reads var(--...) and flips on its own.
+    const { theme } = useTheme();
+
     return (
         <ResponsiveContainer width="100%" height="100%">
             <BarChart data={rows} margin={{ top: 24, right: 12, bottom: 8, left: 4 }}>
@@ -90,7 +96,7 @@ function DipColumnChart({ rows }) {
                     minPointSize={1}
                 >
                     {rows.map((row) => (
-                        <Cell key={row.symbol} fill={barColorFor(row.variance)} />
+                        <Cell key={row.symbol} fill={barColorFor(row.variance, theme)} />
                     ))}
                     <LabelList dataKey="variance" content={EndOfColumnLabel} />
                 </Bar>

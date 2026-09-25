@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 import DipColumnChart from "./DipColumnChart.jsx";
-import { BAR_COLORS, buildDipRows } from "../dipChartHelpers.js";
+import { buildDipRows } from "../dipChartHelpers.js";
 import sampleData from "../sample-data/dipSampleData.json";
 
 // ResponsiveContainer measures its parent, which is 0x0 under jsdom, and mocking
@@ -29,6 +29,9 @@ function texts(container, selector) {
 const columns = (container) => container.querySelectorAll(".recharts-rectangle");
 const fills = (container) =>
   Array.from(columns(container)).map((node) => node.getAttribute("fill"));
+
+// Fills are computed per row, so they come back as literal hexes.
+const redder = (hex) => parseInt(hex.slice(1, 3), 16) > parseInt(hex.slice(3, 5), 16);
 
 describe("DipColumnChart", () => {
   test("draws one column per scanned symbol, including the flat ones", () => {
@@ -70,22 +73,42 @@ describe("DipColumnChart", () => {
     ]);
   });
 
-  test("bands the column colours by how deep the dip is", () => {
+  // The regression this replaced: a fixed five-step ramp put neighbouring columns
+  // in the same band, so the best performer and the next one down rendered as a
+  // single colour and the chart read as flat.
+  test("gives every distinct variance its own colour", () => {
     const { container } = renderChart();
 
-    // Only TROW (-27%) clears the deep-dip threshold in the 200-day series.
-    const bands = fills(container);
-    expect(bands.filter((fill) => fill === BAR_COLORS.deepDip)).toHaveLength(1);
-    expect(bands.filter((fill) => fill === BAR_COLORS.dip)).toHaveLength(7);
-    expect(bands.filter((fill) => fill === BAR_COLORS.neutral)).toHaveLength(5);
+    // 13 columns, but two pairs share a variance (-11 twice, 0 twice).
+    expect(new Set(fills(container)).size).toBe(11);
   });
 
-  test("rebands when the 50-day series is plotted", () => {
+  test("never repeats a colour between columns that differ", () => {
+    const { container } = renderChart();
+    const rows = buildDipRows(sampleData.variance["200"]);
+    const colours = fills(container);
+
+    rows.forEach((row, index) => {
+      const neighbour = rows[index + 1];
+
+      if (neighbour && neighbour.variance !== row.variance) {
+        expect(colours[index]).not.toBe(colours[index + 1]);
+      }
+    });
+  });
+
+  test("runs red at the deepest dip and green at the best performer", () => {
+    const { container } = renderChart();
+    const colours = fills(container);
+
+    expect(redder(colours[0])).toBe(true); // TROW -27
+    expect(redder(colours[colours.length - 1])).toBe(false); // AAPL +12
+  });
+
+  test("re-colours the 50-day series without collapsing neighbours", () => {
     const { container } = renderChart("50");
 
-    const bands = fills(container);
-    expect(bands.filter((fill) => fill === BAR_COLORS.deepDip)).toHaveLength(1);
-    expect(bands.filter((fill) => fill === BAR_COLORS.dip)).toHaveLength(7);
-    expect(bands.filter((fill) => fill === BAR_COLORS.neutral)).toHaveLength(5);
+    // All 13 values differ in this window, so no colour may repeat.
+    expect(new Set(fills(container)).size).toBe(13);
   });
 });
