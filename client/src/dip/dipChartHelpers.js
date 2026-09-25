@@ -58,6 +58,42 @@ export function buildDipRows(varianceBySymbol) {
     .sort((left, right) => left.variance - right.variance);
 }
 
+// Guests start with nothing. The old fixture shipped 6 symbols against a
+// 5-symbol anonymous quota, so a seeded default would 403 a first-time visitor
+// on their very first page load -- and would spend those units before they ever
+// opened /overview. An empty list teaches the free-tier mechanic instead.
+export const DEFAULT_WATCHLIST = [];
+
+// Reshape the /pages/dip response back into the fixture's shapes, so that
+// buildDipRows, DipColumnChart and the whole render path stay untouched.
+export function buildVarianceByWindow(results, window) {
+  const varianceBySymbol = {};
+
+  for (const result of results ?? []) {
+    const variance = result?.variance?.[window];
+
+    // A symbol whose moving average is missing is dropped rather than plotted
+    // as a zero: buildDipRows sorts numerically, and null would coerce to 0 and
+    // drop the row into the middle of the chart.
+    if (!Number.isFinite(variance)) {
+      continue;
+    }
+
+    varianceBySymbol[result.symbol] = variance;
+  }
+
+  return varianceBySymbol;
+}
+
+export function buildSymbolEntries(results) {
+  return (results ?? []).map((result) => ({
+    symbol: result.symbol,
+    // Always a string: filterSymbols and WatchlistSidebar both dereference
+    // .name, and "unknown" rows carry a null one.
+    name: String(result.name ?? result.symbol),
+  }));
+}
+
 export function findSymbolEntry(symbols, query) {
   const needle = String(query ?? "").trim().toUpperCase();
 
@@ -83,8 +119,8 @@ export function filterSymbols(symbols, query, exclude = []) {
     }
 
     return (
-      entry.symbol.toLowerCase().includes(needle) ||
-      entry.name.toLowerCase().includes(needle)
+      String(entry.symbol ?? "").toLowerCase().includes(needle) ||
+      String(entry.name ?? "").toLowerCase().includes(needle)
     );
   });
 }

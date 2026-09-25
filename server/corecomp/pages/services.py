@@ -30,6 +30,9 @@ class FinancialDataService:
             return {"Global Quote": {}}  # invalid symbol -> view 400
         return {"Global Quote": {"05. price": price}}
 
+    def get_dip_row(self, symbol):
+        return wisesheets.get_dip_row(symbol)
+
     def get_overview(self, symbol):
         return wisesheets.get_overview_av(symbol)
 
@@ -63,6 +66,14 @@ class FinancialDataService:
         return wisesheets.get_pricing_av(symbol)
 
 class MockFinancialDataService:
+    def get_dip_row(self, symbol):
+        path = SAMPLES_DIR / "dip_rows.json"
+        with open(path, 'r') as file:
+            data = json.load(file)
+        # Keyed by symbol, unlike the single-shape fixtures: a miss here stands
+        # in for "symbol not in the API universe".
+        return data.get(symbol.upper(), {})
+
     def get_current_price(self, symbol):
         path = SAMPLES_DIR / "global_quote.json"
         with open(path, 'r') as file:

@@ -1,7 +1,26 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { cn } from "../../lib/utils.ts";
+import { authenticatedClient } from "../../helpers/api.js";
 import { filterSymbols, findSymbolEntry } from "../dipChartHelpers.js";
+
+const DEBOUNCE_MS = 300;
+
+// The symbol-search endpoint returns DB rows, but a live row is still normalised
+// here so that filterSymbols and the two render sites can rely on a real string.
+function normalizeSuggestion(entry) {
+    if (!entry || typeof entry !== "object") {
+        return null;
+    }
+
+    const symbol = typeof entry.symbol === "string" ? entry.symbol.trim().toUpperCase() : "";
+
+    if (!symbol) {
+        return null;
+    }
+
+    return { symbol, name: String(entry.name ?? symbol) };
+}
 
 function TickerBadge({ symbol }) {
     return (
@@ -11,18 +30,72 @@ function TickerBadge({ symbol }) {
     );
 }
 
-function WatchlistSidebar({ items, symbols, selectedSymbol, onSelect, onAdd, onRemove }) {
+function WatchlistSidebar({ items, selectedSymbol, onSelect, onAdd, onRemove }) {
     const [query, setQuery] = useState("");
     const [notice, setNotice] = useState(null);
+    const [suggestions, setSuggestions] = useState([]);
+
+    // Same debounce + sequence-guard shape as shared/SymbolSearch.jsx: the
+    // requestId check stops a slow early response from overwriting a later one.
+    const debounceRef = useRef(null);
+    const requestRef = useRef(0);
+
+    useEffect(() => {
+        const trimmed = query.trim();
+
+        if (!trimmed) {
+            requestRef.current += 1;
+            setSuggestions([]);
+            return undefined;
+        }
+
+        const requestId = requestRef.current + 1;
+        requestRef.current = requestId;
+
+        debounceRef.current = window.setTimeout(async () => {
+            try {
+                // AllowAny on the server, so typing costs no quota.
+                const response = await authenticatedClient({
+                    endpoint: "/pages/symbol-search",
+                    payload: { symbol: trimmed },
+                });
+
+                const data = await response.json();
+
+                if (requestRef.current !== requestId) {
+                    return;
+                }
+
+                if (!response.ok) {
+                    setSuggestions([]);
+                    return;
+                }
+
+                setSuggestions(
+                    Array.isArray(data) ? data.map(normalizeSuggestion).filter(Boolean) : [],
+                );
+            } catch {
+                if (requestRef.current === requestId) {
+                    setSuggestions([]);
+                }
+            }
+        }, DEBOUNCE_MS);
+
+        return () => {
+            if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+            }
+        };
+    }, [query]);
 
     const held = items.map((item) => item.symbol);
-    const matches = filterSymbols(symbols, query, held);
+    const matches = filterSymbols(suggestions, query, held);
 
     function commit(rawSymbol) {
-        const entry = findSymbolEntry(symbols, rawSymbol);
+        const entry = findSymbolEntry(suggestions, rawSymbol);
 
         if (!entry) {
-            setNotice(`No sample data for "${rawSymbol.trim().toUpperCase()}"`);
+            setNotice(`No match for "${rawSymbol.trim().toUpperCase()}" in our symbol list`);
             return;
         }
 

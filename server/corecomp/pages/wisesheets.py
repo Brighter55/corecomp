@@ -100,17 +100,6 @@ def fetch_wisesheets(endpoint, params):
 _UPSTREAM_CACHE = {}
 
 
-def _record_request():
-    """INCR a daily counter for quota observability. Never raises."""
-    try:
-        from django.core.cache import cache
-
-        cache.incr("ws:requests", 1)
-        cache.expire("ws:requests", 40 * 86400)
-    except Exception:
-        pass
-
-
 def _upstream(key, fetch_fn, ttl_seconds=300):
     now = time.time()
     cached = _UPSTREAM_CACHE.get(key)
@@ -120,7 +109,6 @@ def _upstream(key, fetch_fn, ttl_seconds=300):
     if isinstance(value, Response):
         return value  # errors are never cached
     _UPSTREAM_CACHE[key] = (now + ttl_seconds, value)
-    _record_request()
     return value
 
 
@@ -667,6 +655,33 @@ def get_live_row(symbol):
         return {}
     rows = data.get("data") or []
     return rows[0] if rows else {}
+
+
+def get_dip_row(symbol):
+    """Price and both moving averages for the dip chart.
+
+    Returns {symbol, name, price, sma50, sma200} or a Response; {} for an
+    unknown symbol. Any individual field may be None -- the caller renders
+    those as "unavailable" rather than failing the whole request.
+
+    Rides the same `live:{symbol}` upstream memo as /pages/current-price, so a
+    user opening both pages for one symbol costs one upstream call, not two.
+    That memo is the only thing the two features share; the Redis-level caches
+    stay separate.
+    """
+    row = get_live_row(symbol)
+    if isinstance(row, Response):
+        return row
+    if not row:
+        return {}
+
+    return {
+        "symbol": symbol.upper(),
+        "name": row.get("name"),
+        "price": _safe_float(row.get("price")),
+        "sma50": _safe_float(row.get("priceAvg50")),
+        "sma200": _safe_float(row.get("priceAvg200")),
+    }
 
 
 # ---------------------------------------------------------------------------
