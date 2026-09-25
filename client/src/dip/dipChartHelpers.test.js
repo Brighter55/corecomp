@@ -8,6 +8,7 @@ import {
     filterSymbols,
     findSymbolEntry,
     formatVariance,
+    formatVarianceTick,
 } from "./dipChartHelpers.js";
 
 describe("buildDipRows", () => {
@@ -47,14 +48,33 @@ describe("barColorFor", () => {
 
 describe("formatVariance", () => {
     test("renders bare values with no leading plus, as the design does", () => {
-        expect(formatVariance(-27)).toBe("-27%");
-        expect(formatVariance(0)).toBe("0%");
-        expect(formatVariance(12)).toBe("12%");
+        expect(formatVariance(-27)).toBe("-27.00%");
+        expect(formatVariance(0)).toBe("0.00%");
+        expect(formatVariance(12)).toBe("12.00%");
+    });
+
+    test("keeps the hundredths the API actually reports", () => {
+        expect(formatVariance(-11.4)).toBe("-11.40%");
+        expect(formatVariance(12.71)).toBe("12.71%");
+    });
+
+    test("does not sign a value that rounds away to zero", () => {
+        expect(formatVariance(-0.001)).toBe("0.00%");
+        expect(formatVariance(-0.004)).toBe("0.00%");
     });
 
     test("falls back for missing data", () => {
         expect(formatVariance(undefined)).toBe("--");
         expect(formatVariance(Number.NaN)).toBe("--");
+    });
+});
+
+describe("formatVarianceTick", () => {
+    test("keeps the gridlines at whole percents", () => {
+        expect(formatVarianceTick(15)).toBe("15%");
+        expect(formatVarianceTick(0)).toBe("0%");
+        expect(formatVarianceTick(-5)).toBe("-5%");
+        expect(formatVarianceTick(-30)).toBe("-30%");
     });
 });
 

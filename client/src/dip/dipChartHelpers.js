@@ -37,12 +37,22 @@ export function barColorFor(variance) {
   return BAR_COLORS.neutral;
 }
 
-// The design renders values bare -- "-27%", "0%", "12%" -- with no leading plus.
+// The design renders values bare -- "-27.40%", "0.00%", "12.71%" -- with no leading
+// plus. Hundredths, because whole percents hide the separation this page exists to show.
 export function formatVariance(value) {
   if (!Number.isFinite(value)) {
     return "--";
   }
 
+  const rounded = value.toFixed(2);
+
+  // A value that rounds to zero must not keep the sign: -0.004 would read "-0.00%".
+  return `${rounded === "-0.00" ? "0.00" : rounded}%`;
+}
+
+// The value axis keeps whole percentages: its ticks are fixed at 5% steps, so
+// hundredths on the gridlines would be noise rather than information.
+export function formatVarianceTick(value) {
   return `${Math.round(value)}%`;
 }
 

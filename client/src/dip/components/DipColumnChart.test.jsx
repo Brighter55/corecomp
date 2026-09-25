@@ -52,12 +52,14 @@ describe("DipColumnChart", () => {
     const { container } = renderChart();
 
     expect(texts(container, ".dip-column-label")).toEqual([
-      "-27%", "-16%", "-11%", "-11%", "-10%", "-6%", "-3%",
-      "-2%", "0%", "0%", "1%", "10%", "12%",
+      "-27.00%", "-16.00%", "-11.00%", "-11.00%", "-10.00%", "-6.00%", "-3.00%",
+      "-2.00%", "0.00%", "0.00%", "1.00%", "10.00%", "12.00%",
     ]);
   });
 
-  test("keeps the fixed percentage axis from +15% down to -30%", () => {
+  // The axis is deliberately coarser than the columns: its ticks are fixed 5% steps,
+  // so hundredths on the gridlines would be noise. This pins that split.
+  test("keeps the fixed percentage axis whole, from +15% down to -30%", () => {
     const { container } = renderChart();
 
     expect(

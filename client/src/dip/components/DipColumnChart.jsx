@@ -15,6 +15,7 @@ import {
     VARIANCE_TICKS,
     barColorFor,
     formatVariance,
+    formatVarianceTick,
 } from "../dipChartHelpers.js";
 
 // Every column is anchored on the zero line, so a negative variance hangs below
@@ -72,7 +73,7 @@ function DipColumnChart({ rows }) {
                     stroke="var(--text-main)"
                     tick={{ fontSize: 12 }}
                     tickLine={false}
-                    tickFormatter={formatVariance}
+                    tickFormatter={formatVarianceTick}
                 />
                 <ReferenceLine y={0} stroke="var(--main-dry-sage)" strokeDasharray="4 4" />
                 <Tooltip
