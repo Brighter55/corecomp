@@ -57,8 +57,44 @@ def _windows_exe(argv: list[str]) -> list[str]:
     return argv
 
 
+def _pipenv_venv() -> Path | None:
+    """Where pipenv keeps this project's virtualenv, or None."""
+    pipenv = shutil.which("pipenv")
+    if not pipenv or not (SERVER / "Pipfile").is_file():
+        return None
+    try:
+        proc = subprocess.run(
+            _windows_exe([pipenv, "--venv"]),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env={**os.environ, "PIPENV_PIPFILE": str(SERVER / "Pipfile")},
+        )
+    except OSError:
+        return None
+    if proc.returncode != 0:
+        return None
+    # pipenv prints "Loading .env environment variables..." ahead of the path,
+    # so take the last line that actually names a directory.
+    for line in reversed((proc.stdout or "").strip().splitlines()):
+        candidate = Path(line.strip())
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
 def python_cmd() -> list[str]:
-    """The project interpreter, explicitly -- never an assumed active venv."""
+    """The project interpreter, explicitly -- never an assumed active venv.
+
+    Deliberately resolved to the venv's python *binary* rather than
+    `pipenv run python`. pipenv loads server/.env and OVERRIDES the process
+    environment with it, so `pipenv run` silently discards every variable
+    build_env() sets -- MOCK, REDIS_CACHE_LOCATION, CSRF_TRUSTED_ORIGINS and
+    the rest. That went unnoticed only because server/.env happens to hold
+    usable values on a developer machine; on any other machine the contract
+    would be void. Invoking the interpreter directly keeps the env intact.
+    """
     override = os.environ.get("CORECOMP_PYTHON")
     if override:
         return _windows_exe([override])
@@ -71,9 +107,12 @@ def python_cmd() -> list[str]:
         candidate = SERVER / rel
         if candidate.exists():
             return [str(candidate)]
-    pipenv = shutil.which("pipenv")
-    if pipenv and (SERVER / "Pipfile").is_file():
-        return _windows_exe([pipenv, "run", "python"])
+    venv = _pipenv_venv()
+    if venv:
+        for rel in ("Scripts/python.exe", "bin/python"):
+            candidate = venv / rel
+            if candidate.exists():
+                return [str(candidate)]
     return [sys.executable]
 
 
