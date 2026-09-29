@@ -194,7 +194,25 @@ free SEC EDGAR call.
 
 - **Right fix:** `--source sec` unless you specifically need the WiseSheets data.
 
-### 12. Never run `pipenv` from the repo root
+### 12. Tests must not read gitignored files
+
+This one actually happened: CI failed on the first PR with two gates red that
+were green locally, because the suite silently depended on files that are not in
+the repo — `pages/statement_samples/*.json` (generated, gitignored) and
+`client/.env`. The suite had never been runnable from a clean checkout.
+
+- **Wrong fix:** "works on my machine" — regenerate the samples in CI. That
+  spends real WiseSheets quota on every run and still leaves the frontend broken.
+- **Right fix:** test data must be committed. `overview_payload` (conftest.py)
+  reads a tracked fixture, and `client/.env.test` pins the test-mode config.
+- **How to check:** hide the gitignored files and run the gate —
+  `mv statement_samples{,.hidden}`, same for `client/.env` and `server/.env`,
+  then `python scripts/check.py`. That is CI's exact situation.
+
+Anything a test reads must be in git. If it is not, the test passes locally and
+fails for everyone else, which is worse than no test.
+
+### 13. Never run `pipenv` from the repo root
 
 The Pipfile is in `server/`. Running pipenv from the root resolves against
 `~/.virtualenvs/corecomp-*` instead of the project's `server-*` environment and
