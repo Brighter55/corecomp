@@ -23,7 +23,8 @@ I plan to monetize with ads once it picks up users.
 - **Backend**: `pipenv run python corecomp/manage.py runserver` (from `server/`) → :8000
 - **Frontend**: `npm run dev` (from `client/`) → :5173
 - To bring up everything: run the `/run-app` skill.
-- `server/.env` is gitignored; `MOCK=True` locally (mock data fixtures). `WISESHEETS_API_KEY` is set in `.env` (dev) and the Render dashboard (prod); `MOCK=False` for live data.
+- `server/.env` is gitignored; **`MOCK=False` locally, so local dev runs on live WiseSheets data.** `WISESHEETS_API_KEY` is set in `.env` (dev) and the Render dashboard (prod) — **the dev key is the same one production uses**, on a shared 5,000 req/month free tier, so local browsing spends real budget (`/dip` ≈ 1 request per cold symbol, `/overview` ≈ 6). Run `/run-app` for the full picture, including how to switch to mock.
+- `MOCK` is read at **import time** in `services/__init__.py`, so changing it needs a backend restart, not just a reload.
 
 ## Auth & anonymous quota (core of the free model)
 
@@ -36,7 +37,8 @@ I plan to monetize with ads once it picks up users.
 
 ## Testing
 
-- Backend: `pipenv run pytest` from `server/` (≈145 tests). Requires Postgres + Redis running.
+- Backend: `pipenv run pytest` from **`server/corecomp/`** (≈179 tests). Requires Postgres + Redis running.
+  - Not from `server/`: `pytest.ini` lives in `server/corecomp/`, so running one level up does not discover it and every test errors with `ImproperlyConfigured: Requested setting REST_FRAMEWORK`.
 - Frontend: `npm test` (≈167 Vitest tests) and `npm run build` from `client/`.
 
 ## Deployment (Render)

@@ -83,6 +83,16 @@ function ProductHeader() {
                                             <p className="text-sm font-semibold text-[var(--text-main)]">Overview</p>
                                             <p className="text-xs text-[var(--text-muted)]">Browse company fundamentals and market data.</p>
                                         </button>
+                                        <button
+                                            type="button"
+                                            className="rounded-xl px-3 py-2 text-left transition hover:bg-[var(--surface-soft)]"
+                                            onClick={() => {
+                                                handleItemClicked("/dip");
+                                            }}
+                                        >
+                                            <p className="text-sm font-semibold text-[var(--text-main)]">Dip Finder</p>
+                                            <p className="text-xs text-[var(--text-muted)]">See how far stocks have fallen below their moving average.</p>
+                                        </button>
                                     </div>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
@@ -169,6 +179,16 @@ function ProductHeader() {
                             }}
                         >
                             Features
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            className="mb-1 flex w-full justify-start rounded-xl text-[var(--text-main)]"
+                            onClick={() => {
+                                handleItemClicked("/dip");
+                            }}
+                        >
+                            Dip Finder
                         </Button>
                         {user ? (
                             <>

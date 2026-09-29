@@ -1,0 +1,51 @@
+{
+  "asOf": "2026-09-12",
+  "symbols": [
+    { "symbol": "TROW", "name": "T. Rowe Price Group Inc" },
+    { "symbol": "SBUX", "name": "Starbucks Corp" },
+    { "symbol": "TGT", "name": "Target Corp" },
+    { "symbol": "DIS", "name": "Walt Disney Co" },
+    { "symbol": "NKE", "name": "Nike Inc" },
+    { "symbol": "VICI", "name": "VICI Properties Inc" },
+    { "symbol": "JPM", "name": "JPMorgan Chase & Co" },
+    { "symbol": "TXRH", "name": "Texas Roadhouse Inc" },
+    { "symbol": "MSFT", "name": "Microsoft Corp" },
+    { "symbol": "HD", "name": "Home Depot Inc" },
+    { "symbol": "SPG", "name": "Simon Property Group Inc" },
+    { "symbol": "COST", "name": "Costco Wholesale Corp" },
+    { "symbol": "AAPL", "name": "Apple Inc" }
+  ],
+  "watchlist": ["AAPL", "MSFT", "COST", "VICI", "SBUX", "DIS"],
+  "variance": {
+    "200": {
+      "TROW": -27,
+      "SBUX": -16,
+      "TGT": -11,
+      "DIS": -11,
+      "NKE": -10,
+      "VICI": -6,
+      "JPM": -3,
+      "TXRH": -2,
+      "MSFT": 0,
+      "HD": 0,
+      "SPG": 1,
+      "COST": 10,
+      "AAPL": 12
+    },
+    "50": {
+      "TROW": -21,
+      "SBUX": -13,
+      "NKE": -12,
+      "TGT": -9,
+      "DIS": -8,
+      "VICI": -4,
+      "JPM": -2,
+      "HD": -1,
+      "TXRH": 1,
+      "MSFT": 2,
+      "SPG": 3,
+      "COST": 7,
+      "AAPL": 9
+    }
+  }
+}

@@ -4,13 +4,17 @@ import Footer from "./shared/Footer.tsx";
 const versions = [
     {
         name: "Current Version",
-        version: "0.8.2",
-        date: "09/08/2026",
+        version: "0.9.0",
+        date: "09/28/2026",
         updates: [
-            "Turn the landing page \"Data you can trust\" section into real, interactive charts (no more placeholder images)",
-            "Sample each statement category (income, balance sheet, cash flow, metrics, price) with live WiseSheets data",
-            "Show real company logos on landing page charts",
-            "Fix fullscreen chart expand inside the landing page \"Data you can trust\" panel",
+            "Add Dip Finder page: build a watchlist and chart how far each ticker has fallen below its moving average",
+            "Switch the chart between the 50-day and 200-day simple moving average",
+            "Colour chart columns on a green-to-red ramp so the deepest dips stand out",
+            "Add a ? button beside the page title explaining the metric",
+            "Show company logos in the watchlist, falling back to the ticker chip when none is found",
+            "Add Dip Finder to the header navigation",
+            "Share the 5 free symbol views/month across Dip Finder and single-company pages",
+            "Fix the search icon drifting down into the results list",
         ],
     },
     {

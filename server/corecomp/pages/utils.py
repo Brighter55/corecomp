@@ -756,4 +756,21 @@ def compute_pfcf(pricing, cash_flow, balance_sheet):
     _append_pfcf_quarterly(balance_sheet.get("quarterlyReports", []))
 
     return result
+
+
+def compute_variance(price, sma):
+    """Percent deviation of price from a simple moving average.
+
+    Returns None if either input is missing or the average is zero, so the
+    caller can mark the row unavailable instead of rendering a bogus "-".
+    Left unrounded on purpose: the client sorts on this value and rounds only
+    for display, so rounding here would collapse near-ties into source order.
+    """
+    price = safe_float(price)
+    sma = safe_float(sma)
+
+    if price is None or sma in (None, 0):
+        return None
+
+    return (price - sma) / sma * 100
     

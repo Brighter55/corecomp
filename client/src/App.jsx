@@ -8,6 +8,7 @@ import Account from "./Account.jsx"
 import PrivacyPolicy from "./PrivacyPolicy.jsx"
 import TermsOfService from "./TermsOfService.jsx"
 import Upcoming from "./Upcoming.jsx"
+import DipPage from "./dip/DipPage.jsx"
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/tos" element={<TermsOfService></TermsOfService>} />
         <Route path="/account" element={<AuthenticatedRoute><Account /></AuthenticatedRoute>} />
         <Route path="/upcoming" element={<Upcoming />} />
+        <Route path="/dip" element={<DipPage />} />
       </Routes>
     </BrowserRouter>
   )

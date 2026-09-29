@@ -12,6 +12,9 @@ urlpatterns = [
     path("earnings", overview.earnings, name="earnings"),
     path("dividends", overview.dividends, name="dividends"),
     path("pricing", overview.pricing, name="pricing"),
+    # no trailing slash: APPEND_SLASH would 301 a POST, and fetch follows a 301
+    # as a GET, turning it into a 405
+    path("dip", overview.dip, name="dip"),
     path("symbol-search", overview.symbol_search, name="symbol_search"),
     path("composite", overview.composite, name="composite"),
 ]

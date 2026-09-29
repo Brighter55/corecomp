@@ -445,6 +445,85 @@ class TestCurrentPrice:
         assert FinancialDataService().get_current_price("ZZZZ") == {"Global Quote": {}}
 
 
+class TestDipRow:
+    """get_dip_row feeds /pages/dip. It must not disturb get_current_price."""
+
+    def _live_payload(self, **overrides):
+        row = {
+            "symbol": "AAPL",
+            "price": "190.12",
+            "priceAvg50": "180.5",
+            "priceAvg200": "150.25",
+            "name": "Apple Inc",
+        }
+        row.update(overrides)
+        return {"data": [row], "meta": {}}
+
+    def test_maps_price_and_both_averages(self, monkeypatch):
+        monkeypatch.setenv("WISESHEETS_API_KEY", "wsh_live_test")
+        monkeypatch.setattr(
+            wisesheets, "fetch_wisesheets", lambda endpoint, params: self._live_payload()
+        )
+
+        assert wisesheets.get_dip_row("AAPL") == {
+            "symbol": "AAPL",
+            "name": "Apple Inc",
+            "price": 190.12,
+            "sma50": 180.5,
+            "sma200": 150.25,
+        }
+
+    def test_missing_average_becomes_none_not_the_string_none(self, monkeypatch):
+        monkeypatch.setenv("WISESHEETS_API_KEY", "wsh_live_test")
+        monkeypatch.setattr(
+            wisesheets, "fetch_wisesheets",
+            lambda endpoint, params: self._live_payload(priceAvg200=None),
+        )
+
+        row = wisesheets.get_dip_row("AAPL")
+        assert row["sma200"] is None
+        assert row["sma50"] == 180.5
+
+    def test_unknown_symbol_returns_empty(self, monkeypatch):
+        monkeypatch.setenv("WISESHEETS_API_KEY", "wsh_live_test")
+        monkeypatch.setattr(
+            wisesheets, "fetch_wisesheets",
+            lambda endpoint, params: {"data": [], "meta": {"unknownSymbols": ["ZZZZ"]}},
+        )
+
+        assert wisesheets.get_dip_row("ZZZZ") == {}
+
+    def test_upstream_error_passes_through(self, monkeypatch):
+        monkeypatch.setenv("WISESHEETS_API_KEY", "wsh_live_test")
+        monkeypatch.setattr(
+            wisesheets, "fetch_wisesheets",
+            lambda endpoint, params: Response(
+                {"error": "rate limit issue"}, status=status.HTTP_503_SERVICE_UNAVAILABLE
+            ),
+        )
+
+        assert isinstance(wisesheets.get_dip_row("AAPL"), Response)
+
+    def test_shares_the_live_memo_with_current_price(self, monkeypatch):
+        # The memo is keyed by upstream resource, not by feature, so opening
+        # /overview and /dip for one symbol is one upstream call. This is the
+        # only thing the two features share -- the Redis caches stay separate.
+        monkeypatch.setenv("WISESHEETS_API_KEY", "wsh_live_test")
+        calls = []
+        monkeypatch.setattr(
+            wisesheets, "fetch_wisesheets",
+            lambda endpoint, params: calls.append(endpoint) or self._live_payload(),
+        )
+
+        from pages.services import FinancialDataService
+
+        service = FinancialDataService()
+        service.get_current_price("AAPL")
+        service.get_dip_row("AAPL")
+
+        assert calls == ["prices/live"]
+
+
 # ---------------------------------------------------------------------------
 # Dividends
 # ---------------------------------------------------------------------------
