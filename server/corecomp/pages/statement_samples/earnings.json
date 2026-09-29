@@ -1,0 +1,59 @@
+{
+    "symbol": "IBM",
+    "annualEarnings": [
+        {
+            "fiscalDateEnding": "2025-12-31",
+            "reportedEPS": "11.3600000000000000"
+        },
+        {
+            "fiscalDateEnding": "2024-12-31",
+            "reportedEPS": "6.5300000000000000"
+        },
+        {
+            "fiscalDateEnding": "2023-12-31",
+            "reportedEPS": "8.2300000000000000"
+        },
+        {
+            "fiscalDateEnding": "2022-12-31",
+            "reportedEPS": "1.82000000000000000000"
+        },
+        {
+            "fiscalDateEnding": "2021-12-31",
+            "reportedEPS": "6.4100000000000000"
+        }
+    ],
+    "quarterlyEarnings": [
+        {
+            "fiscalDateEnding": "2026-06-30",
+            "reportedEPS": "2.3000000000000000"
+        },
+        {
+            "fiscalDateEnding": "2026-03-31",
+            "reportedEPS": "1.30000000000000000000"
+        },
+        {
+            "fiscalDateEnding": "2025-12-31",
+            "reportedEPS": "6.0066893474465376"
+        },
+        {
+            "fiscalDateEnding": "2025-09-30",
+            "reportedEPS": "1.87000000000000000000"
+        },
+        {
+            "fiscalDateEnding": "2025-06-30",
+            "reportedEPS": "2.3600000000000000"
+        },
+        {
+            "fiscalDateEnding": "2025-03-31",
+            "reportedEPS": "1.14000000000000000000"
+        },
+        {
+            "fiscalDateEnding": "2024-12-31",
+            "reportedEPS": "3.1613166488515155"
+        },
+        {
+            "fiscalDateEnding": "2024-09-30",
+            "reportedEPS": "-0.36000000000000000000"
+        }
+    ]
+}

@@ -1,0 +1,9 @@
+{
+  "AAPL": { "symbol": "AAPL", "name": "Apple Inc", "price": 231.4, "sma50": 216.1, "sma200": 205.3 },
+  "MSFT": { "symbol": "MSFT", "name": "Microsoft Corp", "price": 418.9, "sma50": 424.5, "sma200": 430.2 },
+  "COST": { "symbol": "COST", "name": "Costco Wholesale Corp", "price": 912.7, "sma50": 880.4, "sma200": 842.9 },
+  "TROW": { "symbol": "TROW", "name": "T. Rowe Price Group Inc", "price": 101.5, "sma50": 128.0, "sma200": 139.2 },
+  "VICI": { "symbol": "VICI", "name": "VICI Properties Inc", "price": 31.9, "sma50": 33.6, "sma200": 34.1 },
+  "SBUX": { "symbol": "SBUX", "name": "Starbucks Corp", "price": 77.2, "sma50": 88.1, "sma200": null },
+  "DIS": { "symbol": "DIS", "name": "Walt Disney Co", "price": 96.4, "sma50": null, "sma200": 101.8 }
+}
