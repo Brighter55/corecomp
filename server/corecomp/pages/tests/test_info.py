@@ -1,5 +1,3 @@
-import json
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -13,7 +11,7 @@ url = reverse('info')
 # test for valid request
 @patch("pages.views.overview.financial_data_service.get_overview")
 @pytest.mark.django_db
-def test_info(mock_get_overview, authorized_client):
+def test_info(mock_get_overview, authorized_client, overview_payload):
     symbol = Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
@@ -21,10 +19,7 @@ def test_info(mock_get_overview, authorized_client):
     )
     symbol.save()
 
-    path = Path(__file__).resolve().parent.parent / "statement_samples" / "overview.json"
-    with open(path, 'r') as file:
-        return_value = json.load(file)
-
+    return_value = overview_payload
     mock_get_overview.return_value = return_value
     payload = {"symbol": "IBM"}
     response = authorized_client.post(url, payload, format="json")

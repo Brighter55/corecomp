@@ -1,5 +1,3 @@
-import json
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -63,15 +61,15 @@ def test_quota_view_authenticated_post_rejects_wrong_csrf(api_client, authentica
 # match (cookie-only double-submit; secret chars must be CSRF_ALLOWED_CHARS).
 @patch("pages.views.overview.financial_data_service.get_overview")
 @pytest.mark.django_db
-def test_quota_view_authenticated_post_with_valid_csrf(mock_get_overview, api_client, authenticated_user):
+def test_quota_view_authenticated_post_with_valid_csrf(
+    mock_get_overview, api_client, authenticated_user, overview_payload
+):
     Symbol(
         symbol="IBM",
         name="International Business Machines Corp",
         type="Stock",
     ).save()
-    path = Path(__file__).resolve().parents[2] / "pages" / "statement_samples" / "overview.json"
-    with open(path, "r") as file:
-        mock_get_overview.return_value = json.load(file)
+    mock_get_overview.return_value = overview_payload
     secret = "A" * 32
     api_client.credentials(
         HTTP_COOKIE=f"access_token={access_token_for(authenticated_user)}; csrftoken={secret}",
