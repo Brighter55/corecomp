@@ -9,18 +9,25 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         async function getUser() {
-            const response = await authenticatedClient({endpoint: "/accounts/me"});
-            if (!response.ok) {
+            try {
+                const response = await authenticatedClient({endpoint: "/accounts/me"});
+                if (!response.ok) {
+                    setUser(null);
+                    return;
+                }
+                setUser(await response.json());
+            } catch {
+                // A rejected request (backend down, request aborted) or a
+                // non-JSON body must still settle `loading`. Otherwise it stays
+                // true forever and AuthenticatedRoute -- which has no timeout of
+                // its own -- renders "Loading..." permanently, so one blip
+                // bricks every route rather than just failing to sign you in.
                 setUser(null);
+            } finally {
                 setLoading(false);
-                return;
             }
-            const data = await response.json();
-            setUser(data);
-            setLoading(false);
         }
 
-        
         getUser();
     }, []);
 
