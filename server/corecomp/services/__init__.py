@@ -1,9 +1,9 @@
 # determines if the services are mock or live
 
-from pages.services import FinancialDataService, MockFinancialDataService
 import os
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
+from pages.services import FinancialDataService, MockFinancialDataService
 
 load_dotenv()
 if os.getenv("MOCK") == "True":

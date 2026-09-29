@@ -888,7 +888,6 @@ def get_overview_av(symbol):
     shares_outstanding = _safe_float(live.get("sharesOutstanding"))
     price = _safe_float(live.get("price"))
     eps_live = _safe_float(live.get("eps"))
-    pe_live = _safe_float(live.get("pe"))
 
     revenue_ttm = _ttm_sum(quarterly, "totalRevenue")
     gross_profit_ttm = _ttm_sum(quarterly, "grossProfit")

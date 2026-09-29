@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import overview
 
+from .views import overview
 
 urlpatterns = [
     # Search page

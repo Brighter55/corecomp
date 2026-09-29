@@ -1,12 +1,12 @@
+import json
+from pathlib import Path
+from unittest.mock import patch
+
 import pytest
 from django.urls import reverse
-from unittest.mock import patch
 from pages.models import Symbol
-from rest_framework.response import Response
 from rest_framework import status
-from pathlib import Path
-import json
-
+from rest_framework.response import Response
 
 url = reverse('info')
 

@@ -21,6 +21,7 @@ gunicorn = "*"
 dj-database-url = "*"
 
 [dev-packages]
+ruff = "*"
 
 [requires]
 python_version = "3.11"

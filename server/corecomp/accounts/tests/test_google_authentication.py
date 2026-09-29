@@ -1,8 +1,8 @@
-from django.contrib.auth import get_user_model
-from django.urls import reverse
-import pytest
 from unittest.mock import patch
 
+import pytest
+from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 User = get_user_model()
 url = reverse("google_authentication")
@@ -11,7 +11,7 @@ url = reverse("google_authentication")
 @pytest.mark.django_db
 @patch("accounts.views.verify_google_token")
 def test_valid_google_sign_in(mock_verify, api_client):
-    user = User.objects.create_user(username="test@gmail.com", is_active=True, email="test@gmail.com")
+    User.objects.create_user(username="test@gmail.com", is_active=True, email="test@gmail.com")
     payload = {"JWTToken": "invalid token"}
     mock_verify.return_value = {
         "sub": "123",

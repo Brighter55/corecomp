@@ -5,9 +5,8 @@ from unittest.mock import patch
 import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from rest_framework_simplejwt.tokens import RefreshToken
-
 from pages.models import Symbol
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 

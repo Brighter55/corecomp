@@ -17,9 +17,8 @@ import json
 import os
 
 from django.core.management.base import BaseCommand, CommandError
+from pages.services import SAMPLES_DIR, FinancialDataService
 from rest_framework.response import Response
-
-from pages.services import FinancialDataService, SAMPLES_DIR
 
 
 class Command(BaseCommand):

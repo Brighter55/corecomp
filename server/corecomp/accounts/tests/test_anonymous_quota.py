@@ -1,8 +1,8 @@
-from django.urls import reverse
 from unittest.mock import patch
-import pytest
-from pages.models import Symbol
 
+import pytest
+from django.urls import reverse
+from pages.models import Symbol
 
 # The quota gate applies to real data views, not the free symbol-search
 # autocomplete. current_price is a representative AllowAnonymousWithQuota view.

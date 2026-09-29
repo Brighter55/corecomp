@@ -1,38 +1,39 @@
 import os
 from datetime import date
 
+# permission
+from accounts.permissions import AllowAnonymousWithQuota, AllowAnonymousWithQuotaList
+from django.contrib.auth import get_user_model
+from django.core.cache import cache
+
+# model
+from django.db.models import Q
+from django_redis import get_redis_connection
+from pages.models import Symbol
+
+# serializer
+from pages.serializers import CompositeGraphSerializer, DipSymbolsSerializer, SymbolSerializer
+from pages.utils import (
+    annotate_current_ratio,
+    annotate_debt_equity_ratio,
+    annotate_free_cash_flow,
+    annotate_profit_margin,
+    annotate_quick_ratio,
+    compute_market_cap,
+    compute_pb,
+    compute_pe,
+    compute_pfcf,
+    compute_ps,
+    compute_roa,
+    compute_roe,
+    compute_variance,
+    transform_pricing,
+)
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth import get_user_model
-from pages.utils import (
-    annotate_profit_margin,
-    annotate_free_cash_flow,
-    annotate_current_ratio,
-    annotate_quick_ratio,
-    annotate_debt_equity_ratio,
-    transform_pricing,
-    compute_roe,
-    compute_roa,
-    compute_pe,
-    compute_pb,
-    compute_market_cap,
-    compute_ps,
-    compute_pfcf,
-    compute_variance,
-)
-from django.core.cache import cache
-from django_redis import get_redis_connection
-# permission
-from accounts.permissions import AllowAnonymousWithQuota, AllowAnonymousWithQuotaList
-# serializer
-from pages.serializers import SymbolSerializer
-from pages.serializers import CompositeGraphSerializer
-from pages.serializers import DipSymbolsSerializer
-# model
-from django.db.models import Q
-from pages.models import Symbol
+
 # services
 from services import financial_data_service
 

@@ -14,6 +14,6 @@ class Command(BaseCommand):
 
 		self.stdout.write(
 			self.style.SUCCESS(
-				f"Redis FLUSHALL completed successfully."
+				"Redis FLUSHALL completed successfully."
 			)
 		)
