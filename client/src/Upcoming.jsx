@@ -4,6 +4,21 @@ import Footer from "./shared/Footer.tsx";
 const versions = [
     {
         name: "Current Version",
+        version: "0.9.0",
+        date: "09/28/2026",
+        updates: [
+            "Add Dip Finder page: build a watchlist and chart how far each ticker has fallen below its moving average",
+            "Switch the chart between the 50-day and 200-day simple moving average",
+            "Colour chart columns on a green-to-red ramp so the deepest dips stand out",
+            "Add a ? button beside the page title explaining the metric",
+            "Show company logos in the watchlist, falling back to the ticker chip when none is found",
+            "Add Dip Finder to the header navigation",
+            "Share the 5 free symbol views/month across Dip Finder and single-company pages",
+            "Fix the search icon drifting down into the results list",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.8.1",
         date: "08/31/2026",
         updates: [
