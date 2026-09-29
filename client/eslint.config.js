@@ -5,7 +5,17 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'coverage']),
+  // Build output and test artifacts. `eslint .` crawls these, and the
+  // Playwright report/report dirs contain bundled JS that would otherwise fail
+  // the lint gate with hundreds of unrelated errors.
+  globalIgnores([
+    'dist',
+    'dist-e2e',
+    'coverage',
+    'playwright-report',
+    'test-results',
+    'blob-report',
+  ]),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
