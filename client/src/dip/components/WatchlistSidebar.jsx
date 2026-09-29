@@ -126,25 +126,31 @@ function WatchlistSidebar({ items, selectedSymbol, onSelect, onAdd, onRemove }) 
 
     return (
         <aside className="flex w-full shrink-0 flex-col gap-6 rounded-3xl bg-[rgba(218,215,205,0.06)] p-5 lg:w-72">
-            <div className="relative">
-                <label htmlFor="dip-ticker-search" className="sr-only">
-                    Search ticker
-                </label>
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
-                <input
-                    id="dip-ticker-search"
-                    type="text"
-                    value={query}
-                    onChange={(event) => {
-                        setQuery(event.target.value);
-                        setNotice(null);
-                    }}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Search Ticker..."
-                    aria-label="Search ticker"
-                    autoComplete="off"
-                    className="h-12 w-full rounded-full border border-transparent bg-[rgba(218,215,205,0.12)] pl-11 pr-4 text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--main-fern)]"
-                />
+            <div>
+                {/* The icon is positioned against this wrapper, so it must contain
+                    the input and nothing else. The results list and notice are
+                    siblings below it — inside the same box they would grow it and
+                    drag `top-1/2` down into the rows. */}
+                <div className="relative">
+                    <label htmlFor="dip-ticker-search" className="sr-only">
+                        Search ticker
+                    </label>
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-muted)]" />
+                    <input
+                        id="dip-ticker-search"
+                        type="text"
+                        value={query}
+                        onChange={(event) => {
+                            setQuery(event.target.value);
+                            setNotice(null);
+                        }}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Search Ticker..."
+                        aria-label="Search ticker"
+                        autoComplete="off"
+                        className="h-12 w-full rounded-full border border-transparent bg-[rgba(218,215,205,0.12)] pl-11 pr-4 text-sm text-[var(--text-main)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--main-fern)]"
+                    />
+                </div>
 
                 {query.trim() ? (
                     <ul
