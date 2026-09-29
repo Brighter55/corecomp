@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { TrendingDown, TrendingUp, X } from "lucide-react";
 import ProductHeader from "../headers/product-header/ProductHeader.jsx";
 import GraphCard from "../overview/components/GraphCard.jsx";
 import { cn } from "../lib/utils.ts";
 import { authenticatedClient } from "../helpers/api.js";
+import Explanation from "../shared/Explanation.jsx";
+import Footer from "../shared/Footer.tsx";
 import DipColumnChart from "./components/DipColumnChart.jsx";
 import WatchlistSidebar from "./components/WatchlistSidebar.jsx";
 import { useDipWatchlist } from "./useDipWatchlist.js";
@@ -18,6 +20,56 @@ import {
 const QUOTA_MESSAGE =
     "You've used all 5 free symbols for this month. Sign in for unlimited access.";
 const UNAVAILABLE_MESSAGE = "Dip data is unavailable right now. Try again in a moment.";
+
+// Same bold-header shape as the overview graph explanations, so the ? affordance
+// reads consistently across the app. Held to the length of those (this is ~230
+// words; the longest existing one is ~420): the popover sets a max width but no
+// max height, so a much longer body would run past the bottom of the viewport.
+const dipFinderExplanation = (
+    <div className="space-y-3">
+        <p className="text-sm font-bold text-[var(--text-main)]">What is it?</p>
+        <p className="text-sm text-[var(--text-main)]">
+            Dip Finder measures how far each stock in your watchlist sits above or below
+            its own moving average. A deeply negative reading means the price has fallen
+            well under its recent trend — a dip.
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">The two averages</p>
+        <p className="text-sm text-[var(--text-main)]">
+            The 50-day average is the medium-term trend: the last 50 trading days of
+            closing prices, divided by 50. The 200-day average spans roughly ten months and
+            moves slowly, so it shows the longer direction the stock has been travelling in.
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Calculation</p>
+        <p className="text-sm font-mono text-[var(--text-main)]">
+            Variance % = (Price − SMA) / SMA × 100
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Reading the chart</p>
+        <p className="text-sm text-[var(--text-main)]">
+            Columns are coloured on a green-to-red ramp by distance from the average —
+            green above it, red below — so the deepest dips stand out. The value axis is
+            fixed from +15% to −30%, so a bar means the same thing whatever is on your
+            watchlist. Switch between the 50-day and 200-day windows to compare a
+            short-term pullback against the longer trend.
+        </p>
+        <p className="text-sm font-bold text-[var(--text-main)]">Interpretation</p>
+        <div className="flex items-start gap-2">
+            <TrendingDown className="mt-0.5 w-10 rounded-md text-red-600" />
+            <p className="text-sm text-[var(--text-main)]">
+                A deeply negative variance means the price is well below its average. That
+                can be a short-term pullback within an intact trend, or the start of
+                something worse — the 200-day reading is what separates the two.
+            </p>
+        </div>
+        <div className="flex items-start gap-2">
+            <TrendingUp className="mt-0.5 w-10 rounded-md text-green-600" />
+            <p className="text-sm text-[var(--text-main)]">
+                Variance near zero means the price is sitting on its trend — neither
+                stretched nor discounted. Dip Finder surfaces the candidates; the
+                fundamentals tell you which is which.
+            </p>
+        </div>
+    </div>
+);
 
 function DipPage() {
     const [smaWindow, setSmaWindow] = useState(DEFAULT_SMA_WINDOW);
@@ -161,9 +213,14 @@ function DipPage() {
 
             <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6">
                 <main className="space-y-8">
-                    <h1 className="text-center font-serif text-4xl font-bold tracking-tight text-[var(--text-main)] sm:text-5xl">
-                        Dip Finder
-                    </h1>
+                    {/* Explanation stays a sibling of the h1, never a child: a button
+                        inside the heading would join its accessible name. */}
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                        <h1 className="text-center font-serif text-4xl font-bold tracking-tight text-[var(--text-main)] sm:text-5xl">
+                            Dip Finder
+                        </h1>
+                        <Explanation explanation={dipFinderExplanation} />
+                    </div>
 
                     <div className="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
                         <WatchlistSidebar
@@ -244,6 +301,12 @@ function DipPage() {
                         </GraphCard>
                     </div>
                 </main>
+
+                {/* Footer carries its own space-y-6 but no top gap; Landing gets that
+                    from a parent space-y-20, which this wrapper does not have. */}
+                <div className="mt-16">
+                    <Footer />
+                </div>
             </div>
         </div>
     );

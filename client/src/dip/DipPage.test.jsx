@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import DipPage from "./DipPage.jsx";
@@ -283,5 +284,51 @@ describe("DipPage", () => {
     fireEvent.click(screen.getByLabelText("Close graph"));
 
     expect(screen.queryByLabelText("Close graph")).not.toBeInTheDocument();
+  });
+
+  test("renders the shared footer", () => {
+    renderPage();
+
+    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Contact Us" })).toHaveAttribute(
+      "href",
+      "mailto:support@corecomp.cc",
+    );
+  });
+
+  test("explains the page from the ? beside the title", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    // The copy is hidden until asked for, so it cannot clutter the page.
+    expect(screen.queryByText("What is it?")).not.toBeInTheDocument();
+
+    // userEvent, not fireEvent: the popover is Radix, which opens on real
+    // pointer events rather than a synthetic click.
+    await user.click(screen.getByRole("button", { name: "Show explanation" }));
+
+    expect(await screen.findByText("What is it?")).toBeInTheDocument();
+  });
+
+  test("shows each watchlist company's logo, falling back to the ticker chip", async () => {
+    seedWatchlist(["AAPL"]);
+    const { container } = renderPage();
+
+    await screen.findByText("Apple Inc");
+
+    const logo = container.querySelector('img[src*="img.logo.dev"]');
+    expect(logo).toBeInTheDocument();
+    expect(logo.getAttribute("src")).toContain("AAPL");
+
+    // Counted as a delta: the ticker also appears on the chart, so an absolute
+    // number here would break the moment the chart's labelling changes.
+    const tickerLabelsBefore = screen.getAllByText("AAPL").length;
+
+    // logo.dev has no mark for every ticker, so a failed image has to degrade to
+    // the ticker chip rather than leaving an empty circle.
+    fireEvent.error(logo);
+
+    expect(container.querySelector('img[src*="img.logo.dev"]')).not.toBeInTheDocument();
+    expect(screen.getAllByText("AAPL").length).toBe(tickerLabelsBefore + 1);
   });
 });
