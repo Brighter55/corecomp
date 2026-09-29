@@ -18,7 +18,7 @@ Stock fundamentals, visualized. Search any US-listed ticker and explore a compan
 
 The backend exposes a provider-agnostic, Alpha Vantage-shaped API. Under the hood data is sourced from the **[WiseSheets](https://wisesheets.io) API**, which pulls standardized SEC EDGAR XBRL filings. `pages/wisesheets.py` maps WiseSheets responses onto the internal shape; `FinancialDataService` (`pages/services.py`) hands those dicts to the views, annotators and ratio computators in `pages/utils.py`.
 
-In development with `MOCK=True`, the app runs entirely on local JSON fixtures (see `pages/statement_samples/`) — no network or API key needed.
+With `MOCK=True` the app runs entirely on local JSON fixtures (see `pages/statement_samples/`) — no network or API key needed. **Note that the local `server/.env` actually ships `MOCK=False`, so local dev runs on live WiseSheets data**, sharing the production key on a 5,000 req/month free tier (`/pages/dip` ≈ 1 request per cold symbol, `/pages/overview` ≈ 6). See the `/run-app` skill for how to switch to mock — it needs a cache flush *and* a restart in both directions.
 
 ### Auth & the anonymous quota (the core of the free model)
 
@@ -54,6 +54,9 @@ In development with `MOCK=True`, the app runs entirely on local JSON fixtures (s
 │   ├── docker-compose.yml  # local Redis only
 │   ├── Pipfile · Pipfile.lock · requirements.txt
 ├── client/                 # React + Vite frontend
+├── scripts/check.py        # the one verification command (see Verification)
+├── .github/workflows/ci.yml # runs scripts/check.py on push to master + every PR
+├── .claude/                # Claude Code skills + feature-map.md (symptom → file)
 ├── render.yaml             # Render blueprint (API, static FE, Postgres, Redis)
 ├── CLAUDE.md               # dev notes for working in this repo (Claude Code)
 ```
@@ -105,9 +108,9 @@ Prerequisites: **PostgreSQL 17** running as a native Windows service (`postgresq
    pipenv install
    pipenv run python corecomp/manage.py migrate
    ```
-   Optionally seed the symbol search table (needs `WISESHEETS_API_KEY` + network; falls back to SEC EDGAR):
+   Optionally seed the symbol search table. **Use `--source sec`** — it makes one free SEC EDGAR call, whereas the default `--source wisesheets` paginates `/companies/` and can spend ~1,000 requests of the shared monthly quota:
    ```
-   pipenv run python corecomp/manage.py import_symbol_model
+   pipenv run python corecomp/manage.py import_symbol_model --source sec
    ```
 4. **Frontend env** — create `client/.env`:
    ```dotenv
@@ -127,14 +130,41 @@ Prerequisites: **PostgreSQL 17** running as a native Windows service (`postgresq
 
 There's also a `/run-app` Claude Code skill that starts Redis + Postgres + both servers and verifies each is up.
 
-## Testing
+## Verification
+
+Everything checkable lives behind one command, run from the repo root:
 
 ```bash
-# backend — from server/ (needs Postgres + Redis running)
-pipenv run pytest          # ≈145 tests
+python scripts/check.py            # every gate, ~55s
+python scripts/check.py --fast     # skip the slow frontend build
+python scripts/check.py --backend  # or --frontend
+```
+
+It runs Django's `check`, a migration-drift check, the backend tests and ruff,
+then the frontend lint, tests, `tsc` and production build, and prints a PASS/FAIL
+summary. Every gate runs even when an earlier one fails, so one pass gives the
+whole picture. The exit code is 0 only when everything passed — a gate that
+*could not* run (Postgres or Redis down) reports `INCOMPLETE` and still exits 1,
+so a broken environment can never masquerade as green.
+
+It needs **Postgres + Redis running**, and it never touches production: it
+refuses a non-loopback database or Redis URL, and it builds the frontend against
+`127.0.0.1` rather than letting `.env.production` inject `api.corecomp.cc`.
+
+CI (`.github/workflows/ci.yml`) runs exactly this script on every push to
+`master` and every pull request — it deliberately does not repeat the individual
+commands, so a new gate added to the script is picked up automatically.
+
+The underlying commands, if you want them directly:
+
+```bash
+# backend — from server/corecomp/ (NOT server/: pytest.ini lives here, and
+# running one level up makes every test error with ImproperlyConfigured)
+pipenv run pytest          # 179 tests
 
 # frontend — from client/
-npm test                   # ≈167 Vitest tests
+npm test                   # watch mode, for humans
+npm run test:run           # 222 tests, single run (the CI shape)
 npm run build              # production build
 ```
 
