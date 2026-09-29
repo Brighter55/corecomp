@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import TimeRanges from "./TimeRanges.jsx";
-import Explanation from "./Explanation.jsx";
+import Explanation from "../../shared/Explanation.jsx";
 import { useStockHeader } from "../StockHeaderContext.jsx";
 
 

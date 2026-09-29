@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { X } from "lucide-react";
 import { filterReports, getPercentChange, formatToUnits } from "../../helpers/GraphsHelper.js"
 import GraphCard from "./GraphCard.jsx"
-import Explanation from "./Explanation.jsx"
+import Explanation from "../../shared/Explanation.jsx"
 import TimeRanges from "./TimeRanges.jsx"
 import { Card, CardContent } from "@/components/ui/card";
 

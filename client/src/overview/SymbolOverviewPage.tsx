@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import ProductHeader from "../headers/product-header/ProductHeader.jsx";
 import { authenticatedClientWithRetry } from "../helpers/api.js";
 import { hasStatementContent } from "../helpers/GraphsHelper.js";
+import { companyLogoUrl } from "../shared/companyLogoUrl.js";
 import { StockHeaderProvider } from "./StockHeaderContext.jsx";
 import {
   CapitalExpendituresGraph,
@@ -372,9 +373,7 @@ function SymbolOverviewPage() {
     };
   }, [routeSymbol, fetchVersion]);
 
-  const logoUrl = routeSymbol
-    ? `https://img.logo.dev/ticker/${routeSymbol}?token=${import.meta.env.VITE_LOGO_DEV_PUBLISHABLE_KEY}&size=450`
-    : "";
+  const logoUrl = companyLogoUrl(routeSymbol, 450);
 
   const aboutRows = [
     { label: "Sector", value: infoData?.sector },
