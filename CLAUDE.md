@@ -35,11 +35,42 @@ I plan to monetize with ads once it picks up users.
 - Data endpoints in `pages/views/overview.py` use `AllowAnonymousWithQuota`; `symbol_search` is `AllowAny`. In `accounts/`: `me` & `sign-out` are `IsAuthenticated`; `google-authentication` & `refresh` are `AllowAny`.
 - JWT in httpOnly cookies via `accounts/authenticate.py` (CustomJWTAuthentication) + AutoRefreshJWTMiddleware.
 
-## Testing
+## Verification — start here
 
-- Backend: `pipenv run pytest` from **`server/corecomp/`** (≈179 tests). Requires Postgres + Redis running.
+**Run `python scripts/check.py` from the repo root.** One command, every gate:
+Django `check`, migration drift, backend tests + ruff, frontend lint + tests +
+`tsc` + build, and a post-build scan proving the bundle can't reach production.
+It prints a PASS/FAIL summary, runs every gate even when one fails, and exits 0
+only if everything passed. `--fast` skips the build; `--backend` / `--frontend`
+scope it. Use the `/check` skill.
+
+Three things worth knowing:
+
+- **`INCOMPLETE` is not a pass.** If Postgres or Redis is down the affected gate
+  is skipped and the run exits 1. Fix the environment; don't narrow the gate.
+- **It never touches production.** Non-loopback DB/Redis URLs are refused
+  outright, and the frontend build is forced to `127.0.0.1` so
+  `client/.env.production` can't inject `api.corecomp.cc`.
+- **It doesn't set `MOCK`,** so verification runs the same code path as local dev.
+
+CI (`.github/workflows/ci.yml`) runs exactly this script on push to `master` and
+on every PR. It does not repeat the individual commands — add a gate to the
+script and CI picks it up automatically.
+
+Underlying commands, if you need them directly:
+
+- Backend: `pipenv run pytest` from **`server/corecomp/`** (179 tests). Requires Postgres + Redis running.
   - Not from `server/`: `pytest.ini` lives in `server/corecomp/`, so running one level up does not discover it and every test errors with `ImproperlyConfigured: Requested setting REST_FRAMEWORK`.
-- Frontend: `npm test` (≈167 Vitest tests) and `npm run build` from `client/`.
+  - Never run `pipenv` from the repo root — it resolves to a *different* virtualenv (`~/.virtualenvs/corecomp-*`, not `server-*`).
+- Frontend: `npm run test:run` (222 Vitest tests, single run — `npm test` is watch mode and never exits) and `npm run build` from `client/`.
+
+## Debugging & bugs
+
+- **`.claude/feature-map.md`** maps symptoms to files, and — more usefully —
+  lists the deliberate decisions that a "cleanup" would silently reverse. Read
+  the traps section before changing anything around caching, quota, or CSRF.
+- For a reported bug, use the `/reproduce-bug` skill: turn the symptom into a
+  failing test *first*, then fix, then keep the test.
 
 ## Deployment (Render)
 

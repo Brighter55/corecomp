@@ -1,10 +1,10 @@
-import jwt
-from rest_framework_simplejwt.tokens import RefreshToken
 import os
-from dotenv import load_dotenv
+
+import jwt
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
+from dotenv import load_dotenv
+from rest_framework_simplejwt.tokens import RefreshToken
 
 """
 flow: 

@@ -1,14 +1,12 @@
+from unittest.mock import patch
+
 import pytest
 from django.core.cache import cache
 from django.urls import reverse
-from unittest.mock import patch
-
 from pages.models import Symbol
+from pages.views import overview
 from rest_framework import status
 from rest_framework.response import Response
-
-from pages.views import overview
-
 
 url = reverse("dip")
 

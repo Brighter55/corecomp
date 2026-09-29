@@ -1,5 +1,6 @@
 from pages.utils import compute_roe
 
+
 def test_compute_roe():
     income_statement = {
         "annualReports": [

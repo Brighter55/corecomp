@@ -1,7 +1,7 @@
+import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework_simplejwt.tokens import RefreshToken
-import pytest
 
 User = get_user_model()
 url = reverse("sign_out")

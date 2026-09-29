@@ -1,11 +1,10 @@
-from rest_framework_simplejwt.authentication import JWTAuthentication
+import jwt
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.middleware.csrf import _does_token_match
 from rest_framework import exceptions
 from rest_framework.permissions import AllowAny
-from django.middleware.csrf import _does_token_match
-from django.conf import settings
-import jwt
-from django.contrib.auth import get_user_model
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 User = get_user_model()
 

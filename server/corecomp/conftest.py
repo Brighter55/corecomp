@@ -1,10 +1,26 @@
+import json
+from pathlib import Path
+
 import pytest
-from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
-
+from rest_framework.test import APIClient
 
 User = get_user_model()
+
+
+@pytest.fixture
+def overview_payload():
+    """A realistic Alpha Vantage-shaped overview dict, for mocking get_overview.
+
+    Committed on purpose. The generated `pages/statement_samples/` fixtures are
+    gitignored, so tests that read them passed locally and failed on a clean
+    checkout with FileNotFoundError -- the suite was not runnable from a fresh
+    clone. This file is tracked and must stay stable; it is test data, not a
+    regenerated sample.
+    """
+    path = Path(__file__).resolve().parent / "pages" / "tests" / "fixtures" / "overview.json"
+    return json.loads(path.read_text(encoding="utf-8"))
 
 # represents unauthenticated request
 @pytest.fixture

@@ -9,10 +9,9 @@ import json
 
 import pytest
 import requests
+from pages import wisesheets
 from rest_framework import status
 from rest_framework.response import Response
-
-from pages import wisesheets
 
 
 @pytest.fixture(autouse=True)

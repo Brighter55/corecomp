@@ -1,8 +1,9 @@
-from django.urls import reverse
 from unittest.mock import patch
-import pytest
-from pages.models import Symbol
 
+import pytest
+from django.urls import reverse
+from django_redis import get_redis_connection
+from pages.models import Symbol
 
 # The quota gate applies to real data views, not the free symbol-search
 # autocomplete. current_price is a representative AllowAnonymousWithQuota view.
@@ -54,6 +55,47 @@ def test_reviewing_same_symbol_does_not_consume_extra_quota(mock_get_current_pri
     for _ in range(6):
         response = api_client.post(url, {"symbol": "AAPL"}, format="json", HTTP_X_ANONYMOUS_SESSION="session-1")
         assert response.status_code == 200
+
+
+@pytest.mark.django_db
+@patch("pages.views.overview.financial_data_service.get_current_price")
+def test_symbol_case_does_not_consume_extra_quota(mock_get_current_price, api_client):
+    # DRF runs permissions BEFORE the serializer, so the permission sees the
+    # raw request body and SymbolSerializer's .upper() has not run yet -- the
+    # permission has to normalise the case itself. Six spellings of one ticker
+    # are one company; without that .upper() each would burn its own slot.
+    _create_symbol("IBM")
+    mock_get_current_price.return_value = _mock_global_quote()
+    for spelling in ["ibm", "IBM", "Ibm", "iBM", "ibM", "IBm"]:
+        response = api_client.post(
+            url,
+            {"symbol": spelling},
+            format="json",
+            HTTP_X_ANONYMOUS_SESSION="case-session",
+        )
+        assert response.status_code == 200, f"{spelling} was rejected"
+
+
+@pytest.mark.django_db
+@patch("pages.views.overview.financial_data_service.get_current_price")
+def test_quota_set_carries_an_expiry(mock_get_current_price, api_client):
+    # The set is written on the raw redis connection, bypassing django-redis,
+    # so nothing else in the suite would notice a missing TTL. Without one the
+    # key never expires and a visitor stays blocked forever rather than ~30 days.
+    redis = get_redis_connection("default")
+    key = "anon_quota:ttl-session"
+    redis.delete(key)
+
+    _create_symbol("AAPL")
+    mock_get_current_price.return_value = _mock_global_quote()
+    response = api_client.post(
+        url, {"symbol": "AAPL"}, format="json", HTTP_X_ANONYMOUS_SESSION="ttl-session"
+    )
+    assert response.status_code == 200
+
+    ttl = redis.ttl(key)
+    assert ttl != -1, "quota set was written without an expiry"
+    assert 0 < ttl <= 60 * 60 * 24 * 30
 
 
 @pytest.mark.django_db

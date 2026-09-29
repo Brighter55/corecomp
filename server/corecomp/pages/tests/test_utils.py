@@ -1,5 +1,4 @@
 import pytest
-
 from pages.utils import compute_variance, safe_float, safe_int
 
 

@@ -1,11 +1,11 @@
-from django.core.management.base import BaseCommand
-from pages.models import Symbol
-import requests
-from django.db import transaction
-from dotenv import load_dotenv
 import os
 import re
 
+import requests
+from django.core.management.base import BaseCommand
+from django.db import transaction
+from dotenv import load_dotenv
+from pages.models import Symbol
 
 load_dotenv()
 

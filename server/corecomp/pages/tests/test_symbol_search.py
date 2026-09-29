@@ -1,6 +1,5 @@
 import pytest
 from django.urls import reverse
-from unittest.mock import patch
 from pages.models import Symbol
 
 url = reverse('symbol_search')
