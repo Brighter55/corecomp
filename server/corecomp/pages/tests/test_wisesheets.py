@@ -6,6 +6,7 @@ mappers are exercised end to end.
 """
 
 import json
+from datetime import date, timedelta
 
 import pytest
 import requests
@@ -590,6 +591,18 @@ def _quarterly_payload():
     return _statements_payload(entries)
 
 
+def _days_ago(days: int) -> str:
+    """An ISO date N days before today.
+
+    `_trailing_dividend_per_share` computes its window from `date.today()`, so
+    hardcoded fixture dates make this test EXPIRE. It did: the fixture's fourth
+    payment was pinned to 2025-10-01, which fell outside the 365-day window on
+    2026-10-02 and turned the suite red for everyone. Anchoring to today keeps
+    four payments inside the window and one outside, whatever the calendar says.
+    """
+    return (date.today() - timedelta(days=days)).isoformat()
+
+
 def _overview_fake_fetch(endpoint, params):
     if endpoint.startswith("companies/"):
         return {"data": {
@@ -605,17 +618,21 @@ def _overview_fake_fetch(endpoint, params):
             "priceAvg50": "105", "priceAvg200": "100",
         }]}
     if endpoint == "dividends":
+        # Relative to today on purpose (see _days_ago): four payments inside the
+        # trailing 12 months and one well outside, so the expected
+        # DividendPerShare of 1.0 holds on any date. Rows stay descending by
+        # ex-date, which _trailing_dividend_per_share relies on to stop early.
         return {"data": [
-            {"symbol": "TEST", "date": "2026-07-01", "dividend": "0.25",
-             "recordDate": "2026-07-02", "paymentDate": "2026-07-20", "declarationDate": "2026-06-01"},
-            {"symbol": "TEST", "date": "2026-04-01", "dividend": "0.25",
-             "recordDate": "2026-04-02", "paymentDate": "2026-04-20", "declarationDate": "2026-03-01"},
-            {"symbol": "TEST", "date": "2026-01-02", "dividend": "0.25",
-             "recordDate": "2026-01-03", "paymentDate": "2026-01-20", "declarationDate": "2025-12-01"},
-            {"symbol": "TEST", "date": "2025-10-01", "dividend": "0.25",
-             "recordDate": "2025-10-02", "paymentDate": "2025-10-20", "declarationDate": "2025-09-01"},
-            {"symbol": "TEST", "date": "2025-01-05", "dividend": "0.25",
-             "recordDate": "2025-01-06", "paymentDate": "2025-01-20", "declarationDate": "2024-12-01"},
+            {"symbol": "TEST", "date": _days_ago(30), "dividend": "0.25",
+             "recordDate": _days_ago(29), "paymentDate": _days_ago(11), "declarationDate": _days_ago(70)},
+            {"symbol": "TEST", "date": _days_ago(120), "dividend": "0.25",
+             "recordDate": _days_ago(119), "paymentDate": _days_ago(101), "declarationDate": _days_ago(160)},
+            {"symbol": "TEST", "date": _days_ago(210), "dividend": "0.25",
+             "recordDate": _days_ago(209), "paymentDate": _days_ago(191), "declarationDate": _days_ago(250)},
+            {"symbol": "TEST", "date": _days_ago(300), "dividend": "0.25",
+             "recordDate": _days_ago(299), "paymentDate": _days_ago(281), "declarationDate": _days_ago(340)},
+            {"symbol": "TEST", "date": _days_ago(500), "dividend": "0.25",
+             "recordDate": _days_ago(499), "paymentDate": _days_ago(481), "declarationDate": _days_ago(540)},
         ]}
     if endpoint.startswith("statements/"):
         return _quarterly_payload()
@@ -656,8 +673,8 @@ class TestOverview:
         # dividends: 4 payments in trailing 12 months
         assert overview["DividendPerShare"] == "1.0"
         assert overview["DividendYield"] == "0.01"          # 1.0 / 100
-        assert overview["DividendDate"] == "2026-07-20"
-        assert overview["ExDividendDate"] == "2026-07-01"
+        assert overview["DividendDate"] == _days_ago(11)
+        assert overview["ExDividendDate"] == _days_ago(30)
 
         # removed fields are never emitted
         for key in ("Description", "OfficialSite", "Address", "PEGRatio", "Beta",
