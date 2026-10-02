@@ -57,8 +57,44 @@ def _windows_exe(argv: list[str]) -> list[str]:
     return argv
 
 
+def _pipenv_venv() -> Path | None:
+    """Where pipenv keeps this project's virtualenv, or None."""
+    pipenv = shutil.which("pipenv")
+    if not pipenv or not (SERVER / "Pipfile").is_file():
+        return None
+    try:
+        proc = subprocess.run(
+            _windows_exe([pipenv, "--venv"]),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env={**os.environ, "PIPENV_PIPFILE": str(SERVER / "Pipfile")},
+        )
+    except OSError:
+        return None
+    if proc.returncode != 0:
+        return None
+    # pipenv prints "Loading .env environment variables..." ahead of the path,
+    # so take the last line that actually names a directory.
+    for line in reversed((proc.stdout or "").strip().splitlines()):
+        candidate = Path(line.strip())
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
 def python_cmd() -> list[str]:
-    """The project interpreter, explicitly -- never an assumed active venv."""
+    """The project interpreter, explicitly -- never an assumed active venv.
+
+    Deliberately resolved to the venv's python *binary* rather than
+    `pipenv run python`. pipenv loads server/.env and OVERRIDES the process
+    environment with it, so `pipenv run` silently discards every variable
+    build_env() sets -- MOCK, REDIS_CACHE_LOCATION, CSRF_TRUSTED_ORIGINS and
+    the rest. That went unnoticed only because server/.env happens to hold
+    usable values on a developer machine; on any other machine the contract
+    would be void. Invoking the interpreter directly keeps the env intact.
+    """
     override = os.environ.get("CORECOMP_PYTHON")
     if override:
         return _windows_exe([override])
@@ -71,9 +107,12 @@ def python_cmd() -> list[str]:
         candidate = SERVER / rel
         if candidate.exists():
             return [str(candidate)]
-    pipenv = shutil.which("pipenv")
-    if pipenv and (SERVER / "Pipfile").is_file():
-        return _windows_exe([pipenv, "run", "python"])
+    venv = _pipenv_venv()
+    if venv:
+        for rel in ("Scripts/python.exe", "bin/python"):
+            candidate = venv / rel
+            if candidate.exists():
+                return [str(candidate)]
     return [sys.executable]
 
 
@@ -122,7 +161,10 @@ def build_env() -> dict[str, str]:
     env = os.environ.copy()
     local = _read_dotenv(SERVER / ".env")
 
-    env["DJANGO_SECRET_KEY"] = env.get("DJANGO_SECRET_KEY") or "verification-only-secret-key"
+    # 32+ bytes: PyJWT warns (InsecureKeyLengthWarning) for shorter HS256 keys.
+    env["DJANGO_SECRET_KEY"] = (
+        env.get("DJANGO_SECRET_KEY") or "verification-only-secret-key-padded-to-32b"
+    )
 
     # Deliberately does not blindly reuse an inherited DATABASE_URL -- a stray
     # shell export pointing at Render would otherwise aim the whole run at prod.
@@ -153,8 +195,9 @@ def build_env() -> dict[str, str]:
     env.setdefault("FRONTEND_BASE_URL", "http://localhost:5173")
 
     env["PYTHONIOENCODING"] = "utf-8"
+    # FORCE_COLOR only; setting NO_COLOR as well makes Node warn that the two
+    # contradict each other.
     env["FORCE_COLOR"] = "0"
-    env["NO_COLOR"] = "1"
 
     # Keep `pipenv run` CWD-independent.
     if (SERVER / "Pipfile").is_file():
@@ -323,7 +366,24 @@ def scan_dist(dist: Path) -> Result:
 # --------------------------------------------------------------------------- #
 # Main
 # --------------------------------------------------------------------------- #
+def _force_utf8_output() -> None:
+    """Make this script's own stdout/stderr UTF-8.
+
+    Child processes emit UTF-8 (vitest prints '❯', ruff prints box-drawing
+    characters), but a Windows console defaults to cp1252, where print() raises
+    UnicodeEncodeError. Without this, echoing a FAILING gate's output crashes the
+    reporter -- i.e. exactly when it is most needed. errors="replace" is a
+    deliberate last resort: mangled output beats no output.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, OSError):  # non-reconfigurable stream (e.g. piped)
+            pass
+
+
 def main() -> int:
+    _force_utf8_output()
     parser = argparse.ArgumentParser(
         description="Run every CoreComp verification gate.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -331,12 +391,17 @@ def main() -> int:
     scope = parser.add_mutually_exclusive_group()
     scope.add_argument("--backend", action="store_true", help="backend gates only")
     scope.add_argument("--frontend", action="store_true", help="frontend gates only")
+    scope.add_argument("--e2e", action="store_true", help="browser (Playwright) gate only")
     parser.add_argument("--fast", action="store_true", help="skip the slow frontend build")
     parser.add_argument("--verbose", action="store_true", help="print full gate output")
     args = parser.parse_args()
 
-    run_backend = args.backend or not args.frontend
-    run_frontend = args.frontend or not args.backend
+    # --e2e is opt-in and must never join the default gate list. It runs the app
+    # with MOCK=True and its own Redis DB, whereas the default run deliberately
+    # does neither (see the MOCK note in build_env) -- folding it in would break
+    # that guarantee for every ordinary verification.
+    run_backend = (args.backend or not args.frontend) and not args.e2e
+    run_frontend = (args.frontend or not args.backend) and not args.e2e
 
     env = build_env()
     py, npm = python_cmd(), npm_cmd()
@@ -386,8 +451,16 @@ def main() -> int:
                 )
             )
 
+    if args.e2e:
+        # The harness owns its own environment (client/e2e/env.ts pins MOCK,
+        # the Redis DB, and the localhost origins for both servers), so this
+        # gate only needs to know that Postgres and Redis must be up.
+        gates.append(
+            Gate("browser (playwright)", npm + ["run", "e2e"], CLIENT, needs_infra=True)
+        )
+
     infra_note = ""
-    if run_backend:
+    if run_backend or args.e2e:
         problems = diagnose_infra(env)
         if problems:
             infra_note = "\n".join(problems)

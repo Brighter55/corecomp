@@ -31,10 +31,33 @@ __pycache__/
 *.pyc
 
 # samples
-server/corecomp/pages/statement_samples
+#
+# The nine files MockFinancialDataService reads ARE tracked. They used to be
+# fully ignored, which meant MOCK=True only worked on a machine that had already
+# run generate_statement_samples -- a fresh clone (and CI) got FileNotFoundError
+# -> 500 on every mocked endpoint. Tests and workflows must not depend on
+# gitignored files; see .claude/feature-map.md trap 12.
+#
+# dip_rows.json is the important one: the generator's FILES dict omits it, so it
+# is hand-maintained and NOT regenerable. It existed only on one machine.
+#
+# These are generated, and generate_statement_samples writes them in place, so
+# regenerating will show a diff. That is informative, not a problem.
+#
+# The files below are read by zero code paths (the generator's own IGNORED list
+# calls this out), so tracking them is pure noise.
+server/corecomp/pages/statement_samples/*_no_data.json
+server/corecomp/pages/statement_samples/shares_outstanding.json
 
 # keys
 .env
 server/.env.production
 client/.env
 client/.env.production
+
+# e2e (playwright)
+client/dist-e2e
+client/playwright-report
+client/test-results
+client/blob-report
+client/e2e/.auth

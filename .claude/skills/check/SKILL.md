@@ -16,8 +16,15 @@ python scripts/check.py              # everything (~55s)
 python scripts/check.py --fast       # skip the frontend build (~45s)
 python scripts/check.py --backend    # backend gates only
 python scripts/check.py --frontend   # frontend gates only
+python scripts/check.py --e2e        # the browser suite (Playwright)
 python scripts/check.py --verbose    # stream full gate output
 ```
+
+**`--e2e` is deliberately NOT part of the default run.** The other nine gates
+run the app the way a developer does and never set `MOCK`; the browser gate runs
+it on fixtures with its own Redis DB. Run it separately, and run it when you have
+touched anything the browser can see — routing, `localStorage`, cookies, CORS,
+or the quota. First time on a machine: `cd client && npm run e2e:install`.
 
 Run it from the repo root. It is CWD-independent, so it also works from
 `server/` or `client/`.

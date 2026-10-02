@@ -216,8 +216,37 @@ fails for everyone else, which is worse than no test.
 
 The Pipfile is in `server/`. Running pipenv from the root resolves against
 `~/.virtualenvs/corecomp-*` instead of the project's `server-*` environment and
-gives a different interpreter (or a confusing `No module named …`). `check.py`
-pins `PIPENV_PIPFILE` for exactly this reason.
+gives a different interpreter (or a confusing `No module named …`). It also
+silently *creates a `Pipfile` at the repo root* pinning whatever Python it
+found. `check.py` pins `PIPENV_PIPFILE` for exactly this reason; if a root
+`Pipfile` appears, that is what happened — delete it.
+
+### 14. `pipenv run` overrides your environment with `server/.env`
+
+The one that nearly cost real money. **`pipenv run <cmd>` loads `server/.env`
+and overwrites the process environment with it** — it does not defer to
+variables you already set.
+
+```
+$ MOCK=True pipenv run python -c "import os; print(os.getenv('MOCK'))"
+Loading .env environment variables...
+False          # <- server/.env's value won
+```
+
+Why it matters: a browser suite that meant to run on fixtures would have run
+against **live WiseSheets and spent the shared quota**, with no error to show
+for it. It also silently discarded every variable `scripts/check.py` sets
+(`REDIS_CACHE_LOCATION`, `CSRF_TRUSTED_ORIGINS`, any `CORECOMP_TEST_*`
+override) — invisible locally only because `server/.env` happens to hold usable
+values on a developer machine.
+
+- **Wrong fix:** pass the env to `pipenv run` and assume it arrives.
+- **Right fix:** invoke the virtualenv's interpreter directly —
+  `pipenv --venv` then `<venv>/Scripts/python.exe` (Windows) or
+  `<venv>/bin/python`. Both `scripts/check.py:python_cmd()` and
+  `client/e2e/env.ts:pythonExe()` resolve this way.
+- **How to check:** `MOCK=True <resolved-python> -c "import os; print(os.getenv('MOCK'))"`
+  should print `True`.
 
 ---
 
@@ -228,7 +257,7 @@ Recorded so nobody assumes coverage that doesn't exist.
 | Gap | Detail |
 |---|---|
 | **`.tsx`/`.ts` are not linted** | `client/eslint.config.js` globs `{js,jsx}` only. 18 `.tsx` + 2 `.ts` files escape ESLint. `tsc --noEmit` covers them partially, but it only sees ~20 files (`allowJs: false`) |
-| **No browser/E2E tests** | No Playwright/Cypress. UI behaviour is covered only by jsdom component tests — real-browser behaviour is unverified |
+| **E2E covers dip + the quota boundary only** | A Playwright harness exists (see below), but `/overview/:symbol` and the auth flows are not yet covered by it |
 | **Cache mode-namespacing** | Nine legacy keys still un-prefixed (trap 3). Deferred, not fixed |
 | **Stampede locks** | `info` and `current_price` lack the `redis.lock` that the cheaper views have; a cold `info` hit by N requests does 4N upstream calls |
 | **`tickers` batching** | `get_live_row` indexes `rows[0]`, assuming the plural param returns one row. Unverified against the real API |
@@ -249,6 +278,8 @@ deliberately breaking the code and confirming the suite goes red:
 | Dip list permission writes before checking | `test_single_symbol_spend_counts_against_dip` |
 | `AllowAny` views no longer skip CSRF | `test_csrf_auth.py` |
 | CSRF enforced on every request | `test_csrf_auth.py` |
+| Quota relaxed on the batch permission (`QUOTA 5 -> 99`) | `e2e/anon/dip-quota.spec.ts` |
+| Any request leaving localhost | `client/e2e/fixtures.ts` hermetic guard |
 
 The middle two were **not** caught until those tests were written — the quota
 TTL and the case normalisation had no defence at all, which is exactly the kind
@@ -256,6 +287,45 @@ of hole that looks covered.
 
 Not mutation-checked: everything else. Treat other tests as documents of intent
 until you have seen them fail.
+
+## Browser tests (Playwright)
+
+There is a real browser suite for the things jsdom cannot see: cookies crossing
+ports, CORS preflight, the `X-Anonymous-Session` header, `localStorage`
+persistence, and the quota as the browser actually experiences it.
+
+```bash
+python scripts/check.py --e2e     # or: cd client && npm run e2e
+```
+
+**`--e2e` is NOT part of the default gate list** on purpose. Every other gate
+runs the live code path and never sets `MOCK`; the browser gate sets `MOCK=True`
+and its own Redis DB. Folding it in would break that guarantee.
+
+What it runs against: a real Django server on `:8000` with `MOCK=True`, and the
+SPA built into `client/dist-e2e` and served by `vite preview` on `:4173`. Both
+are started by `playwright.config.ts`. `e2e_prepare` migrates, flushes Redis DB
+2, and seeds the `Symbol` table first.
+
+Things to know before editing it:
+
+- **Both sides must say `localhost`.** `localhost` and `127.0.0.1` are different
+  origins *and* cross-site for cookies, so a mismatch makes the browser withhold
+  `access_token`/`csrftoken` and every request silently looks anonymous. The
+  hermetic guard deliberately does not allowlist `127.0.0.1` so this fails loudly.
+- **The hermetic guard** (`client/e2e/fixtures.ts`) fails any test whose browser
+  contacts a non-localhost host. Two hosts are allowlisted-and-aborted, each with
+  a written reason: `accounts.google.com/gsi/*` (loaded on *every* route by
+  `GoogleOAuthProvider`) and `img.logo.dev` (logos — aborting also exercises the
+  ticker-chip fallback, so assert the chip, not an `<img>`).
+- **Auth without Google**: `scripts/e2e_mint_token.py` mints a JWT offline. It
+  lives outside `server/` so it can never be deployed, and refuses to run unless
+  `MOCK=True` and `AUTH_COOKIE_SECURE=False`.
+- **`AUTH_COOKIE_SECURE` is `True` unless the value is the literal string
+  `"False"`.** Get it wrong and the browser drops the cookie over plain http.
+- **A `<header>` nested in `<section>` loses the implicit `banner` role.** The
+  landing page does this (`Landing.tsx:14-15`), so query `locator('header')`
+  rather than `getByRole('banner')` if you want to match every route.
 
 ## Verifying a change
 

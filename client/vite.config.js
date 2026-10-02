@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { configDefaults, defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -16,6 +16,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: './src/setupTests.js'
+    setupFiles: './src/setupTests.js',
+    // Vitest's default include matches **/*.spec.ts, which would sweep up the
+    // Playwright specs under e2e/ and run them in the wrong runner. They are
+    // Playwright's, not vitest's.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
   }
 });

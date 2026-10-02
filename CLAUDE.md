@@ -44,6 +44,14 @@ It prints a PASS/FAIL summary, runs every gate even when one fails, and exits 0
 only if everything passed. `--fast` skips the build; `--backend` / `--frontend`
 scope it. Use the `/check` skill.
 
+There is also a Playwright browser suite, run separately:
+`python scripts/check.py --e2e`. It is **not** in the default run — it starts the
+app on fixtures (`MOCK=True`) with its own Redis DB, whereas the default gates
+run the live code path. It covers what jsdom cannot: cookies crossing ports,
+CORS, the `X-Anonymous-Session` header, `localStorage`, and the anonymous quota
+as a browser actually experiences it. First time on a machine:
+`cd client && npm run e2e:install`.
+
 Three things worth knowing:
 
 - **`INCOMPLETE` is not a pass.** If Postgres or Redis is down the affected gate
