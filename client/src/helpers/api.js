@@ -50,7 +50,16 @@ export async function authenticatedClient({ endpoint = null, payload = null} = {
     return response
 }
 
-export async function authenticatedClientWithRetry(endpoint, payload, isActive, navigate, setSymbol) {
+// A persistent 503 must not retry forever. Two extra attempts is a judgement
+// call; the property that matters is that the call always SETTLES, so callers
+// see the 503 instead of waiting on a promise that never resolves.
+const MAX_RETRIES = 2;
+
+// Bounds an absurd Retry-After. Deliberately not lower than what the backend
+// actually sends ("60000", milliseconds), so a real value is never shortened.
+const MAX_RETRY_DELAY_MS = 60_000;
+
+export async function authenticatedClientWithRetry(endpoint, payload, isActive, navigate, setSymbol, attempt = 0) {
     const response = await fetch(`${backendBaseUrl}${endpoint}`, {
         method: "POST",
         credentials: "include",
@@ -77,13 +86,15 @@ export async function authenticatedClientWithRetry(endpoint, payload, isActive, 
             navigate("/login");
         } else if (response.status == 400) {
             setSymbol("");
-        } else if (response.status == 503 && isActive()) {
+        } else if (response.status == 503 && isActive() && attempt < MAX_RETRIES) {
             // retry again after the "Retry-After"
             const retryAfter = response.headers.get('Retry-After');
-            if (retryAfter) {
-                const delay = parseInt(retryAfter);
-                await new Promise(resolve => setTimeout(resolve, delay));
-                return authenticatedClientWithRetry(endpoint, payload, isActive, navigate, setSymbol)
+            // parseInt("") and parseInt("soon") are NaN, and setTimeout(NaN) fires
+            // immediately -- which is a tight loop, not a backoff. Guard it.
+            const delay = Number.parseInt(retryAfter ?? "", 10);
+            if (Number.isFinite(delay) && delay >= 0) {
+                await new Promise(resolve => setTimeout(resolve, Math.min(delay, MAX_RETRY_DELAY_MS)));
+                return authenticatedClientWithRetry(endpoint, payload, isActive, navigate, setSymbol, attempt + 1)
             }
         }
     }
