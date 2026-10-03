@@ -59,7 +59,7 @@ const compositeMetric = {
   MarketCap: "marketCap",
 };
 
-function mockApi(dividendsResponse) {
+function mockApi(dividendsResponse, infoResponse = { sector: "Technology", industry: "Consumer Electronics" }) {
   authenticatedClientWithRetry.mockImplementation(async (endpoint, payload) => {
     if (endpoint === "/pages/dividends") return dividendsResponse;
     if (endpoint === "/pages/pricing") return { status: 200, json: async () => [{ date: "2024-01-01", adjustedClose: "190" }] };
@@ -72,7 +72,7 @@ function mockApi(dividendsResponse) {
       return { status: 200, json: async () => ({ annualReports: [{ fiscalDateEnding: "2023-12-31", [metric]: "10" }], quarterlyReports: [] }) };
     }
     if (endpoint === "/pages/current-price") return { status: 200, json: async () => ({ name: "Apple Inc.", price: "190" }) };
-    if (endpoint === "/pages/info") return { status: 200, json: async () => ({ sector: "Technology", industry: "Consumer Electronics" }) };
+    if (endpoint === "/pages/info") return { status: 200, json: async () => infoResponse };
     return { status: 200, json: async () => ({}) };
   });
 }
@@ -115,5 +115,35 @@ describe("SymbolOverviewPage", () => {
     // "Dividend Payouts" is the graph's card title — only rendered once the
     // statement resolves with usable data, so this confirms the section isn't hidden.
     expect(await screen.findByText("Dividend Payouts")).toBeInTheDocument();
+  }, 20000);
+
+  test("abbreviates oversized facts but leaves ratios and prices verbatim", async () => {
+    mockApi(
+      { status: 204 },
+      {
+        sector: "Technology",
+        marketCapitalization: "4200000000000",
+        sharesOutstanding: "15000000000",
+        revenueTtm: "3900000000000",
+        peRatio: "30.5",
+      }
+    );
+
+    renderPage();
+
+    // Market cap is the reported bug: it used to print 4200000000000 in full in
+    // this strip, and as "$4200.00B" on the charts.
+    expect(await screen.findByText("$4.20T")).toBeInTheDocument();
+    expect(screen.queryByText("$4200.00B")).not.toBeInTheDocument();
+
+    // Revenue TTM is money too.
+    expect(screen.getByText("$3.90T")).toBeInTheDocument();
+
+    // Shares outstanding is a share count, not money: abbreviated, but no "$".
+    expect(screen.getByText("15.00B")).toBeInTheDocument();
+    expect(screen.queryByText("$15.00B")).not.toBeInTheDocument();
+
+    // Ratios must not be abbreviated or currency-prefixed.
+    expect(screen.getByText("30.5")).toBeInTheDocument();
   }, 20000);
 });

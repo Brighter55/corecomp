@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import ProductHeader from "../headers/product-header/ProductHeader.jsx";
 import { authenticatedClientWithRetry } from "../helpers/api.js";
-import { hasStatementContent } from "../helpers/GraphsHelper.js";
+import { formatToUnits, hasStatementContent } from "../helpers/GraphsHelper.js";
 import { companyLogoUrl } from "../shared/companyLogoUrl.js";
 import { StockHeaderProvider } from "./StockHeaderContext.jsx";
 import {
@@ -63,6 +63,15 @@ type HeroState = {
 
 type InfoState = Record<string, string | number | null | undefined> | null;
 
+// "plain" is the default and unchanged: missing -> "--", zero -> "0", else raw.
+// "currency" abbreviates the statement-sized figures to T/B/M, and "count" uses
+// the same tiers without a currency symbol for share counts. Only the rows tagged
+// in `sections` opt in -- ratios, per-share values, prices, percentages and dates
+// must stay verbatim.
+type ValueFormat = "plain" | "currency" | "count";
+type InfoRow = { label: string; value: ReportValue; format?: ValueFormat };
+type InfoSection = { title: string; rows: InfoRow[] };
+
 function GraphGrid({ children }: { children: ReactNode }) {
   return <div className="grid gap-4 lg:grid-cols-2">{children}</div>;
 }
@@ -76,14 +85,20 @@ function isMissing(value: string | number | null | undefined) {
   );
 }
 
-function formatValue(value: string | number | null | undefined) {
+// "plain" is the default and unchanged: missing -> "--", zero -> "0", else raw.
+// "currency" abbreviates the statement-sized figures below to T/B/M, and "count"
+// uses the same tiers without a currency symbol for share counts.
+function formatValue(value: string | number | null | undefined, format: ValueFormat = "plain") {
   if (isMissing(value)) {
     return "--";
   }
-  if (value === 0) {
-    return "0";
+  if (format === "plain") {
+    if (value === 0) {
+      return "0";
+    }
+    return value;
   }
-  return value;
+  return formatToUnits(value, { prefix: format === "currency" ? "$" : "" });
 }
 
 function SymbolOverviewPage() {
@@ -383,12 +398,12 @@ function SymbolOverviewPage() {
     { label: "Fiscal Year End", value: infoData?.fiscalYearEnd },
   ];
 
-  const sections = [
+  const sections: InfoSection[] = [
     {
       title: "Valuation",
       rows: [
-        { label: "Market Cap", value: infoData?.marketCapitalization },
-        { label: "Shares Outstanding", value: infoData?.sharesOutstanding },
+        { label: "Market Cap", value: infoData?.marketCapitalization, format: "currency" },
+        { label: "Shares Outstanding", value: infoData?.sharesOutstanding, format: "count" },
         { label: "PE Ratio", value: infoData?.peRatio },
         { label: "Price To Sales Ratio TTM", value: infoData?.priceToSalesRatioTtm },
         { label: "Price To Book Ratio", value: infoData?.priceToBookRatio },
@@ -408,7 +423,7 @@ function SymbolOverviewPage() {
     {
       title: "Profitability",
       rows: [
-        { label: "EBITDA", value: infoData?.ebitda },
+        { label: "EBITDA", value: infoData?.ebitda, format: "currency" },
         { label: "Diluted EPS TTM", value: infoData?.dilutedEpsTtm },
         { label: "Profit Margin", value: infoData?.profitMargin },
         { label: "Operating Margin TTM", value: infoData?.operatingMarginTtm },
@@ -426,8 +441,8 @@ function SymbolOverviewPage() {
     {
       title: "Profit",
       rows: [
-        { label: "Revenue TTM", value: infoData?.revenueTtm },
-        { label: "Gross Profit TTM", value: infoData?.grossProfitTtm },
+        { label: "Revenue TTM", value: infoData?.revenueTtm, format: "currency" },
+        { label: "Gross Profit TTM", value: infoData?.grossProfitTtm, format: "currency" },
         { label: "Revenue Per Share TTM", value: infoData?.revenuePerShareTtm },
       ],
     },
@@ -561,7 +576,7 @@ function SymbolOverviewPage() {
                         className="flex items-start justify-between gap-4 border-b border-[var(--line-muted)] pb-2 text-sm sm:text-base"
                       >
                         <p className="text-[var(--text-main)]">{row.label}</p>
-                        <p className="text-right font-medium text-[var(--text-main)]">{formatValue(row.value)}</p>
+                        <p className="text-right font-medium text-[var(--text-main)]">{formatValue(row.value, row.format)}</p>
                       </div>
                     ))}
                   </CardContent>
