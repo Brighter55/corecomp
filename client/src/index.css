@@ -100,3 +100,12 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Recharts' default tooltip is a white box, and its label (the period/date) sets no
+   colour of its own -- it inherits GraphCard's `--main-pine-teal`. That token is
+   near-white in light mode (#F6FBF4), so the date disappears against the white box.
+   Pin the label to a dark green that reads on white. Dark mode needs nothing: there
+   `--main-pine-teal` is already dark (#344e41). */
+.theme-light .recharts-default-tooltip .recharts-tooltip-label {
+  color: #46544B;
+}

@@ -27,7 +27,11 @@ function TooltipContent({ active, payload, label }) {
 
     return (
         <Card className="min-w-[12rem] rounded-md border border-[var(--main-dry-sage)] bg-[var(--bg-main)] p-2 shadow-none">
-            <CardContent className="space-y-1 p-0 text-sm">
+            {/* This card paints its own background, so the date has to name a text
+                colour: without one it inherits GraphCard's `--main-pine-teal`, which
+                is too close to the card in both themes (near-white on near-white in
+                light mode, dark-on-dark in dark mode). */}
+            <CardContent className="space-y-1 p-0 text-sm text-[var(--text-main)]">
                 {label}
                 <p className="text-[#588157]">
                 Operating Cash Flow: {formatToUnits(operatingCashflow)}
