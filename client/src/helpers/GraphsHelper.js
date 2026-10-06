@@ -92,21 +92,33 @@ export function getPercentChange(reports, value) {
     const percentChange = ( (newValue - oldValue) / Math.abs(oldValue) ) * 100;
     return parseFloat(percentChange.toFixed(2));
 }
+// Unit thresholds, largest first, shared by the currency and non-currency paths
+// so the two can never drift apart.
+const UNIT_TIERS = [
+    { threshold: 1_000_000_000_000, divisor: 1_000_000_000_000, suffix: "T" },
+    { threshold: 1_000_000_000, divisor: 1_000_000_000, suffix: "B" },
+    { threshold: 1_000_000, divisor: 1_000_000, suffix: "M" },
+];
+
 // receive string integer
-export function formatToUnits(value) {
+// `prefix` is applied only when a tier matches, so a count that is not money can
+// reuse the same thresholds: formatToUnits(value, { prefix: "" }).
+//
+// Options come as an object rather than a bare second argument on purpose:
+// Recharts passes tickFormatter/tooltip formatters extra positional args (index,
+// series name), which a bare parameter would read as the prefix.
+export function formatToUnits(value, { prefix = "$" } = {}) {
     const integerValue = parseInt(value);
     // Missing / unparseable values ("None", null, undefined, NaN) -> "--", never "$None".
     if (!Number.isFinite(integerValue)) {
         return "--";
     }
-    if (integerValue >= 1_000_000_000 || integerValue <= -1_000_000_000) {
-        return `$${(integerValue / 1_000_000_000).toFixed(2)}B`;
-    }
-    if (integerValue >= 1_000_000 || integerValue <= -1_000_000) {
-        return `$${(integerValue / 1_000_000).toFixed(2)}M`;
+    const tier = UNIT_TIERS.find((unit) => Math.abs(integerValue) >= unit.threshold);
+    if (!tier) {
+        return `${prefix}${value}`;
     }
 
-    return `$${value}`;
+    return `${prefix}${(integerValue / tier.divisor).toFixed(2)}${tier.suffix}`;
 }
 
 // True when any report has a real (non-empty, non-"None", numeric) value for dataKey.

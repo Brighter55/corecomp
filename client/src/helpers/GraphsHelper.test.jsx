@@ -47,6 +47,61 @@ describe("formatValue", () => {
     });
 });
 
+describe("formatToUnits units", () => {
+    // The trillion tier. Before it existed, everything above 1e9 divided by 1e9,
+    // so a $4.2T market cap rendered as "$4200.00B".
+    test('4.2 trillion renders as $4.20T, not $4200.00B', () => {
+        expect(formatToUnits("4200000000000")).toBe("$4.20T");
+    });
+
+    test('exactly one trillion uses the trillion tier', () => {
+        expect(formatToUnits("1000000000000")).toBe("$1.00T");
+    });
+
+    test('negative trillion is formatted', () => {
+        expect(formatToUnits("-1500000000000")).toBe("$-1.50T");
+    });
+
+    // The tier boundaries either side of the new one must not move.
+    test('just below a trillion still uses the billion tier', () => {
+        expect(formatToUnits("999000000000")).toBe("$999.00B");
+    });
+
+    test('exactly one billion still uses the billion tier', () => {
+        expect(formatToUnits("1000000000")).toBe("$1.00B");
+    });
+
+    test('exactly one million still uses the million tier', () => {
+        expect(formatToUnits("1000000")).toBe("$1.00M");
+    });
+
+    // prefix: "" -- share counts, which are numbers but not money.
+    test('counts abbreviate without a currency symbol', () => {
+        expect(formatToUnits("15000000000", { prefix: "" })).toBe("15.00B");
+    });
+
+    test('counts above a trillion abbreviate with T and no currency symbol', () => {
+        expect(formatToUnits("1500000000000", { prefix: "" })).toBe("1.50T");
+    });
+
+    test('counts below a million stay raw and unprefixed', () => {
+        expect(formatToUnits("12345", { prefix: "" })).toBe("12345");
+    });
+
+    test('missing count still renders as "--", never a bare prefix', () => {
+        expect(formatToUnits(null, { prefix: "" })).toBe("--");
+        expect(formatToUnits("None", { prefix: "" })).toBe("--");
+    });
+
+    // Recharts calls tickFormatter(value, index) and Tooltip formatter(value, name,
+    // item, index, payload), so formatToUnits is often handed junk as a 2nd arg.
+    // The options object is what keeps that from becoming the prefix.
+    test('a stray positional second argument does not become the prefix', () => {
+        expect(formatToUnits("4200000000000", 3)).toBe("$4.20T");
+        expect(formatToUnits("4200000000000", "Market Cap")).toBe("$4.20T");
+    });
+});
+
 const reports = [
   { fiscalDateEnding: "2024-12-31", totalRevenue: "98000" },
   { fiscalDateEnding: "2023-12-31", totalRevenue: "93000" },
