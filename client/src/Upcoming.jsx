@@ -4,6 +4,21 @@ import Footer from "./shared/Footer.tsx";
 const versions = [
     {
         name: "Current Version",
+        version: "0.10.0",
+        date: "10/09/2026",
+        updates: [
+            "Rebuild the overview page from the new design reference, with a new hero, section headers and card styling",
+            "Add Today's movers: the day's biggest movers ranked by percent change, each with a price sparkline",
+            "Page through Today's movers with arrows that show as many cards as the screen fits",
+            "Give the browser tab a tagline so the site is easier to find in search",
+            "Fix the chart tooltip date being unreadable in light mode",
+            "Abbreviate trillion-scale figures as T rather than a long run of digits",
+            "Bound the retry after a failed request so it cannot loop forever",
+            "Fix the page hanging on load when the session check fails",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.9.0",
         date: "09/28/2026",
         updates: [
