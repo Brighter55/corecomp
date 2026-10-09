@@ -657,6 +657,88 @@ def get_live_row(symbol):
     return rows[0] if rows else {}
 
 
+def _to_float(value):
+    """Coerce an upstream string field. None for anything unparseable."""
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def get_live_rows(symbols):
+    """Batched prices/live: {symbol: row}, or a Response on upstream error.
+
+    `tickers` is plural and the provider accepts a comma-separated list --
+    spike-verified, and `meta.requested.tickers` echoes the list back. This is
+    what keeps the trending section at a flat two requests instead of one call
+    per card. Capped at 25 symbols per request (the provider's own limit).
+
+    Keyed by the symbol list rather than reusing the per-symbol `live:{symbol}`
+    memo, so a batch never aliases a single-symbol fetch.
+    """
+    joined = ",".join(symbols)
+    data = _upstream(
+        f"live-batch:{joined}",
+        lambda: fetch_wisesheets("prices/live", {"tickers": joined, "fields": LIVE_FIELDS}),
+        ttl_seconds=60,
+    )
+    if isinstance(data, Response):
+        return data
+    return {
+        row["symbol"]: row
+        for row in (data.get("data") or [])
+        if row.get("symbol")
+    }
+
+
+def get_eod_batch(symbols, days):
+    """Batched prices/eod over a short window: {symbol: [rows]}, or a Response.
+
+    Rows are oldest -> newest so callers can take "the previous session" as
+    `rows[-2]` without re-sorting.
+
+    Deliberately NOT `_eod_params`, which asks for 4 years. Across a whole
+    universe that exceeds the 10000-row limit and paginates into several
+    requests -- a cost that would be invisible in the response. Callers pass the
+    window they actually need; see pages/trending.py:HISTORY_DAYS.
+    """
+    joined = ",".join(symbols)
+    start = (date.today() - timedelta(days=days)).isoformat()
+    params = {
+        "tickers": joined,
+        "period": f"{start}..{date.today().isoformat()}",
+        "fields": "close,adjClose,volume",
+        "limit": 10000,
+    }
+
+    data = _upstream(
+        f"eod-batch:{days}:{joined}",
+        lambda: fetch_wisesheets("prices/eod", params),
+        ttl_seconds=600,
+    )
+    if isinstance(data, Response):
+        return data
+
+    by_symbol = {}
+    for row in data.get("data") or []:
+        symbol = row.get("symbol")
+        day = row.get("date")
+        close = _to_float(row.get("close"))
+        if not symbol or not day or close is None:
+            continue
+        by_symbol.setdefault(symbol, []).append({
+            "date": day,
+            "close": close,
+            "volume": _to_float(row.get("volume")),
+        })
+
+    for rows in by_symbol.values():
+        rows.sort(key=lambda row: row["date"])
+    return by_symbol
+
+
 def get_dip_row(symbol):
     """Price and both moving averages for the dip chart.
 

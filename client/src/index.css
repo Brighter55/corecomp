@@ -19,6 +19,12 @@
   --line-muted: rgba(218, 215, 205, 0.45);
   --card-main: #f7f6f2;
   --card-text: #2f3037;
+
+  /* Change indicators are foreground colours, so they need their own tokens.
+     --main-fern/--main-brick are *fill* colours (used as bg- with white text)
+     and only reach ~2.3:1 when used as text on --bg-main. */
+  --change-up: #8fd08c;
+  --change-down: #ff9f93;
 }
 
 :root.theme-light {
@@ -38,6 +44,10 @@
   --line-muted: rgba(26, 36, 30, 0.1);
   --card-main: #FFFFFF;
   --card-text: #1A241E;
+
+  /* Darkened for light mode: the dark-theme pastels land at ~1.9:1 on white. */
+  --change-up: #1F5B2C;
+  --change-down: #A33236;
 }
 
 html, body, #root {

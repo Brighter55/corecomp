@@ -49,6 +49,11 @@ MODE = "mock" if os.getenv("MOCK") == "True" else "live"
 # cut upstream spend, and it is independent of every other key here.
 DIP_TTL_SECONDS = 600
 
+# Freshness/cost dial for /pages/trending. Every visitor shares one cached
+# payload, so this TTL -- not traffic -- is what decides the spend. An hour
+# keeps the worst case near 1,440 requests/month against the shared 5,000.
+TRENDING_TTL_SECONDS = 3600
+
 
 @api_view(["POST"])
 @permission_classes([AllowAnonymousWithQuota])
@@ -424,6 +429,40 @@ def dip(request):
         {"asOf": date.today().isoformat(), "results": results},
         status=status.HTTP_200_OK,
     )
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def trending(request):
+    """Ranked "today's movers" for the landing page.
+
+    AllowAny on purpose, unlike every other endpoint in this module. This is
+    teaser content on the homepage: quota-guarding it would spend an anonymous
+    visitor's whole 5-symbol allowance before they ever reached the search box,
+    which defeats the free tier rather than protecting it. The upstream cost is
+    flat regardless of traffic because one cached payload serves everyone, so
+    there is nothing to ration -- see test_trending.py for the assertions that
+    pin this down.
+
+    One key for the entire payload rather than dip's one-per-symbol: it is
+    fetched and ranked as a unit, so splitting it would only add ways for the
+    set to end up inconsistent.
+    """
+    key = f"{MODE}:trending"
+    payload = cache.get(key)
+
+    if payload is None:
+        payload = financial_data_service.get_trending()
+
+        # Upload/provider errors (503 rate limit, 500 invalid call) abort rather
+        # than cache: a cached error would pin the section broken for the whole
+        # TTL, and the provider's own Retry-After already says when to look again.
+        if isinstance(payload, Response):
+            return payload
+
+        cache.set(key, payload, timeout=TRENDING_TTL_SECONDS)
+
+    return Response(payload, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])

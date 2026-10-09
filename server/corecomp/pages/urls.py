@@ -15,6 +15,8 @@ urlpatterns = [
     # no trailing slash: APPEND_SLASH would 301 a POST, and fetch follows a 301
     # as a GET, turning it into a 405
     path("dip", overview.dip, name="dip"),
+    # no trailing slash, same reason as dip above
+    path("trending", overview.trending, name="trending"),
     path("symbol-search", overview.symbol_search, name="symbol_search"),
     path("composite", overview.composite, name="composite"),
 ]
