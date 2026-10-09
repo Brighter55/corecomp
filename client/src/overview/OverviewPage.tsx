@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductHeader from "../headers/product-header/ProductHeader.jsx";
 import SymbolSearch from "../shared/SymbolSearch.jsx";
 import SectionHeader from "./components/SectionHeader.tsx";
@@ -22,37 +22,6 @@ type Mover = {
   marketCap: number | null;
   spark: number[];
 };
-
-// Placeholder content for the Market News section, which is still a design pass.
-const newsCategories = ["All", "Macro", "Commodities", "Technology"];
-const activeCategory = "All";
-
-const newsRows = [
-  {
-    category: "Global Trade",
-    title: "Sovereign bonds rally as fiscal projections stabilize in emerging markets",
-    copy: "Treasury yield compression accelerates across regional hubs following coordinated monetary stance signals and moderated debt servicing outlooks.",
-    meta: "12m ago • 4 min read",
-    source: "Reuters",
-    tag: "$BOND",
-  },
-  {
-    category: "Commodities",
-    title: "Industrial metals reach 6-month high amid green energy transition demand",
-    copy: "Refined copper stockpiles test multi-year troughs while strategic electrification buildouts in grid networks stimulate contract delivery volumes.",
-    meta: "38m ago • 3 min read",
-    source: "Bloomberg",
-    tag: "$COPX",
-  },
-  {
-    category: "Technology",
-    title: "Semiconductor output forecast adjusted following strategic logistics shifts",
-    copy: "Foundry utilization trends point toward robust silicon packaging capacity expansion, easing near-term component backlog bottlenecks.",
-    meta: "1h ago • 5 min read",
-    source: "Financial Times",
-    tag: "$SOXX",
-  },
-];
 
 function formatPercent(value: number) {
   // The sign is part of the display, not the number: "+1.44%" / "-2.45%".
@@ -267,64 +236,6 @@ function OverviewPage() {
               )}
             </section>
           )}
-
-          <section className="space-y-6">
-            <SectionHeader
-              title="Market News"
-              filters={
-                <div className="flex flex-wrap items-center gap-2">
-                  {newsCategories.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      aria-pressed={category === activeCategory}
-                      className={
-                        category === activeCategory
-                          ? "rounded-full bg-[var(--main-hunter-green)] px-3 py-1 text-xs font-semibold text-white"
-                          : "rounded-full border border-[var(--line-muted)] px-3 py-1 text-xs font-semibold text-[var(--text-muted)] transition-colors hover:text-[var(--text-main)]"
-                      }
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              }
-              actions={
-                <a
-                  href="#all-news"
-                  className="flex items-center gap-1 text-xs font-semibold text-[var(--text-main)] transition-colors hover:text-[var(--main-dry-sage)]"
-                >
-                  View all news
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </a>
-              }
-            />
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {newsRows.map((story) => (
-                <article
-                  key={story.title}
-                  className="flex flex-col justify-between rounded-2xl border border-[var(--line-muted)] bg-[var(--surface-soft)] p-6 backdrop-blur-md transition-colors hover:border-[var(--main-dry-sage)]"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="rounded border border-[var(--line-muted)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                        {story.category}
-                      </span>
-                      <span className="text-[11px] text-[var(--text-muted)]">{story.meta}</span>
-                    </div>
-                    <h3 className="text-base font-bold text-[var(--text-main)]">{story.title}</h3>
-                    <p className="text-xs leading-relaxed text-[var(--text-muted)]">{story.copy}</p>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between border-t border-[var(--line-muted)] pt-4 text-xs text-[var(--text-muted)]">
-                    <span className="font-medium text-[var(--text-main)]">{story.source}</span>
-                    <span className="rounded bg-[var(--surface-soft)] px-2 py-0.5 text-[11px] font-semibold text-[var(--text-main)]">
-                      {story.tag}
-                    </span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
         </main>
       </div>
     </div>

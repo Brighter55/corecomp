@@ -135,7 +135,6 @@ describe("OverviewPage", () => {
     renderPage();
 
     expect(screen.getByText("CoreComp")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Market News" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Today's movers" })).toBeInTheDocument();
   });
 
@@ -147,28 +146,20 @@ describe("OverviewPage", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/overview/AAPL");
   });
 
-  test("market news header exposes category filters with All selected", () => {
+  test("renders no section beyond Today's movers", () => {
     renderPage();
 
-    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
-    for (const label of ["Macro", "Commodities", "Technology"]) {
-      expect(screen.getByRole("button", { name: label })).toHaveAttribute("aria-pressed", "false");
-    }
+    // The Market News placeholder was removed, and nothing replaced it.
+    expect(screen.queryByRole("heading", { name: "Market News" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(1);
   });
 
-  test("market news header links out to the full news list", () => {
-    renderPage();
-
-    expect(screen.getByRole("link", { name: /view all news/i })).toBeInTheDocument();
-  });
-
-  test("neither section title is a link", () => {
+  test("the section title is not a link", () => {
     renderPage();
 
     // The titles used to be <a href="#"> with a chevron, going nowhere.
     expect(screen.getByRole("heading", { name: "Today's movers" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Today's movers" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Market News" })).not.toBeInTheDocument();
   });
 
   test("requests the trending endpoint once, as a POST", () => {
