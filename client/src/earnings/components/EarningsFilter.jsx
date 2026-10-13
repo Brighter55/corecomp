@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Filter } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover";
 import { cn } from "../../lib/utils.ts";
-import { NAV_BUTTON } from "./EarningsToolbar.jsx";
+import { NAV_BUTTON } from "./buttonStyles.js";
 import { FILTERS } from "../earningsFilter.js";
 
 // The filter button and its popup. It reuses NAV_BUTTON so it reads as a

@@ -1,15 +1,12 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "../../lib/utils.ts";
 import EarningsFilter from "./EarningsFilter.jsx";
+import { NAV_BUTTON } from "./buttonStyles.js";
 
 const VIEWS = [
     { key: "weekly", label: "Weekly" },
     { key: "monthly", label: "Monthly" },
 ];
-
-// Shared with the filter button, which sits beside the arrows.
-export const NAV_BUTTON =
-    "flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line-muted)] text-[var(--text-muted)] transition-colors hover:border-[var(--main-dry-sage)] hover:text-[var(--text-main)]";
 
 function EarningsToolbar({ view, onViewChange, filter, onFilterChange, label, onPrev, onNext }) {
     const unit = view === "monthly" ? "month" : "week";

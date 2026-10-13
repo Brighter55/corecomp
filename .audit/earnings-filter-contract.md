@@ -45,7 +45,19 @@ The weekly board filters tiles inside each session group, and a group left with 
 
 **NEW `server/corecomp/pages/market_caps.py`** owns market cap and the definition of popular.
 
-- `POPULAR`, a curated `frozenset` of well-known large caps. Start from `trending.UNIVERSE` and extend to roughly the S&P 100 so the filter is useful rather than near-empty. This is the one subjective definition in the feature, so it lives in exactly one place and is easy to change. Comment where it came from.
+- `POPULAR`, a curated `frozenset` of **41 household names**. It is deliberately much narrower than the 100B+ threshold, so Popular is visibly distinct from it rather than a near-duplicate. An S&P 100 sized list was the first draft and was rejected for exactly that reason, since nearly every S&P 100 member is above 100 billion.
+
+  ```python
+  POPULAR = frozenset({
+      "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "AVGO",
+      "ORCL", "AMD", "NFLX", "INTC", "IBM", "JPM", "V", "MA", "BAC",
+      "WFC", "GS", "UNH", "JNJ", "LLY", "PFE", "MRK", "WMT", "PG", "KO",
+      "PEP", "COST", "HD", "MCD", "NKE", "DIS", "SBUX", "XOM", "CVX",
+      "CAT", "BA", "GE", "VZ", "T",
+  })
+  ```
+
+  The test is whether a casual investor recognises the name, not whether the company is large. Edit freely, but keep it near this size and keep the bar at recognition, because a longer list collapses back into the 100B+ option. Comment that reasoning where the set is defined.
 - `is_popular(symbol) -> bool`.
 - `get_market_caps(symbols) -> dict[str, float | None]` resolves a batch, with a Redis per-symbol cache. Cache each symbol under `{MODE}:market_cap_{symbol}` for 604800 seconds, a week, following `info_{symbol}` which already carries a market cap at that TTL. Resolve only the misses, in batches of 25 through `wisesheets.get_live_rows`. A symbol that comes back unknown, or a batch that errors, caches as `None` for a short retry window rather than a week, so one upstream failure does not pin a symbol as sizeless.
 
@@ -57,7 +69,7 @@ Follow the existing error convention. `fetch_wisesheets` returns a DRF `Response
 
 ## Frontend
 
-**Filter button.** Placed immediately LEFT of the Weekly and Monthly toggle, inside a new flex wrapper around the button and the existing `role="radiogroup"` at `EarningsToolbar.jsx:34`. The wrapper replaces the radiogroup as the right-hand child of the toolbar's `justify-between` row, so the toggle stays flush right. Reuse the `NAV_BUTTON` constant at `EarningsToolbar.jsx:9-10` and match the aria-label convention used by `Previous week` and `Next week`. The button must show that a filter is active, not only when the popup is open.
+**Filter button.** Placed immediately LEFT of the Weekly and Monthly toggle, inside a new flex wrapper around the button and the existing `role="radiogroup"` at `EarningsToolbar.jsx:34`. The wrapper replaces the radiogroup as the right-hand child of the toolbar's `justify-between` row, so the toggle stays flush right. Reuse the shared `NAV_BUTTON` constant, which lives in `client/src/earnings/components/buttonStyles.js`, and match the aria-label convention used by `Previous week` and `Next week`. It was first defined in `EarningsToolbar.jsx`, but that file renders the filter, so exporting it from there made the two modules import each other and the constant was extracted to break the cycle. The button must show that a filter is active, not only when the popup is open.
 
 **Filter popup.** Reuse the existing shadcn `popover` primitive at `client/src/components/ui/popover.tsx`, as `src/shared/Explanation.jsx` and `src/shared/SymbolSearch.jsx` already do. Do NOT add `@radix-ui/react-radio-group`. It is not a dependency and this feature does not justify a new one, so build a bespoke `role="radiogroup"` with `role="radio"` buttons mirroring the view toggle in the same toolbar file. There is one radio pattern in this repo and this keeps it at one.
 
