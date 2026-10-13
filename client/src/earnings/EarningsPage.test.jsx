@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import EarningsPage from "./EarningsPage.jsx";
 import { authenticatedClient } from "../helpers/api.js";
-import { addDays, mondayOf, monthLabel, todayIso, weeklyWindow } from "./earningsWindow.js";
+import { addDays, mondayOf, monthLabel, monthlyWindow, todayIso, weeklyWindow } from "./earningsWindow.js";
 
 // The real header pulls in auth, theme and the market search; none of that is
 // what this page is being tested for.
@@ -51,6 +51,31 @@ function mockApi(override) {
         }
         return sessionResponse(buildResponse(payload));
     });
+}
+
+// A response whose days the test chooses, built from the window the page
+// actually asked for so the tiles land in a rendered cell whatever today is.
+function mockApiWith(build) {
+    authenticatedClient.mockImplementation(async ({ payload }) => sessionResponse(build(payload)));
+}
+
+function body(payload, days) {
+    return {
+        asOf: "2026-10-11",
+        window: { start: payload.start, end: addDays(payload.start, payload.days - 1) },
+        days,
+    };
+}
+
+function day(date, sessions) {
+    return { date, sessions };
+}
+
+// Opens the popup and picks an option. userEvent, not fireEvent: the popover
+// is Radix, which opens on real pointer events rather than a synthetic click.
+async function selectFilter(user, label) {
+    await user.click(screen.getByRole("button", { name: "Filter stocks" }));
+    await user.click(await screen.findByRole("radio", { name: label }));
 }
 
 function renderPage() {
@@ -255,5 +280,122 @@ describe("EarningsPage", () => {
         renderPage();
 
         expect(await screen.findByText("Updated as of 2026-10-11")).toBeInTheDocument();
+    });
+
+    test("filters to the tiles the server flagged popular", async () => {
+        const user = userEvent.setup();
+        // POPCO is popular but its market cap is tiny, so reading `popular`
+        // rather than inferring size is the only way it survives.
+        mockApiWith((payload) =>
+            body(payload, [
+                day(payload.start, [
+                    {
+                        session: "before_open",
+                        tiles: [
+                            { symbol: "POPCO", name: "Popular Co", estimate: 1.5, marketCap: 5, popular: true },
+                            { symbol: "BIGCO", name: "Big Co", estimate: 2.5, marketCap: 300_000_000_000, popular: false },
+                        ],
+                    },
+                ]),
+            ]),
+        );
+        renderPage();
+        await screen.findByText("POPCO");
+
+        await selectFilter(user, "Popular stocks");
+
+        expect(screen.getByText("POPCO")).toBeInTheDocument();
+        expect(screen.queryByText("BIGCO")).not.toBeInTheDocument();
+    });
+
+    test("drops an unknown market cap under a threshold and never refetches", async () => {
+        const user = userEvent.setup();
+        mockApiWith((payload) =>
+            body(payload, [
+                day(payload.start, [
+                    {
+                        session: "before_open",
+                        tiles: [
+                            { symbol: "KNOWN", name: "Known Co", estimate: 1, marketCap: 300_000_000_000, popular: false },
+                            { symbol: "UNKNOWN", name: "Unknown Co", estimate: 1, marketCap: null, popular: false },
+                        ],
+                    },
+                ]),
+            ]),
+        );
+        renderPage();
+        await screen.findByText("KNOWN");
+        const callsAfterLoad = authenticatedClient.mock.calls.length;
+
+        await selectFilter(user, "Market cap 100B+");
+
+        expect(screen.getByText("KNOWN")).toBeInTheDocument();
+        expect(screen.queryByText("UNKNOWN")).not.toBeInTheDocument();
+        // The filter narrows what was already received; a refetch would spend
+        // the shared upstream quota for data the page already holds.
+        expect(authenticatedClient.mock.calls.length).toBe(callsAfterLoad);
+    });
+
+    test("counts the monthly overflow over the filtered set", async () => {
+        const user = userEvent.setup();
+        const big = (index) => ({
+            symbol: `BIG${index}`,
+            name: `Big ${index}`,
+            estimate: 1,
+            marketCap: 150_000_000_000,
+            popular: false,
+        });
+        const small = (index) => ({
+            symbol: `SML${index}`,
+            name: `Small ${index}`,
+            estimate: 1,
+            marketCap: 2_000_000_000,
+            popular: false,
+        });
+        // Eight tiles on one day, three above 100B: the cap shows six and two
+        // overflow, until the filter leaves only the three big ones.
+        const tiles = [big(0), big(1), big(2), small(0), small(1), small(2), small(3), small(4)];
+        mockApiWith((payload) =>
+            body(payload, [day(payload.start, [{ session: "before_open", tiles }])]),
+        );
+        renderPage();
+        await screen.findByText("BIG0");
+
+        await user.click(screen.getByRole("radio", { name: "Monthly" }));
+        const start = monthlyWindow(todayIso()).start;
+        const cell = () => within(document.body.querySelector(`[data-date="${start}"]`));
+
+        await waitFor(() => {
+            expect(cell().getAllByTestId("earnings-tile")).toHaveLength(6);
+        });
+        expect(cell().getByTestId("month-overflow")).toHaveTextContent("+2 more");
+
+        await selectFilter(user, "Market cap 100B+");
+
+        await waitFor(() => {
+            expect(cell().getAllByTestId("earnings-tile")).toHaveLength(3);
+        });
+        expect(cell().queryByTestId("month-overflow")).not.toBeInTheDocument();
+    });
+
+    test("shows an empty state when nothing matches the filter", async () => {
+        const user = userEvent.setup();
+        mockApiWith((payload) =>
+            body(payload, [
+                day(payload.start, [
+                    {
+                        session: "before_open",
+                        tiles: [{ symbol: "TINYCO", name: "Tiny Co", estimate: 1, marketCap: null, popular: false }],
+                    },
+                ]),
+            ]),
+        );
+        renderPage();
+        await screen.findByText("TINYCO");
+
+        await selectFilter(user, "Market cap 100B+");
+
+        expect(await screen.findByTestId("earnings-filter-empty")).toBeInTheDocument();
+        expect(screen.queryByTestId("weekly-board")).not.toBeInTheDocument();
     });
 });

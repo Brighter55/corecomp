@@ -5,6 +5,7 @@ import { authenticatedClient } from "../helpers/api.js";
 import EarningsToolbar from "./components/EarningsToolbar.jsx";
 import WeeklyBoard from "./components/WeeklyBoard.jsx";
 import MonthlyGrid from "./components/MonthlyGrid.jsx";
+import { applyFilter } from "./earningsFilter.js";
 import {
     addDays,
     daysByDate,
@@ -21,6 +22,9 @@ const UNAVAILABLE_MESSAGE = "Earnings data is unavailable right now. Try again i
 
 function EarningsPage() {
     const [view, setView] = useState("weekly");
+    // Client-side only: the filter narrows the tiles already fetched, so it is
+    // deliberately absent from the fetch effect's dependencies below.
+    const [filter, setFilter] = useState("all");
     // Any date inside the shown window: the week's Monday comes from it in the
     // weekly view, the month from it in the monthly view.
     const [anchor, setAnchor] = useState(todayIso);
@@ -81,7 +85,11 @@ function EarningsPage() {
         })();
     }, [activeWindow.start, activeWindow.days]);
 
-    const lookup = useMemo(() => daysByDate(data?.days), [data]);
+    // Filtered once, here, so both boards see the same set: the weekly board's
+    // emptied groups vanish and the monthly grid's cap and overflow count the
+    // filtered tiles without either board holding a second copy of the rules.
+    const visibleDays = useMemo(() => applyFilter(data?.days, filter), [data, filter]);
+    const lookup = useMemo(() => daysByDate(visibleDays), [visibleDays]);
     const cells = useMemo(
         () => weekdayCells(activeWindow.start, activeWindow.days),
         [activeWindow.start, activeWindow.days],
@@ -129,6 +137,14 @@ function EarningsPage() {
             );
         }
 
+        if (visibleDays.length === 0) {
+            return (
+                <p data-testid="earnings-filter-empty" className="text-sm text-[var(--text-muted)]">
+                    No stocks match this filter.
+                </p>
+            );
+        }
+
         return view === "monthly" ? (
             <MonthlyGrid cells={cells} daysByDate={lookup} monthAnchor={anchor} />
         ) : (
@@ -149,6 +165,8 @@ function EarningsPage() {
                     <EarningsToolbar
                         view={view}
                         onViewChange={setView}
+                        filter={filter}
+                        onFilterChange={setFilter}
                         label={label}
                         onPrev={handlePrev}
                         onNext={handleNext}
