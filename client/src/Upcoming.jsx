@@ -4,6 +4,18 @@ import Footer from "./shared/Footer.tsx";
 const versions = [
     {
         name: "Current Version",
+        version: "0.11.0",
+        date: "10/12/2026",
+        updates: [
+            "Add an Earnings Calendar page: see which companies report earnings each day, grouped into before the open, after the close, and not yet announced",
+            "Switch the calendar between a weekly board and a monthly grid, and page backwards and forwards through the weeks or months",
+            "Filter the calendar by market cap, or down to the popular household names, so the big reporters stand out from the hundreds of small ones",
+            "Add Earnings to the Features menu in the header",
+            "Show each company's logo on its earnings tile, falling back to the ticker when none is found",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.10.0",
         date: "10/09/2026",
         updates: [
