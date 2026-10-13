@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
@@ -78,12 +78,19 @@ async function selectFilter(user, label) {
     await user.click(await screen.findByRole("radio", { name: label }));
 }
 
-function renderPage() {
-    return render(
-        <MemoryRouter>
-            <EarningsPage />
-        </MemoryRouter>,
-    );
+// Renders inside act and awaits, so the mount fetch's state update lands before
+// the test asserts. The loading test wants that update held back, so it gives
+// the mock a promise that never settles instead.
+async function renderPage() {
+    let result;
+    await act(async () => {
+        result = render(
+            <MemoryRouter>
+                <EarningsPage />
+            </MemoryRouter>,
+        );
+    });
+    return result;
 }
 
 const expectedStart = () => weeklyWindow(todayIso()).start;
@@ -94,15 +101,15 @@ describe("EarningsPage", () => {
         mockApi();
     });
 
-    test("renders the page heading and the header", () => {
-        renderPage();
+    test("renders the page heading and the header", async () => {
+        await renderPage();
 
         expect(screen.getByRole("heading", { level: 1, name: "Earnings Calendar" })).toBeInTheDocument();
         expect(screen.getByTestId("product-header")).toBeInTheDocument();
     });
 
-    test("asks for the Monday-to-Friday week on mount", () => {
-        renderPage();
+    test("asks for the Monday-to-Friday week on mount", async () => {
+        await renderPage();
 
         expect(authenticatedClient).toHaveBeenCalledWith({
             endpoint: "/pages/earnings-calendar",
@@ -111,7 +118,7 @@ describe("EarningsPage", () => {
     });
 
     test("opens on the weekly view and draws five day columns", async () => {
-        renderPage();
+        await renderPage();
 
         await screen.findByText("TSM");
 
@@ -124,8 +131,11 @@ describe("EarningsPage", () => {
         expect(within(board).getAllByRole("heading", { level: 3 })[0]).toHaveTextContent("Mon");
     });
 
-    test("shows a loading skeleton before the window arrives", () => {
-        renderPage();
+    test("shows a loading skeleton before the window arrives", async () => {
+        // A promise that never settles holds the page in its loading state, so
+        // the skeleton is all the test observes and no update lands after it.
+        authenticatedClient.mockImplementation(() => new Promise(() => {}));
+        await renderPage();
 
         expect(screen.getByTestId("earnings-loading")).toBeInTheDocument();
     });
@@ -150,7 +160,7 @@ describe("EarningsPage", () => {
                 ],
             }),
         );
-        renderPage();
+        await renderPage();
 
         await screen.findByText("WAL");
 
@@ -162,7 +172,7 @@ describe("EarningsPage", () => {
     });
 
     test("shows a tile's estimate in its tooltip", async () => {
-        renderPage();
+        await renderPage();
 
         const symbol = await screen.findByText("TSM");
 
@@ -173,7 +183,7 @@ describe("EarningsPage", () => {
     });
 
     test("shows each company's logo, falling back to the ticker chip", async () => {
-        const { container } = renderPage();
+        const { container } = await renderPage();
 
         await screen.findByText("TSM");
 
@@ -190,7 +200,7 @@ describe("EarningsPage", () => {
     });
 
     test("walks the week forward and back by seven days", async () => {
-        renderPage();
+        await renderPage();
         await screen.findByText("TSM");
 
         fireEvent.click(screen.getByRole("button", { name: "Next week" }));
@@ -214,7 +224,7 @@ describe("EarningsPage", () => {
 
     test("switching to the monthly grid asks for whole weeks of the month", async () => {
         const user = userEvent.setup();
-        renderPage();
+        await renderPage();
         await screen.findByText("TSM");
 
         await user.click(screen.getByRole("radio", { name: "Monthly" }));
@@ -243,7 +253,7 @@ describe("EarningsPage", () => {
 
     test("shows an alert when the window cannot be loaded", async () => {
         mockApi(sessionResponse({ detail: "boom" }, { ok: false }));
-        renderPage();
+        await renderPage();
 
         const alert = await screen.findByRole("alert");
 
@@ -261,13 +271,13 @@ describe("EarningsPage", () => {
                 days: [],
             }),
         );
-        renderPage();
+        await renderPage();
 
         expect(await screen.findByTestId("earnings-empty")).toBeInTheDocument();
     });
 
-    test("renders the shared footer", () => {
-        renderPage();
+    test("renders the shared footer", async () => {
+        await renderPage();
 
         expect(screen.getByRole("contentinfo")).toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Contact Us" })).toHaveAttribute(
@@ -277,7 +287,7 @@ describe("EarningsPage", () => {
     });
 
     test("shows the snapshot date the server reported", async () => {
-        renderPage();
+        await renderPage();
 
         expect(await screen.findByText("Updated as of 2026-10-11")).toBeInTheDocument();
     });
@@ -299,7 +309,7 @@ describe("EarningsPage", () => {
                 ]),
             ]),
         );
-        renderPage();
+        await renderPage();
         await screen.findByText("POPCO");
 
         await selectFilter(user, "Popular stocks");
@@ -323,7 +333,7 @@ describe("EarningsPage", () => {
                 ]),
             ]),
         );
-        renderPage();
+        await renderPage();
         await screen.findByText("KNOWN");
         const callsAfterLoad = authenticatedClient.mock.calls.length;
 
@@ -358,7 +368,7 @@ describe("EarningsPage", () => {
         mockApiWith((payload) =>
             body(payload, [day(payload.start, [{ session: "before_open", tiles }])]),
         );
-        renderPage();
+        await renderPage();
         await screen.findByText("BIG0");
 
         await user.click(screen.getByRole("radio", { name: "Monthly" }));
@@ -390,7 +400,7 @@ describe("EarningsPage", () => {
                 ]),
             ]),
         );
-        renderPage();
+        await renderPage();
         await screen.findByText("TINYCO");
 
         await selectFilter(user, "Market cap 100B+");
