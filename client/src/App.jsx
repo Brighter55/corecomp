@@ -9,6 +9,7 @@ import PrivacyPolicy from "./PrivacyPolicy.jsx"
 import TermsOfService from "./TermsOfService.jsx"
 import Upcoming from "./Upcoming.jsx"
 import DipPage from "./dip/DipPage.jsx"
+import EarningsPage from "./earnings/EarningsPage.jsx"
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/account" element={<AuthenticatedRoute><Account /></AuthenticatedRoute>} />
         <Route path="/upcoming" element={<Upcoming />} />
         <Route path="/dip" element={<DipPage />} />
+        <Route path="/earnings" element={<EarningsPage />} />
       </Routes>
     </BrowserRouter>
   )
