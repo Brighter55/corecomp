@@ -129,4 +129,13 @@ describe('ProductHeader', () => {
 
     expect(mockNavigate).toHaveBeenCalledWith("/dip");
   });
+
+  test('earnings nav entry navigates to the earnings calendar', () => {
+    render(<ProductHeader />);
+
+    // Same reasoning as the dip entry: the mobile list renders inline.
+    fireEvent.click(screen.getAllByText("Earnings")[0]);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/earnings");
+  });
 });
