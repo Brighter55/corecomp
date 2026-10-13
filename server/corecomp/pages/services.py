@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from rest_framework import status
 from rest_framework.response import Response
 
-from pages import trending, wisesheets
+from pages import alphavantage, earnings_calendar, trending, wisesheets
 
 load_dotenv()
 
@@ -86,6 +86,19 @@ class FinancialDataService:
             "asOf": today.isoformat(),
             "movers": trending.rank_movers(quotes, history, today),
         }
+
+    def get_earnings_calendar(self):
+        """The whole forward calendar as {"asOf", "days"}, or a Response.
+
+        One upstream request, flat: EARNINGS_CALENDAR returns the entire horizon
+        in a single CSV, so there is no window to pass upstream and no per-symbol
+        cost. The view caches this dict and slices it per request with
+        earnings_calendar.window_payload.
+        """
+        csv_text = alphavantage.fetch_earnings_calendar()
+        if isinstance(csv_text, Response):
+            return csv_text
+        return earnings_calendar.build_payload(csv_text, date.today())
 
 
 class MockFinancialDataService:
@@ -266,6 +279,15 @@ class MockFinancialDataService:
                 },
             ],
         }
+
+    def get_earnings_calendar(self):
+        """Deterministic calendar for MOCK=True.
+
+        Built in code, not read from a fixture, for the same reason as
+        get_trending above: a fixture-backed payload 500s on a clean checkout.
+        See earnings_calendar.mock_payload.
+        """
+        return earnings_calendar.mock_payload(date.today())
 
     def get_rate_limit_error(self):
         # invalid case 503 rate limit
