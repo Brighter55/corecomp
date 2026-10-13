@@ -46,6 +46,18 @@ Horizon decision (user, this session): `horizon=3month`. Costs the same one requ
 
 **Rubric.** R1 contract completeness, all three session states including blank, no ambiguity on empty days. R2 the date-and-session grouping owned in exactly one place. R3 the 25-request/day upstream budget honored structurally, cost independent of request volume and window. R4 seam conformance with no new mechanism, and the correct permission class given no symbol exists. R5 a position on real density, 576 on the busiest day. R6 free of the red flags in design-red-flags.md.
 
+## Session pickup, 2026-10-12
+
+1. Read the checkpoint — done, exit 0, hashes unchanged since publish.
+2. Reconstruct operational state — branch `feat/earnings-calendar` at `84cbf58`, tree clean apart from the two pre-existing skill deletions.
+3. Diff done vs pending — no code exists; resume point is the backend and frontend build.
+4. Route to the playbook — Feature continues.
+5. Verified inherited claims against real code rather than trusting the maps. `accounts/permissions.py:22-24` does raise on a missing `symbol`. `pages/urls.py:12` confirms `/pages/earnings` is taken. The no-trailing-slash rationale is at `urls.py:15-16`.
+
+**Cache-shape item resolved.** Read `pages/trending.py`. It is a pure feature module of constants plus one pure function returning plain dicts, and `FinancialDataService.get_trending` returns a payload dict that the view caches directly. So the cached unit is the payload dict, not a dataclass, which removes the pickle hazard structurally instead of guarding it. `pages/services.py:8` already imports a feature module beside the provider client, so the module split is the house pattern.
+
+Contract frozen at [earnings-calendar-contract.md](earnings-calendar-contract.md).
+
 ## Task todos
 
 - [ ] Freeze the response shape for `GET /pages/earnings/` (see contract below)
