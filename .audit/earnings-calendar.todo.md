@@ -58,6 +58,25 @@ Horizon decision (user, this session): `horizon=3month`. Costs the same one requ
 
 Contract frozen at [earnings-calendar-contract.md](earnings-calendar-contract.md).
 
+## Verification outcome, 2026-10-12
+
+Both delegate branches merged into `feat/earnings-calendar`, no conflicts.
+
+`python scripts/check.py` gives **RESULT: PASS** across all nine gates, including 243 backend tests and 314 frontend tests.
+
+Drove the real page in headless Chromium against the live endpoint on `127.0.0.1:8000` with Vite on 5173.
+
+- Weekly board rendered `Oct 12 – Oct 16, 2026` with exactly five Monday-to-Friday columns. Real Alpha Vantage data grouped correctly. Mon 12 showed MSS, NCPL, RMCF under Unannounced, matching the live feed where those rows carry a blank `timeOfTheDay`. Tue 13 put the banks under Before Open, which is really when they report. Next moved to `Oct 19 – Oct 23`.
+- Monthly grid rendered `October 2026` as 25 Monday-to-Friday cells, 14 of them overflowing. Oct 29 held 6 shown plus 314 more, so the overflow indicator is load-bearing rather than decorative.
+- Days before today are empty, which is correct, because `EARNINGS_CALENDAR` is forward-looking.
+- The header and footer both render, since the page composes them itself.
+- Over HTTP, `AllowAny` was confirmed with no `X-Anonymous-Session` header (200). Validation confirmed with `days=99` (400), a missing `start` (400), and a trailing slash (404, so `APPEND_SLASH` never redirects).
+
+Two observations worth carrying, neither a confirmed defect.
+
+1. **The cost incident.** A real upstream request was spent because `pipenv run` loads `server/.env` and overrides a shell variable of the same name. Verified by running `MOCK=True pipenv run python -c "import os; print(os.getenv('MOCK'))"`, which prints `False`; adding `PIPENV_DONT_LOAD_ENV=1` makes it print `True`. The `live:` cache key in Redis was the confirming evidence. **This belongs in `.claude/feature-map.md`**, because anyone trying to toggle MOCK from the shell will hit it.
+2. Headless Chromium logged `net::ERR_BLOCKED_BY_ORB` for many logo.dev requests, yet logos render in the screenshots and only 2 tiles fell back to the ticker chip. That looks like opaque-response blocking in headless mode rather than a real failure, and the same shared helper serves Dip Finder. Worth confirming in a normal browser.
+
 ## Task todos
 
 - [ ] Freeze the response shape for `GET /pages/earnings/` (see contract below)
