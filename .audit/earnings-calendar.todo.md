@@ -77,6 +77,25 @@ Two observations worth carrying, neither a confirmed defect.
 1. **The cost incident.** A real upstream request was spent because `pipenv run` loads `server/.env` and overrides a shell variable of the same name. Verified by running `MOCK=True pipenv run python -c "import os; print(os.getenv('MOCK'))"`, which prints `False`; adding `PIPENV_DONT_LOAD_ENV=1` makes it print `True`. The `live:` cache key in Redis was the confirming evidence. **This belongs in `.claude/feature-map.md`**, because anyone trying to toggle MOCK from the shell will hit it.
 2. Headless Chromium logged `net::ERR_BLOCKED_BY_ORB` for many logo.dev requests, yet logos render in the screenshots and only 2 tiles fell back to the ticker chip. That looks like opaque-response blocking in headless mode rather than a real failure, and the same shared helper serves Dip Finder. Worth confirming in a normal browser.
 
+## Filter increment outcome, 2026-10-12
+
+Both delegate branches merged. `python scripts/check.py` gives **RESULT: PASS** across all nine gates.
+
+Drove the filter in a real browser against the live app.
+
+- Placement confirmed. The right-hand cluster in DOM order is Previous week, Next week, Filter stocks, Calendar view, so the filter button sits left of the Weekly and Monthly toggle.
+- Five options present. All stocks, Popular stocks, Market cap 100B+, Market cap 10B+, Market cap 1B+.
+- On the weekly window, which holds 70 symbols, the filters leave 70, 6, 17, 35 and 48 tiles. A nested ladder, and Popular at 6 is genuinely narrower than 100B+ at 17, which is what the mid-flight correction to the list bought.
+- Filtering is local. Five selections produced no additional calendar requests.
+- The header Features menu lists Overview, Dip Finder and Earnings.
+- The only console errors were the two pre-existing anonymous 401s on `/accounts/me`.
+
+Cost measured rather than estimated. The first weekly view created 70 `market_cap` keys in Redis, which is 3 WiseSheets requests at 25 per request, and a re-run cost nothing because the cache holds.
+
+**A pre-existing defect, found by the backend delegate, that deserves its own fix.** `clear_cache_between_tests` in `server/corecomp/conftest.py` clears after each test rather than before, so a suite sharing a live Redis can read a payload a running app wrote. The delegate saw `asOf 2026-10-12` against a fixture's `2026-10-11`, and worked around it inside its own tests instead of editing the shared fixture. The root cause is still there for every other test, so it belongs in `conftest.py` rather than in per-test workarounds.
+
+Also worth knowing when editing the curated list. `POPULAR` is pinned by an exact-membership test as a frozen-contract promise, so changing the 41 names means changing that test too.
+
 ## Task todos
 
 - [ ] Freeze the response shape for `GET /pages/earnings/` (see contract below)
