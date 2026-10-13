@@ -15,6 +15,8 @@ import csv
 import io
 from datetime import date, timedelta
 
+from pages.market_caps import is_popular
+
 # The complete session vocabulary, in display order. Array order is display
 # order, so the client needs no ordering table of its own.
 SESSIONS = ("before_open", "after_close", "unannounced")
@@ -95,19 +97,82 @@ def build_payload(csv_text, as_of):
     return {"asOf": as_of_iso, "days": days}
 
 
-def window_payload(payload, start, end):
+def _iso(value):
+    """A date or ISO string -> ISO string, so the two spellings compare equal."""
+    return value.isoformat() if hasattr(value, "isoformat") else value
+
+
+def window_days(payload, start, end):
+    """payload's days within the inclusive [start, end] range.
+
+    The one definition of "the requested window". Dates compare as ISO strings,
+    which sort correctly; a date absent from the result means an empty cell, and
+    the client never re-derives the grid.
+    """
+    start_iso, end_iso = _iso(start), _iso(end)
+    return [day for day in payload["days"] if start_iso <= day["date"] <= end_iso]
+
+
+def window_symbols(payload, start, end):
+    """The symbols the requested window actually carries.
+
+    The view resolves market caps for exactly these, so cost tracks the window
+    rather than the whole forward calendar -- a week is a few requests, three
+    months is dozens.
+    """
+    return {
+        tile["symbol"]
+        for day in window_days(payload, start, end)
+        for group in day["sessions"]
+        for tile in group["tiles"]
+    }
+
+
+def _tile(tile, caps):
+    """One tile of the response, with the filter's two fields stamped on.
+
+    `marketCap` is a number or None; None means unresolved, which is not the
+    same as small and fails every threshold filter. `popular` is computed
+    server-side so the curated list never has a second copy on the client.
+    """
+    symbol = tile["symbol"]
+    return {
+        "symbol": symbol,
+        "name": tile["name"],
+        "estimate": tile["estimate"],
+        "marketCap": caps.get(symbol),
+        "popular": is_popular(symbol),
+    }
+
+
+def window_payload(payload, start, end, caps=None):
     """The response body: payload's days sliced to [start, end], plus envelope.
 
     The only function that produces the response shape, so nothing can hand-write
-    a lookalike. Dates compare as ISO strings, which sort correctly; a date absent
-    from the result means an empty cell, and the client never re-derives the grid.
+    a lookalike. Each tile is rebuilt rather than mutated, so stamping one
+    window's market caps can never leak into the cached payload or into another
+    window's response.
+
+    `caps` maps symbol -> market cap (or None) for this window, already resolved
+    by the caller. A symbol absent from it is stamped None.
     """
-    start_iso = start.isoformat() if hasattr(start, "isoformat") else start
-    end_iso = end.isoformat() if hasattr(end, "isoformat") else end
-    days = [day for day in payload["days"] if start_iso <= day["date"] <= end_iso]
+    caps = caps or {}
+    days = [
+        {
+            "date": day["date"],
+            "sessions": [
+                {
+                    "session": group["session"],
+                    "tiles": [_tile(tile, caps) for tile in group["tiles"]],
+                }
+                for group in day["sessions"]
+            ],
+        }
+        for day in window_days(payload, start, end)
+    ]
     return {
         "asOf": payload["asOf"],
-        "window": {"start": start_iso, "end": end_iso},
+        "window": {"start": _iso(start), "end": _iso(end)},
         "days": days,
     }
 
