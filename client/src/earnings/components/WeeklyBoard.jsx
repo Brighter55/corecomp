@@ -12,7 +12,7 @@ const SESSION_LABELS = {
 
 function WeeklyBoard({ cells, daysByDate }) {
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+        <div data-testid="weekly-board" className="grid grid-cols-1 gap-4 md:grid-cols-5">
             {cells.map((iso) => {
                 const sessions = daysByDate.get(iso)?.sessions ?? [];
 
