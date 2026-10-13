@@ -11,7 +11,8 @@ from django.db.models import Q
 from django_redis import get_redis_connection
 
 # pages
-from pages.earnings_calendar import window_payload
+from pages.earnings_calendar import window_payload, window_symbols
+from pages.market_caps import get_market_caps
 from pages.models import Symbol
 from pages.serializers import (
     CompositeGraphSerializer,
@@ -522,7 +523,22 @@ def earnings_calendar(request):
 
                 cache.set(key, payload, timeout=EARNINGS_CALENDAR_TTL_SECONDS)
 
-    return Response(window_payload(payload, start, end), status=status.HTTP_200_OK)
+    # Market caps are a filter nicety, not core data. Resolve them for the
+    # requested window only -- the whole forward calendar would be dozens of
+    # requests instead of a few -- and if resolution fails at all, render every
+    # tile with marketCap null rather than fail the calendar. `get_market_caps`
+    # already turns an upstream error into per-symbol nulls; this guards the
+    # rest (a cache backend that is down, a provider payload that will not
+    # parse), because the calendar is worth showing without sizes.
+    try:
+        caps = get_market_caps(window_symbols(payload, start, end))
+    except Exception:
+        caps = {}
+
+    return Response(
+        window_payload(payload, start, end, caps=caps),
+        status=status.HTTP_200_OK,
+    )
 
 
 @api_view(["POST"])

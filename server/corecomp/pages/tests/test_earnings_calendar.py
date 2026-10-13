@@ -16,7 +16,12 @@ import requests
 from django.core.cache import cache
 from django.urls import reverse
 from pages import alphavantage
-from pages.earnings_calendar import build_payload, mock_payload, window_payload
+from pages.earnings_calendar import (
+    build_payload,
+    mock_payload,
+    window_payload,
+    window_symbols,
+)
 from pages.services import MockFinancialDataService
 from pages.views import overview
 from rest_framework import status
@@ -46,6 +51,18 @@ CALENDAR_CSV = (
 )
 
 AS_OF = date(2026, 10, 11)
+
+
+@pytest.fixture(autouse=True)
+def fresh_earnings_calendar_cache():
+    """Drop the cached calendar before each test.
+
+    The shared dev Redis DB can already hold `{MODE}:earnings_calendar` from a
+    running app, and conftest clears only *after* each test, so the first view
+    test would otherwise read that foreign payload and assert against it.
+    """
+    cache.delete(f"{overview.MODE}:earnings_calendar")
+    yield
 
 
 def _tiles_by_symbol(day):
@@ -281,8 +298,9 @@ def _calendar_payload():
 
 
 @pytest.mark.django_db
+@patch("pages.views.overview.get_market_caps", return_value={})
 @patch("pages.views.overview.financial_data_service.get_earnings_calendar")
-def test_slices_the_cached_calendar_to_the_requested_window(mock_get, api_client):
+def test_slices_the_cached_calendar_to_the_requested_window(mock_get, mock_caps, api_client):
     mock_get.return_value = _calendar_payload()
 
     response = api_client.post(url, {"start": "2026-10-15", "days": 1}, format="json")
@@ -296,8 +314,9 @@ def test_slices_the_cached_calendar_to_the_requested_window(mock_get, api_client
 
 
 @pytest.mark.django_db
+@patch("pages.views.overview.get_market_caps", return_value={})
 @patch("pages.views.overview.financial_data_service.get_earnings_calendar")
-def test_the_cached_unit_is_the_whole_calendar_not_the_window(mock_get, api_client):
+def test_the_cached_unit_is_the_whole_calendar_not_the_window(mock_get, mock_caps, api_client):
     # Cost must be independent of how far the client pages: a second, disjoint
     # window is served from the one cached payload without a second upstream call.
     mock_get.return_value = _calendar_payload()
@@ -310,8 +329,9 @@ def test_the_cached_unit_is_the_whole_calendar_not_the_window(mock_get, api_clie
 
 
 @pytest.mark.django_db
+@patch("pages.views.overview.get_market_caps", return_value={})
 @patch("pages.views.overview.financial_data_service.get_earnings_calendar")
-def test_days_defaults_to_seven(mock_get, api_client):
+def test_days_defaults_to_seven(mock_get, mock_caps, api_client):
     mock_get.return_value = _calendar_payload()
 
     response = api_client.post(url, {"start": "2026-10-15"}, format="json")
@@ -322,8 +342,9 @@ def test_days_defaults_to_seven(mock_get, api_client):
 
 
 @pytest.mark.django_db
+@patch("pages.views.overview.get_market_caps", return_value={})
 @patch("pages.views.overview.financial_data_service.get_earnings_calendar")
-def test_anonymous_without_a_session_header_is_allowed(mock_get, api_client):
+def test_anonymous_without_a_session_header_is_allowed(mock_get, mock_caps, api_client):
     # AllowAnonymousWithQuota would 403 here: it needs a `symbol`, and the
     # calendar has none. A calendar must also not spend the 5 free symbol views.
     mock_get.return_value = _calendar_payload()
@@ -334,8 +355,9 @@ def test_anonymous_without_a_session_header_is_allowed(mock_get, api_client):
 
 
 @pytest.mark.django_db
+@patch("pages.views.overview.get_market_caps", return_value={})
 @patch("pages.views.overview.financial_data_service.get_earnings_calendar")
-def test_repeated_views_never_exhaust_the_anonymous_quota(mock_get, api_client):
+def test_repeated_views_never_exhaust_the_anonymous_quota(mock_get, mock_caps, api_client):
     # Six fills is more than QUOTA (5). A quota-guarded route refuses the sixth.
     mock_get.return_value = _calendar_payload()
 
@@ -350,8 +372,9 @@ def test_repeated_views_never_exhaust_the_anonymous_quota(mock_get, api_client):
 
 
 @pytest.mark.django_db
+@patch("pages.views.overview.get_market_caps", return_value={})
 @patch("pages.views.overview.financial_data_service.get_earnings_calendar")
-def test_second_request_is_served_from_the_mode_namespaced_cache(mock_get, api_client):
+def test_second_request_is_served_from_the_mode_namespaced_cache(mock_get, mock_caps, api_client):
     mock_get.return_value = _calendar_payload()
 
     first = api_client.post(url, {"start": "2026-10-15", "days": 7}, format="json")
@@ -403,3 +426,97 @@ def test_days_below_one_is_rejected(api_client):
 def test_ttl_is_six_hours():
     # Four upstream calls a day at worst, against the shared 25/day budget.
     assert overview.EARNINGS_CALENDAR_TTL_SECONDS == TTL_SECONDS
+
+
+# --- the market-cap filter: the two fields stamped on each tile -------------
+
+
+def _tiles(body):
+    return {
+        tile["symbol"]: tile
+        for day in body["days"]
+        for group in day["sessions"]
+        for tile in group["tiles"]
+    }
+
+
+def test_window_payload_stamps_market_cap_and_popular_on_every_tile():
+    payload = build_payload(CALENDAR_CSV, AS_OF)
+    # AAPL resolved to null (unresolved is not the same as small), TSM resolved
+    # to a number; ZZZ is absent from caps the way a failed lookup leaves it.
+    caps = {"TSM": 812000000000, "AAPL": None}
+
+    tiles = _tiles(window_payload(payload, date(2026, 10, 15), date(2026, 10, 16), caps=caps))
+
+    assert tiles["TSM"]["marketCap"] == 812000000000
+    assert tiles["AAPL"]["marketCap"] is None
+    assert tiles["ZZZ"]["marketCap"] is None
+    # popular is computed server-side from the curated set, not sent by the client
+    assert tiles["AAPL"]["popular"] is True
+    assert tiles["NFLX"]["popular"] is True
+    assert tiles["SCHW"]["popular"] is False  # a real name, but not a household one
+    assert tiles["TSM"]["popular"] is False
+    assert tiles["ZZZ"]["popular"] is False
+
+
+def test_window_payload_without_caps_stamps_null_but_still_flags_popular():
+    payload = build_payload(CALENDAR_CSV, AS_OF)
+
+    tiles = _tiles(window_payload(payload, date(2026, 10, 15), date(2026, 10, 16)))
+
+    assert all(tile["marketCap"] is None for tile in tiles.values())
+    assert tiles["AAPL"]["popular"] is True
+
+
+def test_window_payload_never_mutates_the_cached_payload():
+    # The payload is the cached unit, shared by every window. Stamping one
+    # window's caps must not leak into it (or into another window's response).
+    payload = build_payload(CALENDAR_CSV, AS_OF)
+
+    window_payload(payload, date(2026, 10, 15), date(2026, 10, 16), caps={"TSM": 1.0})
+
+    for day in payload["days"]:
+        for group in day["sessions"]:
+            for tile in group["tiles"]:
+                assert set(tile) == {"symbol", "name", "estimate"}
+
+
+def test_window_symbols_is_exactly_what_the_window_carries():
+    payload = build_payload(CALENDAR_CSV, AS_OF)
+
+    assert window_symbols(payload, date(2026, 10, 15), date(2026, 10, 15)) == {
+        "TSM", "SCHW", "NFLX", "WAL",
+    }
+    assert window_symbols(payload, date(2026, 10, 17), date(2026, 10, 18)) == set()
+
+
+@pytest.mark.django_db
+@patch("pages.views.overview.get_market_caps")
+@patch("pages.views.overview.financial_data_service.get_earnings_calendar")
+def test_view_stamps_resolved_caps_and_resolves_only_the_window(mock_get, mock_caps, api_client):
+    mock_get.return_value = _calendar_payload()
+    mock_caps.return_value = {"TSM": 812000000000}
+
+    response = api_client.post(url, {"start": "2026-10-15", "days": 1}, format="json")
+
+    assert response.status_code == 200
+    tiles = _tiles(response.json())
+    assert tiles["TSM"]["marketCap"] == 812000000000
+    assert tiles["NFLX"]["marketCap"] is None
+    # Oct 16's symbols (AAPL, ZZZ) are outside the window and must not be
+    # resolved: cost has to track the window, not the whole forward calendar.
+    assert mock_caps.call_args.args[0] == {"TSM", "SCHW", "NFLX", "WAL"}
+
+
+@pytest.mark.django_db
+@patch("pages.views.overview.get_market_caps")
+@patch("pages.views.overview.financial_data_service.get_earnings_calendar")
+def test_cap_resolution_failure_degrades_to_null_not_an_error(mock_get, mock_caps, api_client):
+    # Sizes are a nicety: the calendar must still render when resolution fails.
+    mock_get.return_value = _calendar_payload()
+    mock_caps.side_effect = RuntimeError("cache backend down")
+
+    response = api_client.post(url, {"start": "2026-10-15", "days": 1}, format="json")
+
+    assert response.status_code == 200
+    assert all(tile["marketCap"] is None for tile in _tiles(response.json()).values())
