@@ -17,7 +17,7 @@ function tileTooltip(tile) {
     return parts.length > 0 ? parts.join(" · ") : undefined;
 }
 
-function EarningsTile({ tile, size = 40 }) {
+function EarningsTile({ tile, size = 80 }) {
     return (
         <div
             data-testid="earnings-tile"

@@ -24,7 +24,7 @@ function MonthCell({ iso, day, inMonth }) {
                 <>
                     <div className="grid grid-cols-3 gap-2">
                         {visible.map((tile) => (
-                            <EarningsTile key={tile.symbol} tile={tile} size={24} />
+                            <EarningsTile key={tile.symbol} tile={tile} size={48} />
                         ))}
                     </div>
                     {overflow > 0 ? (
