@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { cn } from "../../lib/utils.ts";
 import { authenticatedClient } from "../../helpers/api.js";
-import { companyLogoUrl } from "../../shared/companyLogoUrl.js";
+import TickerBadge from "../../shared/TickerBadge.jsx";
 import { filterSymbols, findSymbolEntry } from "../dipChartHelpers.js";
 
 const DEBOUNCE_MS = 300;
@@ -21,36 +21,6 @@ function normalizeSuggestion(entry) {
     }
 
     return { symbol, name: String(entry.name ?? symbol) };
-}
-
-function TickerBadge({ symbol }) {
-    const [logoFailed, setLogoFailed] = useState(false);
-
-    // Rows are keyed by symbol, so a recycled badge must clear a previous failure.
-    useEffect(() => {
-        setLogoFailed(false);
-    }, [symbol]);
-
-    const logoUrl = companyLogoUrl(symbol, 80);
-
-    if (logoUrl && !logoFailed) {
-        return (
-            <img
-                src={logoUrl}
-                // The ticker is spelled out right next to this, so describing the
-                // image would only make a screen reader say the symbol twice.
-                alt=""
-                onError={() => setLogoFailed(true)}
-                className="h-10 w-10 shrink-0 rounded-full bg-[rgba(218,215,205,0.15)] object-cover"
-            />
-        );
-    }
-
-    return (
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[rgba(218,215,205,0.15)] text-[10px] font-semibold tracking-wide text-[var(--text-main)]">
-            {symbol}
-        </span>
-    );
 }
 
 function WatchlistSidebar({ items, selectedSymbol, onSelect, onAdd, onRemove }) {
