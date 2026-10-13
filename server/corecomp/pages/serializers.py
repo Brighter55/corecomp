@@ -50,6 +50,24 @@ class DipSymbolsSerializer(serializers.Serializer):
         return symbols
 
 
+class EarningsCalendarSerializer(serializers.Serializer):
+    """Window request for /pages/earnings-calendar.
+
+    The window is client-supplied because the client owns its own date axis --
+    which Monday, which month -- and the server must not hardcode "the current
+    week". `days` is a count rather than a second date so `start` later than
+    `end` is unrepresentable, and the payload is bounded by construction.
+    """
+
+    DEFAULT_DAYS = 7
+    MAX_DAYS = 42
+
+    start = serializers.DateField(required=True)
+    days = serializers.IntegerField(
+        required=False, default=DEFAULT_DAYS, min_value=1, max_value=MAX_DAYS
+    )
+
+
 class CompositeGraphSerializer(serializers.Serializer):
     graph = serializers.CharField(max_length=100, required=True, allow_blank=False)
     
