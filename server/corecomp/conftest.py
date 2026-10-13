@@ -52,8 +52,12 @@ def authorized_client(api_client, authorized_user):
     api_client.force_authenticate(user=authorized_user)
     return api_client
 
-# help clear the cache before/after each test run
+# Clear before and after every test. Clearing only afterwards was not enough,
+# because the dev Redis DB is shared with any running app: without a clear on
+# entry, the first test to touch a key can read a payload the app wrote and see
+# foreign data instead of the fixture's.
 @pytest.fixture(autouse=True)
 def clear_cache_between_tests():
+    cache.clear()
     yield
     cache.clear()

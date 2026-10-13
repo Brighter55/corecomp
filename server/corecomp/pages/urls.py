@@ -17,6 +17,9 @@ urlpatterns = [
     path("dip", overview.dip, name="dip"),
     # no trailing slash, same reason as dip above
     path("trending", overview.trending, name="trending"),
+    # market-wide forward earnings calendar; distinct from "earnings" above,
+    # which returns a symbol's historical reported EPS
+    path("earnings-calendar", overview.earnings_calendar, name="earnings_calendar"),
     path("symbol-search", overview.symbol_search, name="symbol_search"),
     path("composite", overview.composite, name="composite"),
 ]

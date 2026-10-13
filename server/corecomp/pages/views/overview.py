@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, timedelta
 
 # permission
 from accounts.permissions import AllowAnonymousWithQuota, AllowAnonymousWithQuotaList
@@ -9,10 +9,17 @@ from django.core.cache import cache
 # model
 from django.db.models import Q
 from django_redis import get_redis_connection
-from pages.models import Symbol
 
-# serializer
-from pages.serializers import CompositeGraphSerializer, DipSymbolsSerializer, SymbolSerializer
+# pages
+from pages.earnings_calendar import window_payload, window_symbols
+from pages.market_caps import get_market_caps
+from pages.models import Symbol
+from pages.serializers import (
+    CompositeGraphSerializer,
+    DipSymbolsSerializer,
+    EarningsCalendarSerializer,
+    SymbolSerializer,
+)
 from pages.utils import (
     annotate_current_ratio,
     annotate_debt_equity_ratio,
@@ -53,6 +60,12 @@ DIP_TTL_SECONDS = 600
 # payload, so this TTL -- not traffic -- is what decides the spend. An hour
 # keeps the worst case near 1,440 requests/month against the shared 5,000.
 TRENDING_TTL_SECONDS = 3600
+
+# Freshness/cost dial for /pages/earnings-calendar. One upstream call fills the
+# whole forward calendar and every visitor shares the one key, so this TTL -- not
+# traffic -- decides the spend. Six hours keeps the worst case near 4 calls/day
+# against the shared 25/day budget.
+EARNINGS_CALENDAR_TTL_SECONDS = 21600
 
 
 @api_view(["POST"])
@@ -463,6 +476,69 @@ def trending(request):
         cache.set(key, payload, timeout=TRENDING_TTL_SECONDS)
 
     return Response(payload, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def earnings_calendar(request):
+    """Market-wide forward earnings calendar, sliced to the requested window.
+
+    AllowAny for the same reason as trending: the route carries no `symbol`, and
+    AllowAnonymousWithQuota raises quota_exceeded without one
+    (accounts/permissions.py). A calendar is also not a symbol view, so it must
+    not spend the 5 free views.
+
+    The cached unit is the whole forward calendar, not the requested window: one
+    upstream call builds it and every window request slices it, so cost is flat
+    regardless of traffic or how far the client pages. The window is client-
+    supplied because the client owns its own date axis; the server never
+    hardcodes "the current week".
+    """
+    serializer = EarningsCalendarSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    start = serializer.validated_data["start"]
+    end = start + timedelta(days=serializer.validated_data["days"] - 1)
+
+    key = f"{MODE}:earnings_calendar"
+    payload = cache.get(key)
+
+    if payload is None:
+        redis = get_redis_connection("default")
+        lock = redis.lock(f"lock:{key}", timeout=10)
+        with lock:
+            # Double-checked: a cold-cache burst of anonymous visitors collapses
+            # to one upstream call instead of exhausting the day's budget in
+            # seconds.
+            payload = cache.get(key)
+            if payload is None:
+                payload = financial_data_service.get_earnings_calendar()
+
+                # Upstream errors abort rather than cache: a cached error would
+                # pin the calendar broken for the whole TTL, and the provider's
+                # Retry-After already says when to look again.
+                if isinstance(payload, Response):
+                    return payload
+
+                cache.set(key, payload, timeout=EARNINGS_CALENDAR_TTL_SECONDS)
+
+    # Market caps are a filter nicety, not core data. Resolve them for the
+    # requested window only -- the whole forward calendar would be dozens of
+    # requests instead of a few -- and if resolution fails at all, render every
+    # tile with marketCap null rather than fail the calendar. `get_market_caps`
+    # already turns an upstream error into per-symbol nulls; this guards the
+    # rest (a cache backend that is down, a provider payload that will not
+    # parse), because the calendar is worth showing without sizes.
+    try:
+        caps = get_market_caps(window_symbols(payload, start, end))
+    except Exception:
+        caps = {}
+
+    return Response(
+        window_payload(payload, start, end, caps=caps),
+        status=status.HTTP_200_OK,
+    )
 
 
 @api_view(["POST"])

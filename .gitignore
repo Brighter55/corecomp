@@ -61,3 +61,13 @@ client/playwright-report
 client/test-results
 client/blob-report
 client/e2e/.auth
+
+# Scratch checkouts that agent workflows spawn here. They are throwaway copies
+# of this repo on their own branch, so they must never be tracked. Commits made
+# in one live on its branch, which survives removing the directory.
+.claude/worktrees/
+
+# Local working trail (plans, design briefs, verification logs) from agent
+# workflows. Scratch that stays on the machine, never product history. Durable
+# documentation lives in docs/ instead.
+.audit/
