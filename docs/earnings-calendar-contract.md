@@ -2,7 +2,7 @@
 
 Both the backend and the frontend are built against this file. It was frozen before either was written. Do not change it unilaterally. If implementation proves a part of it wrong, say so rather than quietly diverging.
 
-Decided through a two-candidate arena design bakeoff and a cross-judge, then verified against the real repo. The reasoning trail is in [earnings-calendar-design-brief.md](earnings-calendar-design-brief.md) and [earnings-calendar.todo.md](earnings-calendar.todo.md), and the candidate packages are in the resume checkpoint.
+Decided through a two-candidate arena design bakeoff and a cross-judge, then verified against the real repo. The working trail that produced it, meaning the design brief, the plan, and the candidate packages, is deliberately not in this repo. It was local scratch for the build, and the commit messages on the branch that added this endpoint record the decisions that outlived it.
 
 ## Endpoint
 
