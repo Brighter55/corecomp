@@ -1,5 +1,5 @@
 import json
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -66,6 +66,12 @@ class FinancialDataService:
 
     def get_pricing(self, symbol):
         return wisesheets.get_pricing_av(symbol)
+
+    def get_eod_daily_batch(self, symbols, start, end):
+        return wisesheets.get_eod_daily_batch(symbols, start, end)
+
+    def get_dividends_batch(self, symbols, start, end):
+        return wisesheets.get_dividends_batch(symbols, start, end)
 
     def get_trending(self):
         """Ranked movers for the landing page, or a Response on upstream error.
@@ -157,6 +163,38 @@ class MockFinancialDataService:
         with open(path, 'r') as file:
             data = json.load(file)
         return data
+
+    def get_eod_daily_batch(self, symbols, start, end):
+        """Deterministic synthetic closes, built in code like get_trending.
+
+        The statement_samples fixtures are gitignored, so a fixture-backed mock
+        would 500 on a clean checkout and in CI.
+        """
+        requested = sorted({str(s).strip().upper() for s in symbols if str(s).strip()})
+        result = {symbol: [] for symbol in requested}
+        day = date.fromisoformat(start)
+        last = date.fromisoformat(end)
+        step = 0
+        while day <= last:
+            if day.weekday() < 5:
+                step += 1
+                for index, symbol in enumerate(requested):
+                    close = round(100.0 + index * 10 + step * 0.5, 4)
+                    result[symbol].append((day.isoformat(), close, close))
+            day += timedelta(days=1)
+        return result
+
+    def get_dividends_batch(self, symbols, start, end):
+        """One quarterly payment per year, if it falls inside the range."""
+        result = {}
+        for symbol in sorted({str(s).strip().upper() for s in symbols if str(s).strip()}):
+            rows = []
+            for year in range(int(start[:4]), int(end[:4]) + 1):
+                ex_date = f"{year}-03-15"
+                if start <= ex_date <= end:
+                    rows.append((ex_date, 1.25))
+            result[symbol] = rows
+        return result
 
     def get_trending(self):
         """Deterministic movers for MOCK=True.
