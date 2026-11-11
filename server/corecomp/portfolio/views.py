@@ -1,11 +1,23 @@
+import os
+from datetime import date
+
+from django.core.cache import cache
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from services import financial_data_service
 
+from . import analysis
 from .models import Transaction
 from .serializers import TransactionSerializer
+
+MAX_ANALYSIS_SYMBOLS = 200
+DEFAULT_BENCHMARK = "SPY"
+BATCH_CACHE_SECONDS = 3600
+# Read at import, like the pages app, so a MOCK flip needs a restart and a
+# cache flush rather than serving mock-shaped bytes under a live key.
+MODE = "mock" if os.getenv("MOCK") == "True" else "live"
 
 
 def _payload(request):
@@ -86,3 +98,149 @@ def delete_transaction(request):
     if not deleted:
         return Response({"error": "not found"}, status=status.HTTP_404_NOT_FOUND)
     return Response({"deleted": tx_id}, status=status.HTTP_200_OK)
+
+
+def _parse_date(value, field):
+    """(date, None) or (None, Response)."""
+    if value in (None, ""):
+        return None, None
+    try:
+        return date.fromisoformat(str(value)), None
+    except ValueError:
+        return None, Response(
+            {"error": f"{field} must be YYYY-MM-DD"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+def _cached_batch(kind, start, end, symbols, fetch):
+    """Redis-cache an upstream batch by its canonical symbol list.
+
+    Shared across users and workers, which is what keeps a portfolio load from
+    spending the monthly provider budget once per page view. The process-local
+    memo inside wisesheets still collapses an in-worker burst on top of this.
+    """
+    key = f"{MODE}:portfolio_{kind}:{start}:{end}:{','.join(symbols)}"
+    cached = cache.get(key)
+    if cached is not None:
+        return cached
+    value = fetch(symbols, start, end)
+    if isinstance(value, Response):
+        return value
+    cache.set(key, value, BATCH_CACHE_SECONDS)
+    return value
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def analysis_view(request):
+    from_date, invalid = _parse_date(request.query_params.get("from"), "from")
+    if invalid is not None:
+        return invalid
+    to_date, invalid = _parse_date(request.query_params.get("to"), "to")
+    if invalid is not None:
+        return invalid
+
+    rows = list(
+        Transaction.objects.filter(user=request.user).values(
+            "id", "symbol", "trade_date", "kind", "amount", "shares", "price"
+        )
+    )
+    symbols = sorted({row["symbol"] for row in rows})
+    if len(symbols) > MAX_ANALYSIS_SYMBOLS:
+        return Response(
+            {"error": "too many symbols"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    benchmark = str(
+        request.query_params.get("benchmark") or DEFAULT_BENCHMARK
+    ).strip().upper()
+
+    today = date.today()
+    earliest_allowed = today.replace(year=today.year - 4)  # 5 calendar years
+    start_date = from_date or (min(row["trade_date"] for row in rows) if rows else today)
+    if start_date < earliest_allowed:
+        start_date = earliest_allowed
+        if from_date is not None:
+            return Response(
+                {"error": "from is outside the provider's history window"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+    end_date = to_date or today
+    if end_date < start_date:
+        return Response(
+            {"error": "to must not be before from"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    start_iso = start_date.isoformat()
+    end_iso = end_date.isoformat()
+
+    if not rows:
+        empty = {
+            "dates": [],
+            "value": [],
+            "invested": [],
+            "dividends": [],
+            "benchmark_value": [],
+            "benchmark_dividends": [],
+        }
+        return Response({
+            "window": {"start": start_iso, "end": end_iso},
+            "benchmark": benchmark,
+            "positions": [],
+            "summary": analysis.summarize(empty),
+            "series": empty,
+        })
+
+    transactions = [
+        {
+            "id": row["id"],
+            "symbol": row["symbol"],
+            "trade_date": row["trade_date"].isoformat(),
+            "kind": row["kind"],
+            "amount": float(row["amount"]),
+            "shares": float(row["shares"]) if row["shares"] is not None else None,
+            "price": float(row["price"]) if row["price"] is not None else None,
+        }
+        for row in rows
+    ]
+
+    fetch_symbols = sorted(set(symbols) | {benchmark})
+
+    prices = _cached_batch(
+        "eod", start_iso, end_iso, fetch_symbols,
+        financial_data_service.get_eod_daily_batch,
+    )
+    if isinstance(prices, Response):
+        return prices
+
+    dividends = _cached_batch(
+        "dividends", start_iso, end_iso, fetch_symbols,
+        financial_data_service.get_dividends_batch,
+    )
+    if isinstance(dividends, Response):
+        return dividends
+
+    if not prices.get(benchmark):
+        return Response(
+            {"error": "unknown benchmark"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    series = analysis.build_series(
+        transactions,
+        prices,
+        dividends,
+        benchmark,
+        prices,
+        dividends,
+        start=start_iso,
+        end=end_iso,
+    )
+    return Response({
+        "window": {"start": start_iso, "end": end_iso},
+        "benchmark": benchmark,
+        "positions": analysis.build_positions(transactions, prices),
+        "summary": analysis.summarize(series),
+        "series": series,
+    })
