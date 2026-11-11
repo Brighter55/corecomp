@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { XIcon } from "./Common.jsx";
-
-function onBackdropClose(event, onClose) {
-  if (event.target === event.currentTarget) onClose();
-}
+import Modal from "./Modal.jsx";
 
 export function BenchmarkDialog({ open, value, options, onApply, onClose }) {
   const [selected, setSelected] = useState(value);
@@ -13,10 +10,8 @@ export function BenchmarkDialog({ open, value, options, onApply, onClose }) {
     if (open) setSelected(value);
   }, [open, value]);
 
-  if (!open) return null;
-
   return (
-    <dialog open aria-labelledby="bench-title" onClick={(event) => onBackdropClose(event, onClose)}>
+    <Modal open={open} onClose={onClose} labelledBy="bench-title">
       <form
         className="modal"
         onSubmit={(event) => {
@@ -59,7 +54,7 @@ export function BenchmarkDialog({ open, value, options, onApply, onClose }) {
           <button className="btn btn-primary" type="submit">Apply</button>
         </div>
       </form>
-    </dialog>
+    </Modal>
   );
 }
 
@@ -74,10 +69,8 @@ export function CustomRangeDialog({ open, value, onApply, onClose }) {
     }
   }, [open, value]);
 
-  if (!open) return null;
-
   return (
-    <dialog open aria-labelledby="custom-title" onClick={(event) => onBackdropClose(event, onClose)}>
+    <Modal open={open} onClose={onClose} labelledBy="custom-title">
       <form
         className="modal"
         onSubmit={(event) => {
@@ -113,14 +106,13 @@ export function CustomRangeDialog({ open, value, onApply, onClose }) {
           <button className="btn btn-primary" type="submit">Apply</button>
         </div>
       </form>
-    </dialog>
+    </Modal>
   );
 }
 
 export function InfoDialog({ open, title, body, onClose }) {
-  if (!open) return null;
   return (
-    <dialog open aria-labelledby="info-title" onClick={(event) => onBackdropClose(event, onClose)}>
+    <Modal open={open} onClose={onClose} labelledBy="info-title">
       <div className="modal">
         <div className="modal-head">
           <div>
@@ -138,7 +130,7 @@ export function InfoDialog({ open, title, body, onClose }) {
           <button className="btn btn-primary" type="button" onClick={onClose}>Close</button>
         </div>
       </div>
-    </dialog>
+    </Modal>
   );
 }
 
@@ -158,25 +150,22 @@ export function AddTransactionDialog({ open, onSave, onClose, error }) {
     if (open) setForm(EMPTY);
   }, [open]);
 
-  if (!open) return null;
-
   const update = (key) => (event) => setForm({ ...form, [key]: event.target.value });
 
   const submit = (event) => {
     event.preventDefault();
-    const payload = {
+    onSave({
       symbol: form.symbol.trim().toUpperCase(),
       trade_date: form.trade_date,
       kind: form.kind,
       amount: form.amount,
       shares: form.shares === "" ? null : form.shares,
       price: form.price === "" ? null : form.price,
-    };
-    onSave(payload);
+    });
   };
 
   return (
-    <dialog open aria-labelledby="add-title" onClick={(event) => onBackdropClose(event, onClose)}>
+    <Modal open={open} onClose={onClose} labelledBy="add-title">
       <form className="modal" onSubmit={submit}>
         <div className="modal-head">
           <div>
@@ -241,6 +230,6 @@ export function AddTransactionDialog({ open, onSave, onClose, error }) {
           <button className="btn btn-primary" type="submit">Save</button>
         </div>
       </form>
-    </dialog>
+    </Modal>
   );
 }

@@ -1,16 +1,9 @@
 import { DownloadIcon, XIcon } from "./Common.jsx";
+import Modal from "./Modal.jsx";
 
 export default function DetailDrawer({ open, title, kicker, subtitle, columns, rows, onCsv, onClose }) {
-  if (!open) return null;
   return (
-    <dialog
-      open
-      className="drawer"
-      aria-labelledby="drawer-title"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
+    <Modal open={open} onClose={onClose} className="drawer" labelledBy="drawer-title">
       <div className="drawer-panel">
         <div className="drawer-head">
           <div>
@@ -49,6 +42,6 @@ export default function DetailDrawer({ open, title, kicker, subtitle, columns, r
           </table>
         </div>
       </div>
-    </dialog>
+    </Modal>
   );
 }

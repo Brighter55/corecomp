@@ -975,3 +975,21 @@
 }
 .portfolio-page .card tr:last-child td { border-bottom: 0; }
 .portfolio-page .card tbody tr:hover td { background: var(--surface-soft); }
+
+.portfolio-page .modal input,
+.portfolio-page .modal select {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+.portfolio-page .modal input:focus,
+.portfolio-page .modal select:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+.portfolio-page .modal input::placeholder { color: var(--muted); }
