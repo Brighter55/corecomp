@@ -112,6 +112,48 @@ def test_a_bad_date_is_rejected(user, fake_batches):
     assert "from" in response.json()["error"]
 
 
+def test_a_purchase_after_the_last_session_uses_the_prior_close(user, monkeypatch):
+    """A buy dated today, before the provider publishes today's close.
+
+    The window holds no trading session, which used to surface as a 400
+    "unknown benchmark" even though the symbol and the benchmark were both fine.
+    """
+
+    def ranged_eod(symbols, start, end):
+        rows = [("2024-06-02", 110.0), ("2024-06-03", 120.0)]
+        return {
+            symbol: [
+                (day, close, close) for day, close in rows if start <= day <= end
+            ]
+            for symbol in symbols
+        }
+
+    monkeypatch.setattr(financial_data_service, "get_eod_daily_batch", ranged_eod)
+    monkeypatch.setattr(
+        financial_data_service,
+        "get_dividends_batch",
+        lambda symbols, start, end: {symbol: [] for symbol in symbols},
+    )
+    Transaction.objects.create(
+        user=user,
+        symbol="AAPL",
+        trade_date="2024-06-04",
+        kind="BUY",
+        amount=Decimal("1200.00"),
+    )
+
+    response = client_for(user).get(
+        URL, {"from": "2024-06-04", "to": "2024-06-04"}
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["series"]["dates"] == ["2024-06-04"]
+    assert body["summary"]["value"] == 1200.0
+    assert body["summary"]["invested"] == 1200.0
+    assert body["summary"]["profit"] == 0.0
+
+
 def test_an_unknown_benchmark_is_rejected(user, monkeypatch):
     _trade(user)
 

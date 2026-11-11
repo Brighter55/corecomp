@@ -294,6 +294,12 @@ def build_series(
         dates = [day for day in dates if day >= start]
     if end:
         dates = [day for day in dates if day <= end]
+    if not dates and end:
+        # The window holds no session, which is what a buy dated today looks
+        # like before the provider publishes the close. Anchor on the end date
+        # and let _close_at carry the last known close, so the point shows the
+        # holding at its cost rather than nothing at all.
+        dates = [end]
 
     series = {
         "dates": dates,

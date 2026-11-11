@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, timedelta
 
 from django.core.cache import cache
 from rest_framework import status
@@ -15,6 +15,11 @@ from .serializers import TransactionSerializer
 MAX_ANALYSIS_SYMBOLS = 200
 DEFAULT_BENCHMARK = "SPY"
 BATCH_CACHE_SECONDS = 3600
+# The provider publishes a session's close hours after it ends, so a buy dated
+# today has no row yet. Reaching back keeps the last close available for the
+# units and for a series anchored on the window end; 14 days clears any
+# weekend-plus-holiday gap.
+FETCH_LOOKBACK_DAYS = 14
 # Read at import, like the pages app, so a MOCK flip needs a restart and a
 # cache flush rather than serving mock-shaped bytes under a live key.
 MODE = "mock" if os.getenv("MOCK") == "True" else "live"
@@ -175,6 +180,10 @@ def analysis_view(request):
 
     start_iso = start_date.isoformat()
     end_iso = end_date.isoformat()
+    fetch_start = start_date - timedelta(days=FETCH_LOOKBACK_DAYS)
+    if fetch_start < earliest_allowed:
+        fetch_start = earliest_allowed
+    fetch_iso = fetch_start.isoformat()
 
     if not rows:
         empty = {
@@ -209,14 +218,14 @@ def analysis_view(request):
     fetch_symbols = sorted(set(symbols) | {benchmark})
 
     prices = _cached_batch(
-        "eod", start_iso, end_iso, fetch_symbols,
+        "eod", fetch_iso, end_iso, fetch_symbols,
         financial_data_service.get_eod_daily_batch,
     )
     if isinstance(prices, Response):
         return prices
 
     dividends = _cached_batch(
-        "dividends", start_iso, end_iso, fetch_symbols,
+        "dividends", fetch_iso, end_iso, fetch_symbols,
         financial_data_service.get_dividends_batch,
     )
     if isinstance(dividends, Response):
