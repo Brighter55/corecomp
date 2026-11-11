@@ -18,9 +18,21 @@ as profit and does not double count the cash received.
 """
 
 from bisect import bisect_right
+from datetime import date, timedelta
 
 KNOWN_SPLIT_FACTORS = (0.1, 0.5, 1.5, 2.0, 3.0, 4.0, 5.0, 7.0, 10.0, 15.0, 20.0)
 SPLIT_TOLERANCE = 0.03
+
+PERIODS = ("1d", "7d", "1m", "3m", "6m", "ytd", "1y", "5y", "all")
+PERIOD_DAYS = {
+    "1d": 1,
+    "7d": 7,
+    "1m": 30,
+    "3m": 91,
+    "6m": 182,
+    "1y": 365,
+    "5y": 365 * 5,
+}
 
 
 def _to_float(value):
@@ -65,6 +77,26 @@ def _close_at(index, symbol, day):
     if position < 0:
         return None
     return rows[position][1]
+
+
+def _latest(index, symbol):
+    """(date, close) of the last row, or (None, None)."""
+    entry = index.get(symbol)
+    if not entry or not entry[1]:
+        return None, None
+    row = entry[1][-1]
+    return row[0], row[1]
+
+
+def _anchor_date(period, latest):
+    """Start date for a period label, or None when the label is 'all'."""
+    end = date.fromisoformat(latest)
+    if period == "ytd":
+        return date(end.year, 1, 1).isoformat()
+    days = PERIOD_DAYS.get(period)
+    if days is None:
+        return None
+    return (end - timedelta(days=days)).isoformat()
 
 
 def _step_function(pairs):
@@ -158,18 +190,37 @@ def build_positions(transactions, prices):
     positions = []
     for symbol, pairs in unit_pairs.items():
         units = sum(delta for _, delta in pairs)
-        latest = _close_at(index, symbol, "9999-12-31")
+        latest_date, latest = _latest(index, symbol)
         market_value = units * latest if latest is not None else 0.0
         basis = cost_basis.get(symbol, 0.0)
+        lifetime = (
+            round((market_value - basis) / basis * 100, 4) if basis else None
+        )
+
+        period_returns = {}
+        for period in PERIODS:
+            if period == "all":
+                period_returns[period] = lifetime
+                continue
+            anchor = _anchor_date(period, latest_date) if latest_date else None
+            if anchor is None or latest is None:
+                period_returns[period] = None
+                continue
+            _, anchor_close = _price_at(index, symbol, anchor)
+            period_returns[period] = (
+                round((latest / anchor_close - 1) * 100, 4)
+                if anchor_close
+                else None
+            )
+
         positions.append({
             "symbol": symbol,
             "units": round(units, 8),
             "price": latest,
             "market_value": round(market_value, 2),
             "cost_basis": round(basis, 2),
-            "return_pct": (
-                round((market_value - basis) / basis * 100, 4) if basis else None
-            ),
+            "return_pct": lifetime,
+            "period_returns": period_returns,
             "first_date": first_date.get(symbol),
             "shares_typed": round(shares_typed[symbol], 8) if symbol in shares_typed else None,
             "split_factor": split_factor(units, shares_typed.get(symbol)),

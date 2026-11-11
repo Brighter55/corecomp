@@ -166,6 +166,28 @@ def test_series_respects_the_requested_window():
     assert series["dates"] == ["2024-03-01"]
 
 
+def test_positions_carry_a_return_for_each_period_tab():
+    prices = {
+        "AAPL": [
+            ("2024-01-02", 100.0, 100.0),
+            ("2024-10-11", 110.0, 110.0),
+            ("2024-11-08", 120.0, 120.0),
+            ("2024-11-11", 121.0, 121.0),
+        ]
+    }
+    transactions = [_buy("AAPL", "2024-01-02", 1000.0)]
+
+    returns = analysis.build_positions(transactions, prices)[0]["period_returns"]
+
+    assert returns["1d"] == pytest.approx(0.8333, abs=1e-3)
+    assert returns["1m"] == pytest.approx(10.0)
+    assert returns["ytd"] == pytest.approx(21.0)
+    # No data before the first row, so a long period falls back to it.
+    assert returns["5y"] == pytest.approx(21.0)
+    # 'all' is the cost-basis lifetime return, not a price change.
+    assert returns["all"] == pytest.approx(21.0)
+
+
 def test_an_empty_ledger_summarizes_to_zeros():
     empty = {
         "dates": [],
