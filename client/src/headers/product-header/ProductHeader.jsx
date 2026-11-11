@@ -103,6 +103,16 @@ function ProductHeader() {
                                             <p className="text-sm font-semibold text-[var(--text-main)]">Earnings</p>
                                             <p className="text-xs text-[var(--text-muted)]">Browse the market-wide earnings calendar week by week.</p>
                                         </button>
+                                        <button
+                                            type="button"
+                                            className="rounded-xl px-3 py-2 text-left transition hover:bg-[var(--surface-soft)]"
+                                            onClick={() => {
+                                                handleItemClicked("/portfolio");
+                                            }}
+                                        >
+                                            <p className="text-sm font-semibold text-[var(--text-main)]">Portfolio</p>
+                                            <p className="text-xs text-[var(--text-muted)]">Track your own holdings, returns and dividends.</p>
+                                        </button>
                                     </div>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
@@ -209,6 +219,16 @@ function ProductHeader() {
                             }}
                         >
                             Earnings
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            className="mb-1 flex w-full justify-start rounded-xl text-[var(--text-main)]"
+                            onClick={() => {
+                                handleItemClicked("/portfolio");
+                            }}
+                        >
+                            Portfolio
                         </Button>
                         {user ? (
                             <>
