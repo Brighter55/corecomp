@@ -6,7 +6,7 @@ name: CI
 # -- and a green checkmark means nothing if the workflow never started.
 on:
   push:
-    branches: [master]
+    branches: [master, portfolio-tracker]
   pull_request: {}
 
 # A new push supersedes an in-flight run for the same ref.
