@@ -739,6 +739,92 @@ def get_eod_batch(symbols, days):
     return by_symbol
 
 
+EOD_TICKERS_PER_REQUEST = 25
+EOD_ROW_LIMIT = 10000
+
+
+def _chunks(items, size):
+    for start in range(0, len(items), size):
+        yield items[start:start + size]
+
+
+def _fetch_eod_daily(joined, start, end):
+    """One or more prices/eod pages for a comma-joined ticker list.
+
+    `meta.nextCursor` is the only reliable truncation signal. The provider caps
+    a response at 10,000 rows and leaves `meta.truncated` false while still
+    handing back a cursor, so a caller that trusts `truncated` loses rows and
+    can lose whole symbols.
+    """
+    rows = []
+    cursor = None
+    seen = set()
+    while True:
+        params = {
+            "tickers": joined,
+            "period": f"{start}..{end}",
+            "fields": "close,adjClose",
+            "limit": EOD_ROW_LIMIT,
+            "order": "asc",
+        }
+        if cursor:
+            params["cursor"] = cursor
+        page = fetch_wisesheets("prices/eod", params)
+        if isinstance(page, Response):
+            return page
+        rows.extend(page.get("data") or [])
+        cursor = (page.get("meta") or {}).get("nextCursor")
+        if not cursor or cursor in seen:
+            break
+        seen.add(cursor)
+
+    by_symbol = {}
+    for row in rows:
+        symbol = row.get("symbol")
+        day = row.get("date")
+        close = _to_float(row.get("close"))
+        if not symbol or not day or close is None:
+            continue
+        by_symbol.setdefault(symbol, []).append(
+            (day, close, _to_float(row.get("adjClose")))
+        )
+    return by_symbol
+
+
+def get_eod_daily_batch(symbols, start, end):
+    """Daily closes for any number of symbols over an inclusive date range.
+
+    Returns {symbol: [(date, close, adjClose), ...]} oldest first, with every
+    requested symbol present as a key even when the provider has no rows for it.
+    Returns a Response on upstream failure.
+
+    Unlike the other service methods this is not Alpha Vantage shaped. It exists
+    for the portfolio analysis, which needs daily rows rather than a monthly
+    series. Chunked at the provider's 25-ticker cap so one portfolio costs one
+    request per 25 holdings.
+    """
+    requested = sorted({str(s).strip().upper() for s in symbols if str(s).strip()})
+    result = {symbol: [] for symbol in requested}
+    if not requested:
+        return result
+
+    for chunk in _chunks(requested, EOD_TICKERS_PER_REQUEST):
+        joined = ",".join(chunk)
+        data = _upstream(
+            f"eod-daily:{start}:{end}:{joined}",
+            lambda joined=joined: _fetch_eod_daily(joined, start, end),
+            ttl_seconds=3600,
+        )
+        if isinstance(data, Response):
+            return data
+        for symbol, rows in data.items():
+            result.setdefault(symbol, []).extend(rows)
+
+    for rows in result.values():
+        rows.sort(key=lambda row: row[0])
+    return result
+
+
 def get_dip_row(symbol):
     """Price and both moving averages for the dip chart.
 
@@ -796,11 +882,69 @@ def get_dividends_av(symbol):
                 "declaration_date": row.get("declarationDate") or "None",
                 "record_date": row.get("recordDate") or "None",
                 "payment_date": row.get("paymentDate") or "None",
-                "amount": row.get("dividend") or row.get("adjDividend") or "None",
+                "amount": row.get("adjDividend") or row.get("dividend") or "None",
             }
             for row in rows
         ],
     }
+
+
+def _fetch_dividends_batch(joined, start, end):
+    page = fetch_wisesheets("dividends", {
+        "tickers": joined,
+        "fields": "adjDividend,recordDate,paymentDate",
+        "from": start,
+        "to": end,
+        "order": "asc",
+    })
+    if isinstance(page, Response):
+        return page
+    by_symbol = {}
+    for row in page.get("data") or []:
+        symbol = row.get("symbol")
+        ex_date = row.get("date")
+        amount = _to_float(row.get("adjDividend"))
+        if not symbol or not ex_date or amount is None:
+            continue
+        by_symbol.setdefault(symbol, []).append((ex_date, amount))
+    return by_symbol
+
+
+def get_dividends_batch(symbols, start, end):
+    """Historical dividends for any number of symbols over an inclusive range.
+
+    Returns {symbol: [(ex_date, adj_dividend), ...]} oldest first, with every
+    requested symbol present as a key even when it pays nothing. Returns a
+    Response on upstream failure.
+
+    Uses `adjDividend`, which the provider expresses in today's share units
+    after every split, because the analysis multiplies it by a unit count
+    derived from a split-adjusted close. The unadjusted `dividend` would
+    overstate every pre-split payment by the split factor. Verified on NVDA,
+    where the 2022-03-02 row is 0.04 unadjusted against 0.004 adjusted.
+
+    Not Alpha Vantage shaped, for the same reason as get_eod_daily_batch.
+    """
+    requested = sorted({str(s).strip().upper() for s in symbols if str(s).strip()})
+    result = {symbol: [] for symbol in requested}
+    if not requested:
+        return result
+
+    for chunk in _chunks(requested, EOD_TICKERS_PER_REQUEST):
+        joined = ",".join(chunk)
+        data = _upstream(
+            f"dividends-batch:{start}:{end}:{joined}",
+            lambda joined=joined: _fetch_dividends_batch(joined, start, end),
+            ttl_seconds=3600,
+        )
+        if isinstance(data, Response):
+            return data
+        for symbol, rows in data.items():
+            result.setdefault(symbol, []).extend(rows)
+
+    for rows in result.values():
+        rows.sort(key=lambda row: row[0])
+    return result
 
 
 # ---------------------------------------------------------------------------
