@@ -1,8 +1,10 @@
+from datetime import date
 from decimal import Decimal
 
 import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from rest_framework.response import Response
 from rest_framework.test import APIClient
 from services import financial_data_service
 
@@ -44,10 +46,14 @@ def fake_batches(monkeypatch):
         calls["dividends"] += 1
         return {symbol: [] for symbol in symbols}
 
+    def fake_live(symbols):
+        return {symbol: None for symbol in symbols}
+
     monkeypatch.setattr(financial_data_service, "get_eod_daily_batch", fake_eod)
     monkeypatch.setattr(
         financial_data_service, "get_dividends_batch", fake_dividends
     )
+    monkeypatch.setattr(financial_data_service, "get_live_price_batch", fake_live)
     return calls
 
 
@@ -75,6 +81,45 @@ def test_returns_series_positions_and_summary(user, fake_batches):
     assert body["series"]["dates"] == ["2024-01-02", "2024-06-03"]
     assert body["series"]["value"] == [1000.0, 1200.0]
     assert body["summary"]["invested"] == 1000.0
+
+
+def test_a_window_ending_today_uses_the_live_quote(user, fake_batches, monkeypatch):
+    # The fake EOD rows stop in 2024, so the live row is what makes the
+    # position current.
+    monkeypatch.setattr(
+        financial_data_service,
+        "get_live_price_batch",
+        lambda symbols: {symbol: 150.0 for symbol in symbols},
+    )
+    _trade(user)
+
+    response = client_for(user).get(URL)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["summary"]["value"] == 1500.0
+    assert body["positions"][0]["price"] == 150.0
+    assert body["positions"][0]["market_value"] == 1500.0
+    assert body["series"]["dates"][-1] == date.today().isoformat()
+
+
+def test_a_failed_live_feed_falls_back_to_the_closing_price(
+    user, fake_batches, monkeypatch
+):
+    monkeypatch.setattr(
+        financial_data_service,
+        "get_live_price_batch",
+        lambda symbols: Response({"detail": "upstream"}, status=503),
+    )
+    _trade(user)
+
+    response = client_for(user).get(URL)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["summary"]["value"] == 1200.0
+    assert body["positions"][0]["price"] == 120.0
+    assert body["series"]["dates"][-1] == "2024-06-03"
 
 
 def test_empty_ledger_returns_zeros_without_calling_the_provider(user, monkeypatch):

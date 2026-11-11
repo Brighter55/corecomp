@@ -188,6 +188,55 @@ def test_positions_carry_a_return_for_each_period_tab():
     assert returns["all"] == pytest.approx(21.0)
 
 
+def test_with_live_close_appends_a_row_for_the_window_end():
+    prices = {"AAPL": [("2024-06-03", 120.0, 120.0)]}
+
+    wrapped = analysis.with_live_close(prices, {"AAPL": 125.0}, "2024-06-04")
+
+    assert wrapped["AAPL"] == [
+        ("2024-06-03", 120.0, 120.0),
+        ("2024-06-04", 125.0, 125.0),
+    ]
+
+
+def test_with_live_close_keeps_a_series_that_already_reaches_the_day():
+    prices = {"AAPL": [("2024-06-04", 120.0, 120.0)]}
+
+    wrapped = analysis.with_live_close(prices, {"AAPL": 125.0}, "2024-06-04")
+
+    assert wrapped["AAPL"] == [("2024-06-04", 120.0, 120.0)]
+
+
+def test_with_live_close_ignores_a_symbol_without_a_quote():
+    prices = {"AAPL": [("2024-06-03", 120.0, 120.0)]}
+
+    wrapped = analysis.with_live_close(prices, {"AAPL": None}, "2024-06-04")
+
+    assert wrapped["AAPL"] == [("2024-06-03", 120.0, 120.0)]
+
+
+def test_with_live_close_gives_an_empty_series_one_point():
+    prices = {"AAPL": []}
+
+    wrapped = analysis.with_live_close(prices, {"AAPL": 125.0}, "2024-06-04")
+
+    assert wrapped["AAPL"] == [("2024-06-04", 125.0, 125.0)]
+
+
+def test_with_live_close_returns_the_same_map_without_quotes():
+    prices = {"AAPL": [("2024-06-03", 120.0, 120.0)]}
+
+    assert analysis.with_live_close(prices, None, "2024-06-04") is prices
+
+
+def test_with_live_close_does_not_mutate_the_input():
+    prices = {"AAPL": [("2024-06-03", 120.0, 120.0)]}
+
+    analysis.with_live_close(prices, {"AAPL": 125.0}, "2024-06-04")
+
+    assert prices == {"AAPL": [("2024-06-03", 120.0, 120.0)]}
+
+
 def test_an_empty_ledger_summarizes_to_zeros():
     empty = {
         "dates": [],

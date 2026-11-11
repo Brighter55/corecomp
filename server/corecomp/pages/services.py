@@ -70,6 +70,9 @@ class FinancialDataService:
     def get_eod_daily_batch(self, symbols, start, end):
         return wisesheets.get_eod_daily_batch(symbols, start, end)
 
+    def get_live_price_batch(self, symbols):
+        return wisesheets.get_live_price_batch(symbols)
+
     def get_dividends_batch(self, symbols, start, end):
         return wisesheets.get_dividends_batch(symbols, start, end)
 
@@ -183,6 +186,10 @@ class MockFinancialDataService:
                     result[symbol].append((day.isoformat(), close, close))
             day += timedelta(days=1)
         return result
+
+    def get_live_price_batch(self, symbols):
+        # The fixtures carry no per-symbol live quote, so MOCK stays on closing prices.
+        return {symbol: None for symbol in symbols}
 
     def get_dividends_batch(self, symbols, start, end):
         """One quarterly payment per year, if it falls inside the range."""

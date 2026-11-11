@@ -230,6 +230,21 @@ def build_positions(transactions, prices):
     return positions
 
 
+def with_live_close(prices, quotes, day):
+    """Copy of `prices` with a live-price row appended for `day` where missing."""
+    if not quotes or not day:
+        return prices
+
+    result = {}
+    for symbol, rows in (prices or {}).items():
+        live = quotes.get(symbol)
+        if live is None or (rows and rows[-1][0] >= day):
+            result[symbol] = rows
+            continue
+        result[symbol] = list(rows) + [(day, live, live)]
+    return result
+
+
 def build_series(
     transactions,
     prices,
