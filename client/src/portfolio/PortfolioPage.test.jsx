@@ -1,9 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import PortfolioPage from "./PortfolioPage.jsx";
-import { authenticatedClient } from "../helpers/api.js";
+import { authenticatedClient, authenticatedClientUpload } from "../helpers/api.js";
 
 vi.mock("recharts", async () => {
   const actual = await vi.importActual("recharts");
@@ -21,6 +21,7 @@ vi.mock("../headers/product-header/ProductHeader.jsx", () => ({
 
 vi.mock("../helpers/api.js", () => ({
   authenticatedClient: vi.fn(),
+  authenticatedClientUpload: vi.fn(),
 }));
 
 const LEDGER = [
@@ -80,6 +81,12 @@ function respond(overrides = {}) {
         json: async () => overrides.ledger ?? LEDGER,
       });
     }
+    if (endpoint === "/portfolio/splits") {
+      return Promise.resolve({
+        ok: true,
+        json: async () => overrides.splits ?? [],
+      });
+    }
     if (endpoint.startsWith("/portfolio/analysis")) {
       return Promise.resolve({
         ok: true,
@@ -90,9 +97,18 @@ function respond(overrides = {}) {
   });
 }
 
+const PREVIEW = {
+  rows: [{}, {}, {}],
+  counts: { BUY: 2, SELL: 1, DIVIDEND: 0, DTAX: 0, REC: 0, SPL: 1 },
+  skipped: 4,
+  unresolved_splits: [{ symbol: "OLD", trade_date: "2023-01-05", shares: 5 }],
+  positions: { ACME: 13.75, SPLT: 20 },
+};
+
 describe("PortfolioPage", () => {
   beforeEach(() => {
     authenticatedClient.mockReset();
+    authenticatedClientUpload.mockReset();
     respond();
   });
 
@@ -151,5 +167,146 @@ describe("PortfolioPage", () => {
     expect(
       await screen.findByRole("heading", { name: "Choose a benchmark" }),
     ).toBeInTheDocument();
+  });
+
+  test("derives the trade amount from shares times price", async () => {
+    render(<PortfolioPage />);
+    await screen.findByText("Core Portfolio");
+
+    await userEvent.click(screen.getByRole("button", { name: "Add transaction" }));
+    const dialog = screen
+      .getByRole("heading", { name: "Add a transaction" })
+      .closest("dialog");
+
+    await userEvent.type(within(dialog).getByLabelText("Symbol"), "aapl");
+    await userEvent.type(within(dialog).getByLabelText("Shares"), "10");
+    await userEvent.type(within(dialog).getByLabelText("Price"), "121.50");
+
+    expect(within(dialog).getByLabelText(/derived/i)).toHaveValue("1215.00");
+
+    await userEvent.click(within(dialog).getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(
+        authenticatedClient.mock.calls.some(
+          ([call]) => call.endpoint === "/portfolio/transactions" && call.payload,
+        ),
+      ).toBe(true),
+    );
+    const [{ payload }] = authenticatedClient.mock.calls.find(
+      ([call]) => call.endpoint === "/portfolio/transactions" && call.payload,
+    );
+    expect(payload).toMatchObject({
+      symbol: "AAPL",
+      kind: "BUY",
+      amount: "1215.00",
+      shares: "10",
+      price: "121.5",
+    });
+  });
+
+  test("the split dialog posts the new-to-old ratio", async () => {
+    render(<PortfolioPage />);
+    await screen.findByText("Core Portfolio");
+
+    await userEvent.click(screen.getByRole("button", { name: "Add split" }));
+    const dialog = screen
+      .getByRole("heading", { name: "Add a split" })
+      .closest("dialog");
+
+    await userEvent.type(within(dialog).getByLabelText("Symbol"), "aapl");
+    await userEvent.type(within(dialog).getByLabelText("New shares"), "10");
+    await userEvent.type(within(dialog).getByLabelText("Old shares"), "1");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Save split" }));
+
+    await waitFor(() =>
+      expect(
+        authenticatedClient.mock.calls.some(
+          ([call]) => call.endpoint === "/portfolio/splits" && call.payload,
+        ),
+      ).toBe(true),
+    );
+    const [{ payload }] = authenticatedClient.mock.calls.find(
+      ([call]) => call.endpoint === "/portfolio/splits" && call.payload,
+    );
+    expect(payload).toEqual({
+      symbol: "AAPL",
+      effective_date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+      numerator: 10,
+      denominator: 1,
+    });
+  });
+
+  test("import previews with a dry run and then confirms with a real one", async () => {
+    authenticatedClientUpload
+      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => PREVIEW })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ ...PREVIEW, imported: 3 }),
+      });
+
+    render(<PortfolioPage />);
+    await screen.findByText("Core Portfolio");
+
+    await userEvent.click(screen.getByRole("button", { name: "Import" }));
+    const dialog = screen
+      .getByRole("heading", { name: "Import activity" })
+      .closest("dialog");
+    const file = new File(["Activity Date,Instrument"], "activity.csv", {
+      type: "text/csv",
+    });
+
+    await userEvent.upload(within(dialog).getByLabelText("Activity CSV"), file);
+
+    expect(await within(dialog).findByText("3 ledger rows.")).toBeInTheDocument();
+    expect(within(dialog).getByText("BUY 2 · SELL 1 · SPL 1")).toBeInTheDocument();
+    expect(within(dialog).getByText("4 skipped.")).toBeInTheDocument();
+    expect(within(dialog).getByText("OLD on 2023-01-05")).toBeInTheDocument();
+    expect(within(dialog).getByText("ACME 13.75 units")).toBeInTheDocument();
+
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Confirm import" }),
+    );
+
+    await waitFor(() => expect(authenticatedClientUpload).toHaveBeenCalledTimes(2));
+    const [previewCall, importCall] = authenticatedClientUpload.mock.calls.map(
+      ([call]) => call,
+    );
+    expect(previewCall.endpoint).toBe("/portfolio/import");
+    expect(previewCall.formData.get("dry_run")).toBe("true");
+    expect(previewCall.formData.get("file")).toBe(file);
+    expect(importCall.formData.get("file")).toBe(file);
+    expect(importCall.formData.get("dry_run")).toBe("false");
+  });
+
+  test("lists a split beside the ledger and removes it", async () => {
+    respond({
+      splits: [
+        {
+          id: 7,
+          symbol: "SPLT",
+          effective_date: "2024-01-20",
+          numerator: 10,
+          denominator: 1,
+        },
+      ],
+    });
+
+    render(<PortfolioPage />);
+
+    const ratio = await screen.findByText("10:1");
+    const row = ratio.closest("tr");
+    expect(within(row).getByText("SPLIT")).toBeInTheDocument();
+    expect(within(row).getByText("SPLT")).toBeInTheDocument();
+
+    await userEvent.click(within(row).getByRole("button", { name: "Remove" }));
+
+    await waitFor(() =>
+      expect(authenticatedClient).toHaveBeenCalledWith({
+        endpoint: "/portfolio/splits/delete",
+        payload: { id: 7 },
+      }),
+    );
   });
 });

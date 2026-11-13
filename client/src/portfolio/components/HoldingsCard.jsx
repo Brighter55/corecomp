@@ -1,4 +1,10 @@
-import { barScale, formatMoneyWhole, formatPctLabel } from "../analysisView.js";
+import {
+  barScale,
+  formatMoney,
+  formatMoneyWhole,
+  formatPctLabel,
+  formatUnits,
+} from "../analysisView.js";
 import { CardMenu, GridIcon, InfoButton, ListIcon, TimeframeTabs } from "./Common.jsx";
 
 const RANGES = [
@@ -129,6 +135,10 @@ export default function HoldingsCard({
               <div className="h-meta">
                 <span>{formatMoneyWhole(holding.market_value)}</span>
                 <span>{holding.weight.toFixed(1)}% of portfolio</span>
+                <span>{formatUnits(holding.units)} units</span>
+                <span>
+                  {holding.average_cost == null ? "—" : formatMoney(holding.average_cost)} avg cost
+                </span>
               </div>
             </article>
           );

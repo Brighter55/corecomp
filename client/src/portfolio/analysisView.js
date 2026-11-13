@@ -26,6 +26,12 @@ export function formatMoneyWhole(value) {
   return Number.isFinite(number) ? moneyWhole.format(number) : "—";
 }
 
+export function formatUnits(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "—";
+  return number.toFixed(6).replace(/\.?0+$/, "");
+}
+
 export function signedMoney(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return "—";

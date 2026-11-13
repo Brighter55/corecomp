@@ -103,6 +103,40 @@ def test_missing_symbol_is_rejected(user, known_symbols):
     assert not Transaction.objects.exists()
 
 
+def test_buy_requires_shares_and_price(user, known_symbols):
+    client = client_for(user)
+    without_shares = {key: value for key, value in VALID.items() if key != "shares"}
+    without_price = {key: value for key, value in VALID.items() if key != "price"}
+
+    missing_shares = client.post(LIST_URL, without_shares, format="json")
+    missing_price = client.post(LIST_URL, without_price, format="json")
+
+    assert missing_shares.status_code == 400
+    assert missing_shares.json() == {
+        "shares": ["This field is required for a buy or sell."]
+    }
+    assert missing_price.status_code == 400
+    assert missing_price.json() == {
+        "price": ["This field is required for a buy or sell."]
+    }
+    assert not Transaction.objects.exists()
+
+
+def test_dividend_does_not_require_shares_and_price(user, known_symbols):
+    payload = {
+        key: value
+        for key, value in VALID.items()
+        if key not in ("shares", "price")
+    }
+    payload.update(kind="DIVIDEND", amount="12.00")
+
+    response = client_for(user).post(LIST_URL, payload, format="json")
+
+    assert response.status_code == 201
+    assert response.json()["shares"] is None
+    assert response.json()["price"] is None
+
+
 def test_negative_amount_is_rejected(user, known_symbols):
     response = client_for(user).post(
         LIST_URL, {**VALID, "amount": "-1"}, format="json"

@@ -13,14 +13,24 @@ import {
   slicePoints,
   toPoints,
 } from "./analysisView.js";
-import { deleteTransaction, fetchAnalysis, fetchLedger, saveTransaction } from "./portfolioApi.js";
+import {
+  deleteSplit,
+  deleteTransaction,
+  fetchAnalysis,
+  fetchLedger,
+  fetchSplits,
+  saveSplit,
+  saveTransaction,
+} from "./portfolioApi.js";
 import DynamicsCard from "./components/DynamicsCard.jsx";
 import DetailDrawer from "./components/DetailDrawer.jsx";
 import {
   AddTransactionDialog,
   BenchmarkDialog,
   CustomRangeDialog,
+  ImportDialog,
   InfoDialog,
+  SplitDialog,
 } from "./components/Dialogs.jsx";
 import HoldingsCard from "./components/HoldingsCard.jsx";
 import KpiRow from "./components/KpiRow.jsx";
@@ -81,6 +91,7 @@ function downloadCsv(name, rows) {
 
 export default function PortfolioPage() {
   const [ledger, setLedger] = useState([]);
+  const [splits, setSplits] = useState([]);
   const [analysis, setAnalysis] = useState(null);
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState("");
@@ -97,20 +108,25 @@ export default function PortfolioPage() {
   const [benchOpen, setBenchOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [splitOpen, setSplitOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [infoKey, setInfoKey] = useState(null);
   const [drawer, setDrawer] = useState(null);
   const [saveError, setSaveError] = useState("");
+  const [splitError, setSplitError] = useState("");
 
   const load = useCallback(async () => {
     setStatus("loading");
     setError("");
     try {
-      const [rows, data] = await Promise.all([
+      const [rows, data, splitRows] = await Promise.all([
         fetchLedger(),
         fetchAnalysis({ benchmark }),
+        fetchSplits(),
       ]);
       setLedger(Array.isArray(rows) ? rows : []);
       setAnalysis(data);
+      setSplits(Array.isArray(splitRows) ? splitRows : []);
       setStatus("ready");
     } catch (err) {
       setError(err.message || "Could not load your portfolio.");
@@ -294,12 +310,32 @@ export default function PortfolioPage() {
     }
   }
 
+  async function handleSaveSplit(payload) {
+    setSplitError("");
+    try {
+      await saveSplit(payload);
+      setSplitOpen(false);
+      await load();
+    } catch (err) {
+      setSplitError(err.message || "Could not save that split.");
+    }
+  }
+
   async function handleDelete(id) {
     try {
       await deleteTransaction(id);
       await load();
     } catch (err) {
       setError(err.message || "Could not delete that trade.");
+    }
+  }
+
+  async function handleDeleteSplit(id) {
+    try {
+      await deleteSplit(id);
+      await load();
+    } catch (err) {
+      setError(err.message || "Could not delete that split.");
     }
   }
 
@@ -317,14 +353,29 @@ export default function PortfolioPage() {
                 <span className="dot-sep" aria-hidden="true">•</span>
                 <span>USD</span>
               </p>
-              <button
-                className="btn btn-primary"
-                type="button"
-                style={{ marginTop: 12 }}
-                onClick={() => setAddOpen(true)}
-              >
-                Add transaction
-              </button>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+                <button
+                  className="btn btn-primary"
+                  type="button"
+                  onClick={() => setAddOpen(true)}
+                >
+                  Add transaction
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  type="button"
+                  onClick={() => setSplitOpen(true)}
+                >
+                  Add split
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  type="button"
+                  onClick={() => setImportOpen(true)}
+                >
+                  Import
+                </button>
+              </div>
             </div>
             <div className="head-value">
               <p className="head-label">Total value</p>
@@ -426,7 +477,7 @@ export default function PortfolioPage() {
                   <h2 className="card-title">Transactions</h2>
                 </div>
                 <div className="drawer-body" style={{ maxHeight: 360 }}>
-                  {ledger.length === 0 ? (
+                  {ledger.length === 0 && splits.length === 0 ? (
                     <p style={{ padding: "12px 0", fontSize: 13, color: "var(--muted)" }}>
                       No trades recorded yet.
                     </p>
@@ -453,6 +504,23 @@ export default function PortfolioPage() {
                                 className="link-btn"
                                 type="button"
                                 onClick={() => handleDelete(tx.id)}
+                              >
+                                Remove
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {splits.map((split) => (
+                          <tr key={`split-${split.id}`}>
+                            <td>{split.effective_date}</td>
+                            <td className="cell-strong">{split.symbol}</td>
+                            <td>SPLIT</td>
+                            <td>{split.numerator}:{split.denominator}</td>
+                            <td style={{ textAlign: "right" }}>
+                              <button
+                                className="link-btn"
+                                type="button"
+                                onClick={() => handleDeleteSplit(split.id)}
                               >
                                 Remove
                               </button>
@@ -506,6 +574,25 @@ export default function PortfolioPage() {
           setSaveError("");
         }}
         error={saveError}
+      />
+
+      <SplitDialog
+        open={splitOpen}
+        onSave={handleSaveSplit}
+        onClose={() => {
+          setSplitOpen(false);
+          setSplitError("");
+        }}
+        error={splitError}
+      />
+
+      <ImportDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={async () => {
+          setImportOpen(false);
+          await load();
+        }}
       />
 
       <DetailDrawer

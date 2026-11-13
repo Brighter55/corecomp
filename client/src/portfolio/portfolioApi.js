@@ -1,4 +1,4 @@
-import { authenticatedClient } from "../helpers/api.js";
+import { authenticatedClient, authenticatedClientUpload } from "../helpers/api.js";
 
 export async function fetchLedger() {
   const response = await authenticatedClient({ endpoint: "/portfolio/transactions" });
@@ -40,4 +40,52 @@ export async function deleteTransaction(id) {
   });
   if (!response.ok) throw new Error("Could not delete that trade.");
   return response.json();
+}
+
+export async function fetchSplits() {
+  const response = await authenticatedClient({ endpoint: "/portfolio/splits" });
+  if (!response.ok) throw new Error("Could not load your splits.");
+  return response.json();
+}
+
+export async function saveSplit(payload) {
+  const response = await authenticatedClient({
+    endpoint: "/portfolio/splits",
+    payload,
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    const first =
+      body.symbol?.[0] ||
+      body.effective_date?.[0] ||
+      body.numerator?.[0] ||
+      body.denominator?.[0];
+    throw new Error(first || body.error || "Could not save that split.");
+  }
+  return response.json();
+}
+
+export async function deleteSplit(id) {
+  const response = await authenticatedClient({
+    endpoint: "/portfolio/splits/delete",
+    payload: { id },
+  });
+  if (!response.ok) throw new Error("Could not delete that split.");
+  return response.json();
+}
+
+export async function importActivity(file, { dryRun = false } = {}) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("dry_run", dryRun ? "true" : "false");
+  const response = await authenticatedClientUpload({
+    endpoint: "/portfolio/import",
+    formData,
+  });
+  const body = await response.json().catch(() => ({}));
+  if (response.status === 409) {
+    throw new Error("This file was already imported.");
+  }
+  if (!response.ok) throw new Error(body.error || "Could not import that file.");
+  return body;
 }
