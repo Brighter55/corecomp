@@ -38,6 +38,7 @@ def parse_activity(text):
     """Parse activity CSV text into rows, splits and a preview."""
     rows = []
     splits = []
+    pending_splits = []
     unresolved = []
     counts = dict.fromkeys(_COUNT_KEYS, 0)
     skipped = 0
@@ -96,14 +97,19 @@ def parse_activity(text):
             )
             counts["REC"] += 1
         else:
-            split, rejection = _resolve_split(
-                symbol, day, raw.get("Quantity"), rows, splits
+            pending_splits.append(
+                (symbol, day, _decimal(raw.get("Quantity")) or Decimal("0"))
             )
-            if split is None:
-                unresolved.append(rejection)
-            else:
-                splits.append(split)
-                counts["SPL"] += 1
+
+    # Resolve splits only after every trade is known. The export is newest
+    # first, so a split row is read before the purchases it scales.
+    for symbol, day, added in sorted(pending_splits, key=lambda item: (item[1], item[0])):
+        split, rejection = _resolve_split(symbol, day, added, rows, splits)
+        if split is None:
+            unresolved.append(rejection)
+        else:
+            splits.append(split)
+            counts["SPL"] += 1
 
     return ImportResult(
         rows=rows,
@@ -117,8 +123,8 @@ def parse_activity(text):
 
 def _resolve_split(symbol, day, quantity, rows, splits):
     """(split, None) or (None, unresolvable). Held position excludes this row."""
-    held = _held_units(rows, splits, symbol)
-    added = Fraction(_decimal(quantity) or Decimal("0"))
+    held = _held_units(rows, splits, symbol, day)
+    added = Fraction(quantity)
     if held > 0 and held + added > 0:
         ratio = (held + added) / held
         return (
@@ -130,11 +136,19 @@ def _resolve_split(symbol, day, quantity, rows, splits):
             },
             None,
         )
-    return None, {"symbol": symbol, "trade_date": day, "shares": _decimal(quantity)}
+    return None, {"symbol": symbol, "trade_date": day, "shares": quantity}
 
 
-def _held_units(rows, splits, symbol):
-    events = holdings.normalise(rows, splits, _no_close)
+def _held_units(rows, splits, symbol, before):
+    """Units held strictly before `before`, with earlier splits applied.
+
+    The export is newest-first, so the rows parsed so far are the ones after
+    this date. Filter by date rather than trusting file order. A trade dated
+    the same day is excluded because a split takes effect at the open.
+    """
+    prior_rows = [row for row in rows if row["trade_date"] < before]
+    prior_splits = [split for split in splits if split["effective_date"] < before]
+    events = holdings.normalise(prior_rows, prior_splits, _no_close)
     state = holdings.replay(events).get(symbol)
     return Fraction(str(state["units"])) if state else Fraction(0)
 

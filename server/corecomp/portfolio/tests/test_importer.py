@@ -139,3 +139,29 @@ def test_a_split_with_no_held_position_is_reported_and_not_imported():
         {"symbol": "GHOST", "trade_date": "2024-01-05", "shares": Decimal("18")}
     ]
     assert result.rows == []
+
+
+def test_a_split_uses_the_position_on_its_date_not_the_file_order():
+    # Robinhood writes newest first, so the rows above the split are the ones
+    # after it. Reading the held position from file order would see the sale
+    # and find nothing to split.
+    text = HEADER + (
+        '"3/1/2024","3/1/2024","3/1/2024","XYZ","XYZ Corp","Sell","5","$40.00","$200.00"\n'
+        '"2/15/2024","2/15/2024","2/15/2024","XYZ","XYZ Corp Stock Split",'
+        '"SPL","18","",""\n'
+        '"1/2/2024","1/2/2024","1/2/2024","XYZ","XYZ Corp","Buy","2","$100.00",'
+        '"($200.00)"\n'
+    )
+
+    result = parse_activity(text)
+
+    assert result.unresolved_splits == []
+    assert result.splits == [
+        {
+            "symbol": "XYZ",
+            "effective_date": "2024-02-15",
+            "numerator": 10,
+            "denominator": 1,
+        }
+    ]
+    assert result.positions == {"XYZ": 15.0}
