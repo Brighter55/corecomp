@@ -230,6 +230,21 @@ def build_positions(transactions, prices):
     return positions
 
 
+def with_live_close(prices, quotes, day):
+    """Copy of `prices` with a live-price row appended for `day` where missing."""
+    if not quotes or not day:
+        return prices
+
+    result = {}
+    for symbol, rows in (prices or {}).items():
+        live = quotes.get(symbol)
+        if live is None or (rows and rows[-1][0] >= day):
+            result[symbol] = rows
+            continue
+        result[symbol] = list(rows) + [(day, live, live)]
+    return result
+
+
 def build_series(
     transactions,
     prices,
@@ -294,6 +309,12 @@ def build_series(
         dates = [day for day in dates if day >= start]
     if end:
         dates = [day for day in dates if day <= end]
+    if not dates and end:
+        # The window holds no session, which is what a buy dated today looks
+        # like before the provider publishes the close. Anchor on the end date
+        # and let _close_at carry the last known close, so the point shows the
+        # holding at its cost rather than nothing at all.
+        dates = [end]
 
     series = {
         "dates": dates,

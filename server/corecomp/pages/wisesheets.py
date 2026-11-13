@@ -693,6 +693,27 @@ def get_live_rows(symbols):
     }
 
 
+LIVE_TICKERS_PER_REQUEST = 25
+
+
+def get_live_price_batch(symbols):
+    """{symbol: last price} for any number of symbols, or a Response."""
+    requested = sorted({str(s).strip().upper() for s in symbols if str(s).strip()})
+    result = {symbol: None for symbol in requested}
+    if not requested:
+        return result
+
+    for chunk in _chunks(requested, LIVE_TICKERS_PER_REQUEST):
+        rows = get_live_rows(chunk)
+        if isinstance(rows, Response):
+            return rows
+        for symbol in chunk:
+            row = rows.get(symbol)
+            if row:
+                result[symbol] = _to_float(row.get("price"))
+    return result
+
+
 def get_eod_batch(symbols, days):
     """Batched prices/eod over a short window: {symbol: [rows]}, or a Response.
 

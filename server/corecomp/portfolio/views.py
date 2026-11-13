@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, timedelta
 
 from django.core.cache import cache
 from rest_framework import status
@@ -15,6 +15,14 @@ from .serializers import TransactionSerializer
 MAX_ANALYSIS_SYMBOLS = 200
 DEFAULT_BENCHMARK = "SPY"
 BATCH_CACHE_SECONDS = 3600
+# A live quote is 15 minutes delayed, so a minute of cache collapses a burst of
+# page loads without showing a stale price.
+LIVE_CACHE_SECONDS = 60
+# The provider publishes a session's close hours after it ends, so a buy dated
+# today has no row yet. Reaching back keeps the last close available for the
+# units and for a series anchored on the window end; 14 days clears any
+# weekend-plus-holiday gap.
+FETCH_LOOKBACK_DAYS = 14
 # Read at import, like the pages app, so a MOCK flip needs a restart and a
 # cache flush rather than serving mock-shaped bytes under a live key.
 MODE = "mock" if os.getenv("MOCK") == "True" else "live"
@@ -113,7 +121,7 @@ def _parse_date(value, field):
         )
 
 
-def _cached_batch(kind, start, end, symbols, fetch):
+def _cached_batch(kind, start, end, symbols, fetch, ttl=BATCH_CACHE_SECONDS):
     """Redis-cache an upstream batch by its canonical symbol list.
 
     Shared across users and workers, which is what keeps a portfolio load from
@@ -127,8 +135,23 @@ def _cached_batch(kind, start, end, symbols, fetch):
     value = fetch(symbols, start, end)
     if isinstance(value, Response):
         return value
-    cache.set(key, value, BATCH_CACHE_SECONDS)
+    cache.set(key, value, ttl)
     return value
+
+
+def _live_quotes(symbols, end_iso):
+    """Last traded price per symbol, or {} when the quote feed fails."""
+    value = _cached_batch(
+        "live",
+        end_iso,
+        end_iso,
+        symbols,
+        lambda symbols, start, end: financial_data_service.get_live_price_batch(symbols),
+        ttl=LIVE_CACHE_SECONDS,
+    )
+    if isinstance(value, Response):
+        return {}
+    return {symbol: price for symbol, price in value.items() if price}
 
 
 @api_view(["GET"])
@@ -175,6 +198,10 @@ def analysis_view(request):
 
     start_iso = start_date.isoformat()
     end_iso = end_date.isoformat()
+    fetch_start = start_date - timedelta(days=FETCH_LOOKBACK_DAYS)
+    if fetch_start < earliest_allowed:
+        fetch_start = earliest_allowed
+    fetch_iso = fetch_start.isoformat()
 
     if not rows:
         empty = {
@@ -209,14 +236,14 @@ def analysis_view(request):
     fetch_symbols = sorted(set(symbols) | {benchmark})
 
     prices = _cached_batch(
-        "eod", start_iso, end_iso, fetch_symbols,
+        "eod", fetch_iso, end_iso, fetch_symbols,
         financial_data_service.get_eod_daily_batch,
     )
     if isinstance(prices, Response):
         return prices
 
     dividends = _cached_batch(
-        "dividends", start_iso, end_iso, fetch_symbols,
+        "dividends", fetch_iso, end_iso, fetch_symbols,
         financial_data_service.get_dividends_batch,
     )
     if isinstance(dividends, Response):
@@ -226,6 +253,11 @@ def analysis_view(request):
         return Response(
             {"error": "unknown benchmark"}, status=status.HTTP_400_BAD_REQUEST
         )
+
+    quotes = {}
+    if end_date == today:
+        quotes = _live_quotes(fetch_symbols, end_iso)
+    prices = analysis.with_live_close(prices, quotes, end_iso)
 
     series = analysis.build_series(
         transactions,
