@@ -18,4 +18,5 @@ urlpatterns = [
         name="portfolio_split_delete",
     ),
     path("analysis", views.analysis_view, name="portfolio_analysis"),
+    path("import", views.import_transactions, name="portfolio_import"),
 ]

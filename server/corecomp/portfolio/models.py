@@ -20,6 +20,7 @@ class Transaction(models.Model):
         BUY = "BUY", "Buy"
         SELL = "SELL", "Sell"
         DIVIDEND = "DIVIDEND", "Dividend"
+        DTAX = "DTAX", "Foreign tax withheld"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -32,6 +33,8 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=18, decimal_places=4)
     shares = models.DecimalField(max_digits=24, decimal_places=8, null=True, blank=True)
     price = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+    # Sha256 of the source file, so re-uploading the same export is detectable.
+    import_hash = models.CharField(max_length=64, null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

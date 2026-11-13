@@ -1,14 +1,16 @@
+import hashlib
 import os
 from datetime import date, timedelta
 
 from django.core.cache import cache
+from django.db import transaction
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from services import financial_data_service
 
-from . import analysis, holdings
+from . import analysis, holdings, importer
 from .models import Split, Transaction
 from .serializers import SplitSerializer, TransactionSerializer
 
@@ -26,6 +28,8 @@ FETCH_LOOKBACK_DAYS = 14
 # Read at import, like the pages app, so a MOCK flip needs a restart and a
 # cache flush rather than serving mock-shaped bytes under a live key.
 MODE = "mock" if os.getenv("MOCK") == "True" else "live"
+IMPORT_MAX_BYTES = 2 * 1024 * 1024
+IMPORT_TRUTHY = {"1", "true", "yes", "on"}
 
 
 def _payload(request):
@@ -106,6 +110,74 @@ def delete_transaction(request):
     if not deleted:
         return Response({"error": "not found"}, status=status.HTTP_404_NOT_FOUND)
     return Response({"deleted": tx_id}, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def import_transactions(request):
+    upload = request.FILES.get("file")
+    if upload is None:
+        return Response(
+            {"error": "file is required"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    data = upload.read()
+    if len(data) > IMPORT_MAX_BYTES:
+        return Response(
+            {"error": "file is too large"}, status=status.HTTP_400_BAD_REQUEST
+        )
+    try:
+        # Broker exports often carry a UTF-8 BOM, which would otherwise rename
+        # the first header column.
+        text = data.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return Response(
+            {"error": "file must be UTF-8"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    dry_run = str(request.data.get("dry_run", "")).strip().lower() in IMPORT_TRUTHY
+    digest = hashlib.sha256(data).hexdigest()
+    already = Transaction.objects.filter(user=request.user, import_hash=digest)
+    if not dry_run and already.exists():
+        return Response(
+            {"error": "already imported"}, status=status.HTTP_409_CONFLICT
+        )
+
+    try:
+        result = importer.parse_activity(text)
+    except ValueError:
+        return Response(
+            {"error": "file could not be parsed"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    preview = {
+        "rows": result.rows,
+        "counts": result.counts,
+        "skipped": result.skipped,
+        "unresolved_splits": result.unresolved_splits,
+        "positions": result.positions,
+    }
+    if dry_run:
+        return Response(preview)
+
+    with transaction.atomic():
+        Transaction.objects.bulk_create([
+            Transaction(user=request.user, import_hash=digest, **row)
+            for row in result.rows
+        ])
+        for split in result.splits:
+            Split.objects.get_or_create(
+                user=request.user,
+                symbol=split["symbol"],
+                effective_date=split["effective_date"],
+                defaults={
+                    "numerator": split["numerator"],
+                    "denominator": split["denominator"],
+                },
+            )
+
+    return Response({**preview, "imported": len(result.rows)})
 
 
 @api_view(["GET", "POST"])
