@@ -9,8 +9,8 @@ from rest_framework.response import Response
 from services import financial_data_service
 
 from . import analysis
-from .models import Transaction
-from .serializers import TransactionSerializer
+from .models import Split, Transaction
+from .serializers import SplitSerializer, TransactionSerializer
 
 MAX_ANALYSIS_SYMBOLS = 200
 DEFAULT_BENCHMARK = "SPY"
@@ -106,6 +106,84 @@ def delete_transaction(request):
     if not deleted:
         return Response({"error": "not found"}, status=status.HTTP_404_NOT_FOUND)
     return Response({"deleted": tx_id}, status=status.HTTP_200_OK)
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def splits(request):
+    if request.method == "GET":
+        rows = Split.objects.filter(user=request.user)
+        return Response(SplitSerializer(rows, many=True).data)
+    return _save_split(request)
+
+
+def _save_split(request):
+    payload = dict(_payload(request))
+
+    row = None
+    split_id = payload.get("id")
+    if split_id is not None:
+        row = Split.objects.filter(user=request.user, pk=split_id).first()
+        if row is None:
+            return Response(
+                {"error": "not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    if "symbol" in payload:
+        symbol = str(payload.get("symbol") or "").strip().upper()
+        invalid = _validate_symbol(symbol)
+        if invalid is not None:
+            return invalid
+        payload["symbol"] = symbol
+
+    effective_date, invalid = _parse_date(
+        payload.get("effective_date"), "effective_date"
+    )
+    if invalid is not None:
+        return invalid
+    if effective_date is not None:
+        payload["effective_date"] = effective_date.isoformat()
+
+    serializer = SplitSerializer(row, data=payload, partial=row is not None)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    data = serializer.validated_data
+    duplicate = Split.objects.filter(
+        user=request.user,
+        symbol=data.get("symbol", row.symbol if row else None),
+        effective_date=data.get(
+            "effective_date", row.effective_date if row else None
+        ),
+    )
+    if row is not None:
+        duplicate = duplicate.exclude(pk=row.pk)
+    if duplicate.exists():
+        return Response(
+            {"error": "split already recorded"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if row is None:
+        serializer.save(user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def delete_split(request):
+    split_id = _payload(request).get("id")
+    if split_id is None:
+        return Response(
+            {"error": "id is required"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    deleted, _ = Split.objects.filter(user=request.user, pk=split_id).delete()
+    if not deleted:
+        return Response({"error": "not found"}, status=status.HTTP_404_NOT_FOUND)
+    return Response({"deleted": split_id}, status=status.HTTP_200_OK)
 
 
 def _parse_date(value, field):

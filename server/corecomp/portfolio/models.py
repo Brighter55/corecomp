@@ -50,3 +50,42 @@ class Transaction(models.Model):
     def save(self, *args, **kwargs):
         self.symbol = self.symbol.strip().upper()
         super().save(*args, **kwargs)
+
+
+class Split(models.Model):
+    """A stock split stored as a ratio.
+
+    A ratio applies to every lot held on the effective date, and it keeps
+    working after an edit to an earlier trade, where a share delta would not.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="portfolio_splits",
+    )
+    symbol = models.CharField(max_length=20)
+    effective_date = models.DateField()
+    numerator = models.PositiveIntegerField()
+    denominator = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["effective_date", "id"]
+        indexes = [
+            models.Index(fields=["user", "symbol"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "symbol", "effective_date"],
+                name="portfolio_split_unique_per_day",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(numerator__gt=0) & models.Q(denominator__gt=0),
+                name="portfolio_split_ratio_positive",
+            ),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.symbol = self.symbol.strip().upper()
+        super().save(*args, **kwargs)

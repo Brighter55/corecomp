@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Transaction
+from .models import Split, Transaction
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -37,4 +37,27 @@ class TransactionSerializer(serializers.ModelSerializer):
     def validate_price(self, value):
         if value is not None and value < 0:
             raise serializers.ValidationError("price cannot be negative")
+        return value
+
+
+class SplitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Split
+        fields = ["id", "symbol", "effective_date", "numerator", "denominator"]
+        read_only_fields = ["id"]
+
+    def validate_symbol(self, value):
+        symbol = str(value).strip().upper()
+        if not symbol:
+            raise serializers.ValidationError("symbol is required")
+        return symbol
+
+    def validate_numerator(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("numerator must be positive")
+        return value
+
+    def validate_denominator(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("denominator must be positive")
         return value

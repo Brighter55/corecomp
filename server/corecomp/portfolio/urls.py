@@ -11,5 +11,11 @@ urlpatterns = [
         views.delete_transaction,
         name="portfolio_transaction_delete",
     ),
+    path("splits", views.splits, name="portfolio_splits"),
+    path(
+        "splits/delete",
+        views.delete_split,
+        name="portfolio_split_delete",
+    ),
     path("analysis", views.analysis_view, name="portfolio_analysis"),
 ]
