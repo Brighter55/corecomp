@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from services import financial_data_service
 
-from . import analysis
+from . import analysis, holdings
 from .models import Split, Transaction
 from .serializers import SplitSerializer, TransactionSerializer
 
@@ -294,7 +294,7 @@ def analysis_view(request):
             "window": {"start": start_iso, "end": end_iso},
             "benchmark": benchmark,
             "positions": [],
-            "summary": analysis.summarize(empty),
+            "summary": analysis.summarize(empty, 0.0),
             "series": empty,
         })
 
@@ -332,6 +332,16 @@ def analysis_view(request):
             {"error": "unknown benchmark"}, status=status.HTTP_400_BAD_REQUEST
         )
 
+    splits = list(
+        Split.objects.filter(user=request.user).values(
+            "symbol", "effective_date", "numerator", "denominator"
+        )
+    )
+    events = holdings.normalise(
+        transactions, splits, analysis.close_lookup(prices)
+    )
+    states = holdings.replay(events)
+
     quotes = {}
     if end_date == today:
         quotes = _live_quotes(fetch_symbols, end_iso)
@@ -341,6 +351,8 @@ def analysis_view(request):
         transactions,
         prices,
         dividends,
+        splits,
+        states,
         benchmark,
         prices,
         dividends,
@@ -350,7 +362,11 @@ def analysis_view(request):
     return Response({
         "window": {"start": start_iso, "end": end_iso},
         "benchmark": benchmark,
-        "positions": analysis.build_positions(transactions, prices),
-        "summary": analysis.summarize(series),
+        "positions": analysis.build_positions(
+            transactions, splits, prices, states, dividends, end_iso
+        ),
+        "summary": analysis.summarize(
+            series, analysis.total_purchased(transactions)
+        ),
         "series": series,
     })

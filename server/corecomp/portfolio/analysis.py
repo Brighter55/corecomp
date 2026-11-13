@@ -1,27 +1,25 @@
 """Pure portfolio math. No Django, no DRF, no I/O.
 
-Units rule. A holding is dollars, not shares. For each BUY, units is the
-dollars paid divided by the split-adjusted close on the purchase date; a SELL
-subtracts dollars proceeds divided the same way. The provider's `close` is
-already restated into today's share units across the whole history, so this
-yields the correct current share count without any split data. A 10:1 split
-needs no special case, and no branch on a split exists anywhere below.
+Units, cost basis and realized gains come from the share-count engine in
+`holdings`. Provider closes are split-adjusted across the whole history, so a
+historical value restates the units held that day into today's share units
+using every recorded split after it. Pairing a pre-split unit count with an
+adjusted close would shrink every pre-split point by the split factor.
 
 Dividends use `adjDividend`, which the provider also expresses in today's share
-units, so `units * adjDividend` is the cash actually received. Pairing an
-unadjusted dividend with a current-terms unit count would overstate every
-pre-split payment by the split factor.
+units, so the same adjustment applies before multiplying.
 
 Profit. `invested` is net cash contributed, meaning buys minus sells.
 `profit = value + dividends - invested`, which counts realized gains from a sale
-as profit and does not double count the cash received.
+as profit and does not double count the cash received. A return divides that
+profit by the dollars actually purchased, so a position fully sold at a loss
+reports the loss rather than -100%.
 """
 
 from bisect import bisect_right
 from datetime import date, timedelta
 
-KNOWN_SPLIT_FACTORS = (0.1, 0.5, 1.5, 2.0, 3.0, 4.0, 5.0, 7.0, 10.0, 15.0, 20.0)
-SPLIT_TOLERANCE = 0.03
+from . import holdings
 
 PERIODS = ("1d", "7d", "1m", "3m", "6m", "ytd", "1y", "5y", "all")
 PERIOD_DAYS = {
@@ -34,6 +32,8 @@ PERIOD_DAYS = {
     "5y": 365 * 5,
 }
 
+_FAR_FUTURE = "9999-12-31"
+
 
 def _to_float(value):
     if value is None:
@@ -42,6 +42,13 @@ def _to_float(value):
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _day(value):
+    """ISO date string, so a date object and a string compare the same way."""
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return str(value)
 
 
 def _index(prices):
@@ -117,28 +124,45 @@ def _at(step, day):
     return values[position] if position >= 0 else 0.0
 
 
-def split_factor(units, shares_typed):
-    """The cumulative split factor since purchase, or None when uncertain.
+def close_lookup(prices):
+    """`close_for(symbol, day)` for the holdings engine, at or before `day`."""
+    index = _index(prices)
 
-    Advisory only. It exists to label a derived share count, never to decide a
-    valuation. A rounded price or an intraday fill lands near a factor without
-    matching it, so a result outside the tolerance is reported as unknown rather
-    than guessed.
+    def lookup(symbol, day):
+        return _price_at(index, symbol, day)[1]
+
+    return lookup
+
+
+def _adjusted_units(step, symbol, day, splits):
+    """Units held on `day` restated into today's share units.
+
+    Provider closes are split-adjusted across the whole history, so a unit
+    count from before a recorded split must be scaled by every split after it.
     """
-    shares = _to_float(shares_typed)
-    if shares is None or shares <= 0:
-        return None
-    ratio = units / shares
-    for factor in KNOWN_SPLIT_FACTORS:
-        if abs(ratio - factor) / factor <= SPLIT_TOLERANCE:
-            return factor
-    return None
+    units = _at(step, day)
+    if units == 0:
+        return 0.0
+    return units * holdings.split_product(splits, symbol, day, _FAR_FUTURE)
 
 
-def _trade_pairs(transactions, index):
-    """Cumulative unit deltas and net invested cash, per symbol and overall."""
-    unit_pairs = {}
-    invest_pairs = []
+def _buy_amounts(transactions):
+    totals = {}
+    for tx in transactions:
+        if tx.get("kind") != "BUY":
+            continue
+        amount = _to_float(tx.get("amount")) or 0.0
+        totals[tx["symbol"]] = totals.get(tx["symbol"], 0.0) + amount
+    return totals
+
+
+def total_purchased(transactions):
+    """Dollars spent on BUY rows across the whole ledger."""
+    return sum(_buy_amounts(transactions).values())
+
+
+def _invested_pairs(transactions):
+    pairs = []
     for tx in transactions:
         kind = tx.get("kind")
         if kind not in ("BUY", "SELL"):
@@ -146,38 +170,77 @@ def _trade_pairs(transactions, index):
         amount = _to_float(tx.get("amount"))
         if amount is None or amount < 0:
             continue
-        symbol = tx["symbol"]
-        _, close = _price_at(index, symbol, tx["trade_date"])
-        if not close:
+        pairs.append((tx["trade_date"], amount if kind == "BUY" else -amount))
+    return pairs
+
+
+def _has_split_after(splits, symbol, day):
+    for split in splits or []:
+        if split.get("symbol") != symbol:
             continue
-        units = amount / close
-        if kind == "SELL":
-            units = -units
-            invested = -amount
-        else:
-            invested = amount
-        unit_pairs.setdefault(symbol, []).append((tx["trade_date"], units))
-        invest_pairs.append((tx["trade_date"], invested))
-    return unit_pairs, invest_pairs
+        if _day(split["effective_date"]) > day:
+            return True
+    return False
 
 
-def build_positions(transactions, prices):
-    """One row per symbol with units, cost basis and current value."""
+def _position_split_factor(splits, symbol, first_date):
+    if first_date is None:
+        return None
+    if not _has_split_after(splits, symbol, first_date):
+        return None
+    return holdings.split_product(splits, symbol, first_date, _FAR_FUTURE)
+
+
+def _dividend_entries(transactions, dividends, states, splits):
+    """One `(day, symbol, signed_cash)` per payment, one source per symbol.
+
+    A symbol with any ledger DIVIDEND row uses the ledger. A DTAX row is foreign
+    withholding stored positive, so it subtracts. Every other symbol uses the
+    provider's adjusted dividend against the units held on the ex-date.
+    """
+    ledger_symbols = {
+        tx["symbol"] for tx in transactions if tx.get("kind") == "DIVIDEND"
+    }
+
+    entries = []
+    for tx in transactions:
+        kind = tx.get("kind")
+        if kind not in ("DIVIDEND", "DTAX"):
+            continue
+        symbol = tx["symbol"]
+        if symbol not in ledger_symbols:
+            continue
+        amount = _to_float(tx.get("amount")) or 0.0
+        entries.append(
+            (tx["trade_date"], symbol, amount if kind == "DIVIDEND" else -amount)
+        )
+
+    for symbol, rows in (dividends or {}).items():
+        if symbol in ledger_symbols:
+            continue
+        state = (states or {}).get(symbol)
+        if state is None:
+            continue
+        step = state["unit_steps"]
+        for ex_date, amount in rows:
+            units = _adjusted_units(step, symbol, ex_date, splits)
+            if units > 0 and amount:
+                entries.append((ex_date, symbol, units * amount))
+    return entries
+
+
+def build_positions(transactions, splits, prices, states, dividends, end):
+    """One row per held symbol, valued from the engine's final state."""
     index = _index(prices)
-    unit_pairs, _ = _trade_pairs(transactions, index)
+    bought = _buy_amounts(transactions)
 
-    shares_typed = {}
-    cost_basis = {}
     first_date = {}
+    shares_typed = {}
     for tx in transactions:
         kind = tx.get("kind")
         if kind not in ("BUY", "SELL"):
             continue
         symbol = tx["symbol"]
-        amount = _to_float(tx.get("amount")) or 0.0
-        cost_basis[symbol] = cost_basis.get(symbol, 0.0) + (
-            amount if kind == "BUY" else -amount
-        )
         first_date[symbol] = min(
             first_date.get(symbol, tx["trade_date"]), tx["trade_date"]
         )
@@ -187,15 +250,24 @@ def build_positions(transactions, prices):
                 typed if kind == "BUY" else -typed
             )
 
+    dividends_by_symbol = {}
+    for day, symbol, cash in _dividend_entries(
+        transactions, dividends, states, splits
+    ):
+        if day <= end:
+            dividends_by_symbol[symbol] = dividends_by_symbol.get(symbol, 0.0) + cash
+
     positions = []
-    for symbol, pairs in unit_pairs.items():
-        units = sum(delta for _, delta in pairs)
+    for symbol, state in states.items():
+        units = state["units"]
         latest_date, latest = _latest(index, symbol)
         market_value = units * latest if latest is not None else 0.0
-        basis = cost_basis.get(symbol, 0.0)
-        lifetime = (
-            round((market_value - basis) / basis * 100, 4) if basis else None
-        )
+        cost_basis = state["cost_basis"]
+        realized = state["realized"]
+        dividends_paid = dividends_by_symbol.get(symbol, 0.0)
+        profit = market_value - cost_basis + realized + dividends_paid
+        purchased = bought.get(symbol, 0.0)
+        lifetime = round(profit / purchased * 100, 4) if purchased else None
 
         period_returns = {}
         for period in PERIODS:
@@ -218,12 +290,18 @@ def build_positions(transactions, prices):
             "units": round(units, 8),
             "price": latest,
             "market_value": round(market_value, 2),
-            "cost_basis": round(basis, 2),
+            "cost_basis": round(cost_basis, 2),
+            "average_cost": state["average_cost"],
+            "realized": round(realized, 2),
+            "unrealized": round(market_value - cost_basis, 2),
+            "profit": round(profit, 2),
             "return_pct": lifetime,
             "period_returns": period_returns,
             "first_date": first_date.get(symbol),
             "shares_typed": round(shares_typed[symbol], 8) if symbol in shares_typed else None,
-            "split_factor": split_factor(units, shares_typed.get(symbol)),
+            "split_factor": _position_split_factor(
+                splits, symbol, first_date.get(symbol)
+            ),
         })
 
     positions.sort(key=lambda row: row["market_value"], reverse=True)
@@ -249,6 +327,8 @@ def build_series(
     transactions,
     prices,
     dividends,
+    splits,
+    states,
     benchmark_symbol,
     benchmark_prices,
     benchmark_dividends,
@@ -258,23 +338,16 @@ def build_series(
     """Value, invested capital, cash dividends and the benchmark replay."""
     index = _index(prices)
     benchmark_index = _index(benchmark_prices)
-    unit_pairs, invest_pairs = _trade_pairs(transactions, index)
 
-    unit_steps = {
-        symbol: _step_function(pairs) for symbol, pairs in unit_pairs.items()
-    }
-    invest_step = _step_function(invest_pairs)
+    unit_steps = {symbol: state["unit_steps"] for symbol, state in states.items()}
+    invest_step = _step_function(_invested_pairs(transactions))
 
-    dividend_pairs = []
-    for symbol, rows in (dividends or {}).items():
-        step = unit_steps.get(symbol)
-        if step is None:
-            continue
-        for ex_date, amount in rows:
-            held = _at(step, ex_date)
-            if held > 0 and amount:
-                dividend_pairs.append((ex_date, held * amount))
-    dividend_step = _step_function(dividend_pairs)
+    dividend_step = _step_function([
+        (day, cash)
+        for day, _symbol, cash in _dividend_entries(
+            transactions, dividends, states, splits
+        )
+    ])
 
     benchmark_unit_pairs = []
     for tx in transactions:
@@ -327,7 +400,7 @@ def build_series(
     for day in dates:
         value = 0.0
         for symbol, step in unit_steps.items():
-            units = _at(step, day)
+            units = _adjusted_units(step, symbol, day, splits)
             if units == 0:
                 continue
             close = _close_at(index, symbol, day)
@@ -352,7 +425,7 @@ def build_series(
     return series
 
 
-def summarize(series):
+def summarize(series, cost_purchased):
     """Headline numbers from the last point of a series."""
     if not series["dates"]:
         return {
@@ -378,7 +451,7 @@ def summarize(series):
         "dividends": dividends,
         "profit": profit,
         "return_pct": (
-            round(profit / invested * 100, 4) if invested else None
+            round(profit / cost_purchased * 100, 4) if cost_purchased else None
         ),
         "benchmark_value": round(benchmark_value, 2),
         "benchmark_profit": round(benchmark_value - invested, 2),

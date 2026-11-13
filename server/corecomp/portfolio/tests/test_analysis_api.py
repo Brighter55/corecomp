@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.test import APIClient
 from services import financial_data_service
 
-from portfolio.models import Transaction
+from portfolio.models import Split, Transaction
 
 User = get_user_model()
 
@@ -57,13 +57,41 @@ def fake_batches(monkeypatch):
     return calls
 
 
-def _trade(user, symbol="AAPL", amount="1000.00"):
+def _trade(
+    user,
+    symbol="AAPL",
+    amount="1000.00",
+    kind="BUY",
+    shares=None,
+    price=None,
+    trade_date="2024-01-02",
+):
     return Transaction.objects.create(
         user=user,
         symbol=symbol,
-        trade_date="2024-01-02",
-        kind="BUY",
+        trade_date=trade_date,
+        kind=kind,
         amount=Decimal(amount),
+        shares=Decimal(shares) if shares is not None else None,
+        price=Decimal(price) if price is not None else None,
+    )
+
+
+def _set_batches(monkeypatch, prices, dividends):
+    monkeypatch.setattr(
+        financial_data_service,
+        "get_eod_daily_batch",
+        lambda symbols, start, end: {s: prices.get(s, []) for s in symbols},
+    )
+    monkeypatch.setattr(
+        financial_data_service,
+        "get_dividends_batch",
+        lambda symbols, start, end: {s: dividends.get(s, []) for s in symbols},
+    )
+    monkeypatch.setattr(
+        financial_data_service,
+        "get_live_price_batch",
+        lambda symbols: {s: None for s in symbols},
     )
 
 
@@ -236,6 +264,136 @@ def test_more_than_two_hundred_symbols_is_rejected(user, fake_batches):
     assert response.status_code == 400
     assert response.json()["error"] == "too many symbols"
     assert fake_batches["eod"] == 0
+
+
+def test_a_typed_share_count_sets_units_and_a_thousand_cost_basis(
+    user, fake_batches
+):
+    _trade(user, shares="10", price="100")
+
+    body = client_for(user).get(URL).json()
+
+    position = body["positions"][0]
+    assert position["units"] == 10.0
+    assert position["cost_basis"] == 1000.0
+    assert position["average_cost"] == 100.0
+
+
+def test_a_recorded_split_scales_units_and_leaves_cost_basis_alone(
+    user, fake_batches
+):
+    _trade(user, shares="10", price="100")
+    Split.objects.create(
+        user=user,
+        symbol="AAPL",
+        effective_date="2024-06-10",
+        numerator=10,
+        denominator=1,
+    )
+
+    body = client_for(user).get(URL).json()
+
+    position = body["positions"][0]
+    assert position["units"] == 100.0
+    assert position["cost_basis"] == 1000.0
+    assert position["average_cost"] == 10.0
+    assert position["split_factor"] == 10.0
+
+
+def test_a_fully_sold_loss_reports_against_the_cost_purchased(user, fake_batches):
+    _trade(user, shares="10", price="100")
+    _trade(
+        user,
+        kind="SELL",
+        amount="980.00",
+        shares="10",
+        price="98",
+        trade_date="2024-06-03",
+    )
+
+    body = client_for(user).get(URL).json()
+
+    position = body["positions"][0]
+    assert position["units"] == 0.0
+    assert position["cost_basis"] == 0.0
+    assert position["realized"] == -20.0
+    assert position["profit"] == -20.0
+    assert position["return_pct"] == -2.0
+
+
+def test_ledger_dividends_override_the_provider_for_that_symbol(
+    user, monkeypatch
+):
+    prices = {
+        "AAPL": [("2024-01-02", 100.0, 100.0), ("2024-06-03", 120.0, 120.0)],
+        "MSFT": [("2024-01-02", 100.0, 100.0), ("2024-06-03", 120.0, 120.0)],
+        "SPY": [("2024-01-02", 200.0, 200.0), ("2024-06-03", 260.0, 260.0)],
+    }
+    dividends = {
+        "AAPL": [("2024-03-15", 2.0)],
+        "MSFT": [("2024-03-15", 1.5)],
+        "SPY": [],
+    }
+    _set_batches(monkeypatch, prices, dividends)
+    _trade(user, symbol="AAPL", amount="1000.00")
+    _trade(user, symbol="MSFT", amount="2000.00")
+    _trade(
+        user,
+        symbol="AAPL",
+        kind="DIVIDEND",
+        amount="25.00",
+        trade_date="2024-03-15",
+    )
+
+    body = client_for(user).get(URL).json()
+
+    # AAPL uses the 25 dollar ledger row instead of its 20 dollar provider
+    # payment; MSFT has no ledger row and uses the provider's 20 * 1.50.
+    assert body["summary"]["dividends"] == 55.0
+    by_symbol = {position["symbol"]: position for position in body["positions"]}
+    assert by_symbol["AAPL"]["profit"] == 225.0
+    assert by_symbol["MSFT"]["profit"] == 430.0
+
+
+def test_a_dtax_row_subtracts_foreign_withholding(user, monkeypatch):
+    prices = {
+        "AAPL": [("2024-01-02", 100.0, 100.0), ("2024-06-03", 120.0, 120.0)],
+        "SPY": [("2024-01-02", 200.0, 200.0), ("2024-06-03", 260.0, 260.0)],
+    }
+    dividends = {"AAPL": [("2024-03-15", 2.0)], "SPY": []}
+    _set_batches(monkeypatch, prices, dividends)
+    _trade(user, symbol="AAPL", amount="1000.00")
+    _trade(
+        user,
+        symbol="AAPL",
+        kind="DIVIDEND",
+        amount="25.00",
+        trade_date="2024-03-15",
+    )
+    _trade(
+        user,
+        symbol="AAPL",
+        kind="DTAX",
+        amount="5.00",
+        trade_date="2024-03-15",
+    )
+
+    body = client_for(user).get(URL).json()
+
+    assert body["summary"]["dividends"] == 20.0
+    assert body["positions"][0]["profit"] == 220.0
+
+
+def test_a_legacy_trade_without_shares_values_from_the_amount_and_close(
+    user, fake_batches
+):
+    _trade(user, amount="1000.00")
+
+    body = client_for(user).get(URL).json()
+
+    position = body["positions"][0]
+    assert position["units"] == 10.0
+    assert position["cost_basis"] == 1000.0
 
 
 def test_anonymous_request_is_unauthenticated(api_client):
