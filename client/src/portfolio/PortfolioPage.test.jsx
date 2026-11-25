@@ -19,6 +19,11 @@ vi.mock("../headers/product-header/ProductHeader.jsx", () => ({
   default: () => <div data-testid="product-header" />,
 }));
 
+async function openAddMenu(item) {
+  await userEvent.click(screen.getByRole("button", { name: "Add to portfolio" }));
+  await userEvent.click(screen.getByRole("menuitem", { name: item }));
+}
+
 vi.mock("../helpers/api.js", () => ({
   authenticatedClient: vi.fn(),
   authenticatedClientUpload: vi.fn(),
@@ -210,7 +215,7 @@ describe("PortfolioPage", () => {
     render(<PortfolioPage />);
     await screen.findByText("Core Portfolio");
 
-    await userEvent.click(screen.getByRole("button", { name: "Add transaction" }));
+    await openAddMenu(/New trade/);
 
     expect(
       await screen.findByRole("heading", { name: "Add a transaction" }),
@@ -232,7 +237,7 @@ describe("PortfolioPage", () => {
     render(<PortfolioPage />);
     await screen.findByText("Core Portfolio");
 
-    await userEvent.click(screen.getByRole("button", { name: "Add transaction" }));
+    await openAddMenu(/New trade/);
     const dialog = screen
       .getByRole("heading", { name: "Add a transaction" })
       .closest("dialog");
@@ -268,7 +273,7 @@ describe("PortfolioPage", () => {
     render(<PortfolioPage />);
     await screen.findByText("Core Portfolio");
 
-    await userEvent.click(screen.getByRole("button", { name: "Add split" }));
+    await openAddMenu(/New split/);
     const dialog = screen
       .getByRole("heading", { name: "Add a split" })
       .closest("dialog");
@@ -308,7 +313,7 @@ describe("PortfolioPage", () => {
     render(<PortfolioPage />);
     await screen.findByText("Core Portfolio");
 
-    await userEvent.click(screen.getByRole("button", { name: "Import" }));
+    await openAddMenu(/Import a spreadsheet/);
     const dialog = screen
       .getByRole("heading", { name: "Import activity" })
       .closest("dialog");

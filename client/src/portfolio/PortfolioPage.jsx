@@ -21,6 +21,7 @@ import {
   saveSplit,
   saveTransaction,
 } from "./portfolioApi.js";
+import AddMenu from "./components/AddMenu.jsx";
 import DynamicsCard from "./components/DynamicsCard.jsx";
 import DetailDrawer from "./components/DetailDrawer.jsx";
 import {
@@ -107,6 +108,7 @@ export default function PortfolioPage() {
   const [benchOpen, setBenchOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [addKind, setAddKind] = useState("BUY");
   const [splitOpen, setSplitOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [infoKey, setInfoKey] = useState(null);
@@ -351,29 +353,6 @@ export default function PortfolioPage() {
                 <span className="dot-sep" aria-hidden="true">•</span>
                 <span>USD</span>
               </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
-                <button
-                  className="btn btn-primary"
-                  type="button"
-                  onClick={() => setAddOpen(true)}
-                >
-                  Add transaction
-                </button>
-                <button
-                  className="btn btn-ghost"
-                  type="button"
-                  onClick={() => setSplitOpen(true)}
-                >
-                  Add split
-                </button>
-                <button
-                  className="btn btn-ghost"
-                  type="button"
-                  onClick={() => setImportOpen(true)}
-                >
-                  Import
-                </button>
-              </div>
             </div>
             <div className="head-value">
               <p className="head-label">Total value</p>
@@ -384,6 +363,18 @@ export default function PortfolioPage() {
                   {formatMoney(Math.abs(todayChange))} ({Math.abs(todayPct).toFixed(2)}%) today
                 </span>
               </p>
+              <div className="head-actions">
+                <AddMenu
+                  onSelect={(action) => {
+                    if (action === "split") setSplitOpen(true);
+                    else if (action === "import") setImportOpen(true);
+                    else {
+                      setAddKind(action === "dividend" ? "DIVIDEND" : "BUY");
+                      setAddOpen(true);
+                    }
+                  }}
+                />
+              </div>
             </div>
           </section>
 
@@ -406,8 +397,8 @@ export default function PortfolioPage() {
                   </div>
                   <p style={{ marginTop: 12, fontSize: 13.5, color: "var(--ink-soft)" }}>
                     Add your first trade to see portfolio value, profit, monthly returns
-                    and holdings performance. Dollars and a date are enough. Shares and
-                    price are optional.
+                    and holdings performance. Record the exact shares and price you paid,
+                    or import a spreadsheet from your broker.
                   </p>
                   <div className="card-foot">
                     <button className="foot-btn" type="button" onClick={() => setAddOpen(true)}>
@@ -567,6 +558,7 @@ export default function PortfolioPage() {
 
       <AddTransactionDialog
         open={addOpen}
+        initialKind={addKind}
         onSave={handleSave}
         onClose={() => {
           setAddOpen(false);

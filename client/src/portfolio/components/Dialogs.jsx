@@ -150,12 +150,12 @@ const EMPTY = {
 const fieldStyle = { display: "grid", gap: 6 };
 const labelStyle = { fontSize: 12, color: "var(--muted)" };
 
-export function AddTransactionDialog({ open, onSave, onClose, error }) {
+export function AddTransactionDialog({ open, initialKind = "BUY", onSave, onClose, error }) {
   const [form, setForm] = useState(EMPTY);
 
   useEffect(() => {
-    if (open) setForm({ ...EMPTY, trade_date: TODAY() });
-  }, [open]);
+    if (open) setForm({ ...EMPTY, kind: initialKind, trade_date: TODAY() });
+  }, [open, initialKind]);
 
   const update = (key) => (event) => setForm({ ...form, [key]: event.target.value });
   const isDividend = form.kind === "DIVIDEND";
