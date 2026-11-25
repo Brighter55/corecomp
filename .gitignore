@@ -71,3 +71,10 @@ client/e2e/.auth
 # workflows. Scratch that stays on the machine, never product history. Durable
 # documentation lives in docs/ instead.
 .audit/
+
+# A real brokerage export, kept locally to design and test the importer. This
+# repo is public, so the account history must never be committed. Tests use a
+# synthetic fixture instead.
+docs/robinhood-sample.csv
+docs/Snowball_Export_My portfolio_11_25_2026.csv
+docs/

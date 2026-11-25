@@ -17,17 +17,34 @@ function buildHeaders(extra = {}) {
   };
 }
 
-// POST headers: only send X-CSRFToken when a csrftoken cookie actually exists
-// (never send the literal string "undefined").
-function buildPostHeaders() {
-  const headers = buildHeaders({
-    "Content-Type": "application/json",
-  });
+// Only send X-CSRFToken when a csrftoken cookie actually exists (never send
+// the literal string "undefined").
+function buildCsrfHeaders(headers) {
   const csrfToken = getCookie("csrftoken");
   if (csrfToken) {
     headers["X-CSRFToken"] = csrfToken;
   }
   return headers;
+}
+
+function buildPostHeaders() {
+  return buildCsrfHeaders(
+    buildHeaders({
+      "Content-Type": "application/json",
+    }),
+  );
+}
+
+// Multipart upload. Content-Type is deliberately absent: the browser fills it
+// in with the boundary it generated for the FormData body.
+export async function authenticatedClientUpload({ endpoint, formData }) {
+  const response = await fetch(`${backendBaseUrl}${endpoint}`, {
+    method: "POST",
+    headers: buildCsrfHeaders(buildHeaders()),
+    credentials: "include",
+    body: formData,
+  });
+  return response;
 }
 
 // for protected endpoint

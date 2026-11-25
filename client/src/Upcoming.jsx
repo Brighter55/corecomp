@@ -4,6 +4,27 @@ import Footer from "./shared/Footer.tsx";
 const versions = [
     {
         name: "Current Version",
+        version: "0.12.0",
+        date: "11/25/2026",
+        updates: [
+            "Add a Portfolio page: everything you own in one place, with what it is worth today, what you paid, and how much you have made",
+            "Add a trade by entering the ticker, the date, how many shares and the price you paid, and the total is filled in for you",
+            "Add dividends too, so the cash they pay counts towards your return instead of sitting outside it",
+            "Add a stock split and every earlier price and share count is corrected to match, so the chart does not show a sudden crash on the day of the split",
+            "Import a Robinhood activity export in one go instead of typing years of trades, with a preview of what will be added and what will be skipped before you confirm",
+            "Re-import a fresh export whenever you like: trades you already imported are recognised and skipped, so nothing is counted twice",
+            "Compare against the S&P 500, or pick another index or company, and switch any chart between a week, a month, a year, all time, or a range you choose yourself",
+            "See profit as a share of the money you actually paid in, so adding money later does not make the return look better than it is",
+            "See the income your holdings are expected to pay over the next year, based on what they pay today and how fast their dividends have been rising",
+            "Keep Holdings performance to the positions you own today, so a ticker you have sold drops off",
+            "Open a card's menu to see the figures behind the chart, and download them as a file you can open in Excel",
+            "Read a short explanation of any chart or figure from the info icon beside it",
+            "Add a trade, dividend, split or import from one Add menu in the header",
+            "Use the whole page in dark mode",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.11.0",
         date: "10/12/2026",
         updates: [

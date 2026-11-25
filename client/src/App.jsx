@@ -10,6 +10,7 @@ import TermsOfService from "./TermsOfService.jsx"
 import Upcoming from "./Upcoming.jsx"
 import DipPage from "./dip/DipPage.jsx"
 import EarningsPage from "./earnings/EarningsPage.jsx"
+import PortfolioPage from "./portfolio/PortfolioPage.jsx"
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/upcoming" element={<Upcoming />} />
         <Route path="/dip" element={<DipPage />} />
         <Route path="/earnings" element={<EarningsPage />} />
+        <Route path="/portfolio" element={<AuthenticatedRoute><PortfolioPage /></AuthenticatedRoute>} />
       </Routes>
     </BrowserRouter>
   )
