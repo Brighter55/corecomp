@@ -51,6 +51,45 @@
   --shadow: 0 24px 48px -20px rgba(26, 36, 30, .20), 0 6px 16px -8px rgba(26, 36, 30, .07);
   color-scheme: light;
 }
+/* The app is dark unless `theme-light` sits on <html>, and the page carried the
+   design's light palette outright, so a dark session saw a white page. These
+   values follow the app's own dark tokens in index.css. */
+:root:not(.theme-light) .portfolio-page {
+  --canvas: #36453B;
+  --surface: #3E4E43;
+  --surface-soft: rgba(255, 255, 255, .08);
+  --sage-soft: rgba(163, 177, 138, .16);
+  --sage-line: rgba(163, 177, 138, .34);
+  --ink: #DAD7CD;
+  --ink-soft: #C7C9BD;
+  --muted: #B9BBAF;
+  --line: rgba(255, 255, 255, .12);
+  --line-strong: rgba(255, 255, 255, .24);
+  --brand: #A3B18A;
+  --brand-deep: #3A5A40;
+  --gain: #8FD08C;
+  --gain-bar: #6FA98B;
+  --gain-soft: rgba(143, 208, 140, .16);
+  --loss: #FF9F93;
+  --loss-bar: #C06668;
+  --loss-soft: rgba(255, 159, 147, .14);
+  --chart-portfolio: #8FB08A;
+  --chart-perf: #6FA98B;
+  --chart-bench: #D6A64A;
+  --chart-bench2: #7FA3C4;
+  --chart-blend: #B9A18C;
+  --chart-invested: #B3A78F;
+  --shadow: 0 24px 48px -20px rgba(0, 0, 0, .55), 0 6px 16px -8px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+:root:not(.theme-light) .portfolio-page .card,
+:root:not(.theme-light) .portfolio-page .kpi {
+  border: 1px solid var(--line);
+}
+:root:not(.theme-light) .portfolio-page .modal input,
+:root:not(.theme-light) .portfolio-page .modal select {
+  background: var(--canvas);
+}
 .portfolio-page * { box-sizing: border-box; }
 .portfolio-page { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 .portfolio-page {
