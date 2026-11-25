@@ -258,6 +258,9 @@ def build_positions(transactions, splits, prices, states, dividends, end):
         units = state["units"]
         latest_date, latest = _latest(index, symbol)
         market_value = units * latest if latest is not None else 0.0
+        # A fully sold symbol and a fraction of a cent of dust are not holdings.
+        if units == 0 or round(market_value, 2) == 0:
+            continue
         cost_basis = state["cost_basis"]
         realized = state["realized"]
         dividends_paid = dividends_by_symbol.get(symbol, 0.0)

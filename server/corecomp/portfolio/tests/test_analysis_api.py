@@ -328,7 +328,9 @@ def test_a_recorded_split_scales_units_and_leaves_cost_basis_alone(
     assert position["split_factor"] == 10.0
 
 
-def test_a_fully_sold_loss_reports_against_the_cost_purchased(user, fake_batches):
+def test_a_fully_sold_position_leaves_the_list_but_keeps_its_loss_in_the_summary(
+    user, fake_batches
+):
     _trade(user, shares="10", price="100")
     _trade(
         user,
@@ -341,12 +343,11 @@ def test_a_fully_sold_loss_reports_against_the_cost_purchased(user, fake_batches
 
     body = client_for(user).get(URL).json()
 
-    position = body["positions"][0]
-    assert position["units"] == 0.0
-    assert position["cost_basis"] == 0.0
-    assert position["realized"] == -20.0
-    assert position["profit"] == -20.0
-    assert position["return_pct"] == -2.0
+    # A fully sold symbol holds no units, so the holdings list drops it.
+    assert body["positions"] == []
+    # The realized loss still reaches the summary through the series.
+    assert body["summary"]["profit"] == -20.0
+    assert body["summary"]["return_pct"] is None
 
 
 def test_ledger_dividends_override_the_provider_for_that_symbol(

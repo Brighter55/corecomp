@@ -228,6 +228,25 @@ def test_summary_return_divides_profit_by_cost_basis():
     assert summary["return_pct"] == pytest.approx(10.0)
 
 
+def test_positions_skip_fully_sold_and_sub_cent_rows():
+    prices = {
+        "HELD": [("2024-01-02", 100.0, 100.0)],
+        "SOLD": [("2024-01-02", 100.0, 100.0), ("2024-06-03", 100.0, 100.0)],
+        "DUST": [("2024-01-02", 100.0, 100.0)],
+    }
+    transactions = [
+        _buy("HELD", "2024-01-02", 1000.0, shares=10.0),
+        _buy("SOLD", "2024-01-02", 1000.0, shares=10.0),
+        _sell("SOLD", "2024-06-03", 1000.0, shares=10.0),
+        # 0.000005 units at 100 is a fraction of a cent of market value.
+        _buy("DUST", "2024-01-02", 0.0005, shares=0.000005),
+    ]
+
+    positions = _positions(transactions, [], prices)
+
+    assert [position["symbol"] for position in positions] == ["HELD"]
+
+
 def test_a_fully_sold_summary_has_no_return():
     prices = {
         "AAPL": [("2024-01-02", 100.0, 100.0), ("2024-06-03", 98.0, 98.0)],
@@ -246,7 +265,8 @@ def test_a_fully_sold_summary_has_no_return():
         series, sum(position["cost_basis"] for position in positions)
     )
 
-    assert positions[0]["cost_basis"] == 0.0
+    # A fully sold symbol holds no units, so it leaves the positions list.
+    assert positions == []
     assert summary["profit"] == pytest.approx(-20.0)
     assert summary["return_pct"] is None
 

@@ -199,7 +199,7 @@ export default function PortfolioPage() {
       latest.benchmarkValue + latest.benchmarkDividends -
       (first.benchmarkValue + first.benchmarkDividends);
     const difference = portfolioGain - benchmarkGain;
-    const percent = first.value ? (Math.abs(difference) / first.value) * 100 : 0;
+    const percent = latest.value ? (Math.abs(difference) / latest.value) * 100 : 0;
     return `Portfolio is ${difference >= 0 ? "ahead of" : "behind"} ${benchmarkLabel} by ${formatMoney(Math.abs(difference))} (${percent.toFixed(2)}%) over the selected period.`;
   }, [visibleValue, benchmarkLabel]);
 
@@ -436,6 +436,7 @@ export default function PortfolioPage() {
                     points={visiblePerf}
                     range={perfRange}
                     onRange={setPerfRange}
+                    costBasis={summary.cost_basis}
                     benchmarkLabel={benchmarkLabel}
                     compare={compare}
                     onCompare={() => setCompare((value) => !value)}

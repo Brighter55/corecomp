@@ -156,14 +156,16 @@ export function monthlyReturns(points, range) {
     const end = byMonth.get(key);
     const start = previousKey ? byMonth.get(previousKey) : points[0];
     if (!start || !start.value) continue;
-    const dividendDelta = end.dividends - start.dividends;
-    const benchmarkDelta = end.benchmarkDividends - start.benchmarkDividends;
+    // A month's profit is the change in value plus dividends minus net cash,
+    // so a deposit raises `invested` by the same amount and adds no return.
+    const portfolioProfit = profitOf(end) - profitOf(start);
+    const benchmarkProfit = benchmarkProfitOf(end) - benchmarkProfitOf(start);
     result.push({
       key,
       label: formatMonth(key),
-      pct: ((end.value + dividendDelta) / start.value - 1) * 100,
+      pct: (portfolioProfit / start.value) * 100,
       benchmarkPct: start.benchmarkValue
-        ? ((end.benchmarkValue + benchmarkDelta) / start.benchmarkValue - 1) * 100
+        ? (benchmarkProfit / start.benchmarkValue) * 100
         : 0,
     });
   }

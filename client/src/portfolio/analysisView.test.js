@@ -80,10 +80,27 @@ describe("series transforms", () => {
       "2024-12",
       "2025-06",
     ]);
-    // June 2024: (1200 + 10) / 1000 - 1
+    // June 2024: 210 of profit over the 1000 January value.
     expect(months[1].pct).toBeCloseTo(21.0, 6);
-    // December 2024: (1300 + 15) / 1200 - 1
+    // December 2024: 115 of profit over the 1200 June value.
     expect(months[2].pct).toBeCloseTo(9.5833, 3);
+  });
+
+  it("excludes contributions from the monthly return", () => {
+    const withContribution = {
+      dates: ["2024-01-31", "2024-02-29"],
+      value: [1000, 2000],
+      invested: [1000, 2000],
+      dividends: [0, 0],
+      benchmark_value: [1000, 2000],
+      benchmark_dividends: [0, 0],
+    };
+
+    const months = monthlyReturns(toPoints(withContribution), "all");
+
+    // 1000 of value and 1000 of cash arrived together, so no profit was made.
+    expect(months[1].pct).toBe(0);
+    expect(months[1].benchmarkPct).toBe(0);
   });
 });
 

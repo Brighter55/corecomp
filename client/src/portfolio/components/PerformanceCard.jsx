@@ -43,6 +43,7 @@ export default function PerformanceCard({
   points,
   range,
   onRange,
+  costBasis,
   benchmarkLabel,
   compare,
   onCompare,
@@ -60,7 +61,7 @@ export default function PerformanceCard({
   const last = data[data.length - 1];
   const profit = last ? last.profit : 0;
   const change = first && last ? profit - first.profit : 0;
-  const changePct = first && first.profit ? (change / Math.abs(first.profit)) * 100 : 0;
+  const changePct = costBasis ? (change / costBasis) * 100 : null;
   const span = first && last
     ? `${formatRangeDate(first.date)} – ${formatRangeDate(last.date)}`
     : "";
@@ -93,7 +94,11 @@ export default function PerformanceCard({
           <span>{span}</span>
           <span className={change >= 0 ? "gain" : "loss"}>
             <Dot color={COLORS.profit} />{signedMoney(change)}
-            {first ? ` (${changePct >= 0 ? "▲" : "▼"} ${Math.abs(changePct).toFixed(2)}%)` : ""}
+            {first
+              ? changePct === null
+                ? " (—)"
+                : ` (${changePct >= 0 ? "▲" : "▼"} ${Math.abs(changePct).toFixed(2)}%)`
+              : ""}
           </span>
         </div>
       </div>

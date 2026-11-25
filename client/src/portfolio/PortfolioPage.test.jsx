@@ -128,6 +128,37 @@ describe("PortfolioPage", () => {
     expect(screen.getByText("Transactions")).toBeInTheDocument();
   });
 
+  test("reports the benchmark gap over current value and the return on cost basis", async () => {
+    render(<PortfolioPage />);
+    await screen.findByText("Core Portfolio");
+
+    // The 1y window starts at 2024-06-03, so the gap is 100 - 50 = 50 over
+    // the 1,200 current value, and the 100 profit is over the 900 cost basis.
+    expect(
+      screen.getByText(
+        "Portfolio is ahead of S&P 500 (SPY) by $50.00 (4.17%) over the selected period.",
+      ),
+    ).toBeInTheDocument();
+
+    const perfCard = screen.getByText("Portfolio performance").closest("article");
+    expect(within(perfCard).getByText("+$100.00 (▲ 11.11%)")).toBeInTheDocument();
+  });
+
+  test("shows a dash instead of a return when there is no cost basis", async () => {
+    respond({
+      analysis: {
+        ...ANALYSIS,
+        summary: { ...ANALYSIS.summary, cost_basis: 0 },
+      },
+    });
+
+    render(<PortfolioPage />);
+    await screen.findByText("Core Portfolio");
+
+    const perfCard = screen.getByText("Portfolio performance").closest("article");
+    expect(within(perfCard).getByText("+$100.00 (—)")).toBeInTheDocument();
+  });
+
   test("shows the cost basis and the forward income estimate", async () => {
     render(<PortfolioPage />);
     await screen.findByText("Core Portfolio");

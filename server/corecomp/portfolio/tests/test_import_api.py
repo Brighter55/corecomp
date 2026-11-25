@@ -155,5 +155,8 @@ def test_analysis_reports_the_units_the_preview_promised(user, fake_batches):
     analysis = client.get(ANALYSIS_URL).json()
 
     units = {position["symbol"]: position["units"] for position in analysis["positions"]}
-    assert units == preview["positions"]
-    assert units == {"ACME": 13.75, "FICT": 0.0, "SPLT": 20.0, "MULTI": 3.0}
+    # The preview lists every traded symbol; the analysis drops the fully sold one.
+    assert units == {
+        symbol: count for symbol, count in preview["positions"].items() if count
+    }
+    assert units == {"ACME": 13.75, "SPLT": 20.0, "MULTI": 3.0}
