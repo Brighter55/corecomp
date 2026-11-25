@@ -4,6 +4,25 @@ import Footer from "./shared/Footer.tsx";
 const versions = [
     {
         name: "Current Version",
+        version: "0.12.0",
+        date: "11/25/2026",
+        updates: [
+            "Add a Portfolio page: record what you own and see its value, profit and return in one place",
+            "Add a trade with the shares and price from your statement, and the total is worked out for you",
+            "Record a dividend so it counts towards your return instead of sitting outside it",
+            "Record a stock split as a ratio like 10:1, and your earlier share counts and prices are restated to match",
+            "Import your Robinhood activity CSV, previewing every row it will add and every row it will skip before anything is saved",
+            "Re-import the same file without creating duplicates, so you can load a fresh export whenever you like",
+            "Compare the portfolio with the S&P 500 or another benchmark, and switch the range from a week to all time",
+            "Report the return against the money you put in, so a deposit made partway through does not flatter the number",
+            "Estimate the passive income your holdings should pay over the next year, with the current yield and the latest dividend raise",
+            "Show only the positions you still hold, so a ticker you have sold stops appearing",
+            "Add an Add menu to the portfolio header for a new trade, dividend or split, or an import",
+            "Follow the dark theme across the whole Portfolio page",
+        ],
+    },
+    {
+        name: "Version",
         version: "0.11.0",
         date: "10/12/2026",
         updates: [
