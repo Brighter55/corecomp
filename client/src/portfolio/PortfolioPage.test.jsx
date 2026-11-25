@@ -124,7 +124,7 @@ describe("PortfolioPage", () => {
   test("renders the headline value and the four cards", async () => {
     render(<PortfolioPage />);
 
-    expect(await screen.findByText("Core Portfolio")).toBeInTheDocument();
+    expect(await screen.findByText("Portfolio")).toBeInTheDocument();
     expect(screen.getAllByText("$1,200.00").length).toBeGreaterThan(0);
     expect(await screen.findByText("Portfolio value")).toBeInTheDocument();
     expect(screen.getByText("Portfolio performance")).toBeInTheDocument();
@@ -135,7 +135,7 @@ describe("PortfolioPage", () => {
 
   test("reports the benchmark gap over current value and the return on cost basis", async () => {
     render(<PortfolioPage />);
-    await screen.findByText("Core Portfolio");
+    await screen.findByText("Portfolio");
 
     // The 1y window starts at 2024-06-03, so the gap is 100 - 50 = 50 over
     // the 1,200 current value, and the 100 profit is over the 900 cost basis.
@@ -158,7 +158,7 @@ describe("PortfolioPage", () => {
     });
 
     render(<PortfolioPage />);
-    await screen.findByText("Core Portfolio");
+    await screen.findByText("Portfolio");
 
     const perfCard = screen.getByText("Portfolio performance").closest("article");
     expect(within(perfCard).getByText("+$100.00 (—)")).toBeInTheDocument();
@@ -166,7 +166,7 @@ describe("PortfolioPage", () => {
 
   test("shows the cost basis and the forward income estimate", async () => {
     render(<PortfolioPage />);
-    await screen.findByText("Core Portfolio");
+    await screen.findByText("Portfolio");
 
     const valueCard = screen.getByRole("article", { name: "Value" });
     expect(within(valueCard).getByText(/\$900\.00 cost basis/)).toBeInTheDocument();
@@ -213,7 +213,7 @@ describe("PortfolioPage", () => {
 
   test("opens the add transaction dialog", async () => {
     render(<PortfolioPage />);
-    await screen.findByText("Core Portfolio");
+    await screen.findByText("Portfolio");
 
     await openAddMenu(/New trade/);
 
@@ -224,7 +224,7 @@ describe("PortfolioPage", () => {
 
   test("opens the benchmark picker", async () => {
     render(<PortfolioPage />);
-    await screen.findByText("Core Portfolio");
+    await screen.findByText("Portfolio");
 
     await userEvent.click(screen.getAllByRole("button", { name: "Select" })[0]);
 
@@ -235,7 +235,7 @@ describe("PortfolioPage", () => {
 
   test("derives the trade amount from shares times price", async () => {
     render(<PortfolioPage />);
-    await screen.findByText("Core Portfolio");
+    await screen.findByText("Portfolio");
 
     await openAddMenu(/New trade/);
     const dialog = screen
@@ -271,7 +271,7 @@ describe("PortfolioPage", () => {
 
   test("the split dialog posts the new-to-old ratio", async () => {
     render(<PortfolioPage />);
-    await screen.findByText("Core Portfolio");
+    await screen.findByText("Portfolio");
 
     await openAddMenu(/New split/);
     const dialog = screen
@@ -311,7 +311,7 @@ describe("PortfolioPage", () => {
       });
 
     render(<PortfolioPage />);
-    await screen.findByText("Core Portfolio");
+    await screen.findByText("Portfolio");
 
     await openAddMenu(/Import a spreadsheet/);
     const dialog = screen

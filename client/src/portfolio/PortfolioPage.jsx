@@ -347,12 +347,7 @@ export default function PortfolioPage() {
           <section className="page-head" id="overview" aria-labelledby="page-title">
             <div>
               <p className="eyebrow">Portfolio analysis</p>
-              <h1 id="page-title">Core Portfolio</h1>
-              <p className="page-meta">
-                <span>Growth &amp; income</span>
-                <span className="dot-sep" aria-hidden="true">•</span>
-                <span>USD</span>
-              </p>
+              <h1 id="page-title">Portfolio</h1>
             </div>
             <div className="head-value">
               <p className="head-label">Total value</p>
