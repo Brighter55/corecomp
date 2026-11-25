@@ -345,31 +345,33 @@ export default function PortfolioPage() {
       <main id="main">
         <div className="shell">
           <section className="page-head" id="overview" aria-labelledby="page-title">
-            <div>
-              <p className="eyebrow">Portfolio analysis</p>
-              <h1 id="page-title">Portfolio</h1>
-            </div>
-            <div className="head-value">
-              <p className="head-label">Total value</p>
-              <p className="head-total">{formatMoney(summary.value || 0)}</p>
-              <p className={"head-change " + (todayChange >= 0 ? "gain" : "loss")}>
-                {todayChange >= 0 ? "▲" : "▼"}
-                <span>
-                  {formatMoney(Math.abs(todayChange))} ({Math.abs(todayPct).toFixed(2)}%) today
-                </span>
-              </p>
-              <div className="head-actions">
-                <AddMenu
-                  onSelect={(action) => {
-                    if (action === "split") setSplitOpen(true);
-                    else if (action === "import") setImportOpen(true);
-                    else {
-                      setAddKind(action === "dividend" ? "DIVIDEND" : "BUY");
-                      setAddOpen(true);
-                    }
-                  }}
-                />
+            <div className="head-main">
+              <div>
+                <p className="eyebrow">Portfolio analysis</p>
+                <h1 id="page-title">Portfolio</h1>
               </div>
+              <div className="head-value">
+                <p className="head-label">Total value</p>
+                <p className="head-total">{formatMoney(summary.value || 0)}</p>
+                <p className={"head-change " + (todayChange >= 0 ? "gain" : "loss")}>
+                  {todayChange >= 0 ? "▲" : "▼"}
+                  <span>
+                    {formatMoney(Math.abs(todayChange))} ({Math.abs(todayPct).toFixed(2)}%) today
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="head-actions">
+              <AddMenu
+                onSelect={(action) => {
+                  if (action === "split") setSplitOpen(true);
+                  else if (action === "import") setImportOpen(true);
+                  else {
+                    setAddKind(action === "dividend" ? "DIVIDEND" : "BUY");
+                    setAddOpen(true);
+                  }
+                }}
+              />
             </div>
           </section>
 

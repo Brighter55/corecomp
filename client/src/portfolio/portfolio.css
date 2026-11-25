@@ -161,12 +161,18 @@
 }
 .portfolio-page .page-head {
   display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 34px 0 22px;
+}
+.portfolio-page .head-main {
+  display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 28px;
   flex-wrap: wrap;
-  padding: 34px 0 22px;
 }
+.portfolio-page .head-actions { display: flex; justify-content: flex-end; }
 .portfolio-page .eyebrow {
   font-size: 11px;
   font-weight: 600;
@@ -895,6 +901,8 @@
   .portfolio-page .shell { padding: 0 16px 36px; }
   .portfolio-page .page-head { padding: 24px 0 18px; gap: 16px; }
   .portfolio-page h1 { font-size: 24px; }
+  .portfolio-page .head-main { flex-direction: column; align-items: flex-start; }
+  .portfolio-page .head-actions { width: 100%; justify-content: flex-start; }
   .portfolio-page .head-value { width: 100%; text-align: left; }
   .portfolio-page .head-change { justify-content: flex-start; }
   .portfolio-page .head-total { font-size: 28px; }
@@ -984,7 +992,6 @@
 }
 .portfolio-page .modal input::placeholder { color: var(--muted); }
 
-.portfolio-page .head-actions { margin-top: 14px; }
 .portfolio-page .add-menu { position: relative; display: inline-flex; }
 .portfolio-page .add-btn .od-icon { --od-icon-size: 17px; }
 .portfolio-page .add-btn { transition: background .15s ease, transform .15s ease, box-shadow .15s ease; }
