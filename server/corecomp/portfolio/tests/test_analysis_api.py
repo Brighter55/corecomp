@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 import pytest
@@ -163,6 +163,34 @@ def test_empty_ledger_returns_zeros_without_calling_the_provider(user, monkeypat
     assert body["positions"] == []
     assert body["series"]["dates"] == []
     assert body["summary"]["profit"] == 0.0
+    assert body["summary"]["cost_basis"] == 0.0
+    assert body["summary"]["forward_income"] == 0.0
+    assert body["summary"]["forward_yield_pct"] is None
+    assert body["summary"]["dividend_growth_pct"] is None
+
+
+def test_summary_carries_cost_basis_and_forward_income(user, monkeypatch):
+    today = date.today()
+    recent = (today - timedelta(days=30)).isoformat()
+    prior = (today - timedelta(days=400)).isoformat()
+    prices = {
+        "AAPL": [("2024-01-02", 100.0, 100.0), ("2024-06-03", 120.0, 120.0)],
+        "SPY": [("2024-01-02", 200.0, 200.0), ("2024-06-03", 260.0, 260.0)],
+    }
+    dividends = {
+        "AAPL": [(recent, 0.5), (prior, 0.25)],
+        "SPY": [],
+    }
+    _set_batches(monkeypatch, prices, dividends)
+    _trade(user, shares="10", price="100")
+
+    summary = client_for(user).get(URL).json()["summary"]
+
+    # 0.50 per share on 10 units this year, 0.25 last year.
+    assert summary["cost_basis"] == 1000.0
+    assert summary["forward_income"] == 5.0
+    assert summary["forward_yield_pct"] == 0.4167
+    assert summary["dividend_growth_pct"] == 100.0
 
 
 def test_a_second_request_is_served_from_cache(user, fake_batches):

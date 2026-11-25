@@ -362,11 +362,14 @@ def analysis_view(request):
             "benchmark_value": [],
             "benchmark_dividends": [],
         }
+        summary = analysis.summarize(empty, 0.0)
+        summary["cost_basis"] = 0.0
+        summary.update(analysis.income_projection({}, {}, end_iso, 0.0))
         return Response({
             "window": {"start": start_iso, "end": end_iso},
             "benchmark": benchmark,
             "positions": [],
-            "summary": analysis.summarize(empty, 0.0),
+            "summary": summary,
             "series": empty,
         })
 
@@ -431,14 +434,19 @@ def analysis_view(request):
         start=start_iso,
         end=end_iso,
     )
+    positions = analysis.build_positions(
+        transactions, splits, prices, states, dividends, end_iso
+    )
+    cost_basis = sum(row["cost_basis"] for row in positions)
+    summary = analysis.summarize(series, cost_basis)
+    summary["cost_basis"] = round(cost_basis, 2)
+    summary.update(
+        analysis.income_projection(states, dividends, end_iso, summary["value"])
+    )
     return Response({
         "window": {"start": start_iso, "end": end_iso},
         "benchmark": benchmark,
-        "positions": analysis.build_positions(
-            transactions, splits, prices, states, dividends, end_iso
-        ),
-        "summary": analysis.summarize(
-            series, analysis.total_purchased(transactions)
-        ),
+        "positions": positions,
+        "summary": summary,
         "series": series,
     })

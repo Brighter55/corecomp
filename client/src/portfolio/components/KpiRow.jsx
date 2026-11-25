@@ -27,7 +27,7 @@ export default function KpiRow({ kpis, onInfo }) {
           <InfoButton label="About portfolio value" onClick={() => onInfo("value")} />
         </div>
         <p className="kpi-value">{formatMoney(kpis.value)}</p>
-        <p className="kpi-sub">{formatMoney(kpis.invested)} invested</p>
+        <p className="kpi-sub">{formatMoney(kpis.costBasis)} cost basis</p>
       </article>
 
       <article className="kpi" aria-label="Total profit">
@@ -72,16 +72,16 @@ export default function KpiRow({ kpis, onInfo }) {
           <InfoButton label="About passive income" onClick={() => onInfo("passive")} />
         </div>
         <div className="kpi-value-row">
-          <p className="kpi-value">{percent(kpis.incomePct)}</p>
-          {Number.isFinite(Number(kpis.incomeGrowth)) ? (
-            <span className={"kpi-badge " + (kpis.incomeGrowth >= 0 ? "gain" : "loss")}>
-              {kpis.incomeGrowth >= 0 ? <TriUpIcon /> : <TriDownIcon />}
-              <span>{Math.abs(kpis.incomeGrowth).toFixed(0)}%</span>
+          <p className="kpi-value">{percent(kpis.forwardYieldPct)}</p>
+          {Number.isFinite(Number(kpis.dividendGrowthPct)) ? (
+            <span className={"kpi-badge " + (kpis.dividendGrowthPct >= 0 ? "gain" : "loss")}>
+              {kpis.dividendGrowthPct >= 0 ? <TriUpIcon /> : <TriDownIcon />}
+              <span>{Math.abs(kpis.dividendGrowthPct).toFixed(0)}%</span>
             </span>
           ) : null}
         </div>
         <p className="kpi-sub">
-          <span className="kpi-sub-strong">{formatMoney(kpis.annualIncome)}</span> annually
+          <span className="kpi-sub-strong">{formatMoney(kpis.forwardIncome)}</span> est. annually
         </p>
       </article>
     </section>

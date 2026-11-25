@@ -96,8 +96,8 @@ def test_a_weekend_purchase_uses_the_prior_session():
 
 
 def test_a_sale_removes_units_at_the_average_cost():
-    # The model changed: cost basis is now the remaining average cost, not net
-    # cash, and a return divides total profit by the dollars purchased.
+    # Cost basis is the remaining average cost, not net cash. The return
+    # divides profit by what is still owned: 1,000 profit on 800 of cost.
     prices = {"AAPL": [("2024-01-02", 100.0, 100.0), ("2024-06-03", 200.0, 200.0)]}
     transactions = [
         _buy("AAPL", "2024-01-02", 1000.0),
@@ -113,7 +113,7 @@ def test_a_sale_removes_units_at_the_average_cost():
     assert positions[0]["realized"] == pytest.approx(200.0)
     assert positions[0]["unrealized"] == pytest.approx(800.0)
     assert positions[0]["profit"] == pytest.approx(1000.0)
-    assert positions[0]["return_pct"] == pytest.approx(100.0)
+    assert positions[0]["return_pct"] == pytest.approx(125.0)
 
 
 def test_fractional_units_survive():
@@ -168,7 +168,7 @@ def test_series_and_summary_match_hand_computed_values():
     series = _series(
         transactions, [], prices, {"AAPL": [], "VOO": []}, prices, {"VOO": []}
     )
-    summary = analysis.summarize(series, analysis.total_purchased(transactions))
+    summary = analysis.summarize(series, 1000.0)
 
     assert series["dates"] == ["2024-01-02", "2024-06-03"]
     assert series["value"] == [1000.0, 1200.0]
@@ -195,12 +195,60 @@ def test_cash_dividends_add_to_profit_and_use_current_units():
     dividends = {"AAPL": [("2024-03-15", 2.0)], "VOO": []}
 
     series = _series(transactions, [], prices, dividends, prices, dividends)
-    summary = analysis.summarize(series, analysis.total_purchased(transactions))
+    summary = analysis.summarize(series, 1000.0)
 
     # 10 units held on the ex-date, so 20 dollars of cash.
     assert summary["dividends"] == pytest.approx(20.0)
     assert summary["profit"] == pytest.approx(220.0)
     assert summary["return_pct"] == pytest.approx(22.0)
+
+
+def test_summary_return_divides_profit_by_cost_basis():
+    prices = {
+        "AAPL": [("2024-01-02", 100.0, 100.0), ("2024-06-03", 110.0, 110.0)],
+        "VOO": [("2024-01-02", 200.0, 200.0), ("2024-06-03", 260.0, 260.0)],
+    }
+    transactions = [
+        _buy("AAPL", "2024-01-02", 2000.0, shares=20.0),
+        _sell("AAPL", "2024-06-03", 1000.0, shares=10.0),
+    ]
+
+    positions = _positions(transactions, [], prices)
+    series = _series(
+        transactions, [], prices, {"AAPL": [], "VOO": []}, prices, {"VOO": []}
+    )
+    summary = analysis.summarize(
+        series, sum(position["cost_basis"] for position in positions)
+    )
+
+    # 10 units left at a 1,000 cost basis, worth 1,100. Dividing by every
+    # dollar ever bought (2,000) would print 5%.
+    assert positions[0]["cost_basis"] == pytest.approx(1000.0)
+    assert summary["profit"] == pytest.approx(100.0)
+    assert summary["return_pct"] == pytest.approx(10.0)
+
+
+def test_a_fully_sold_summary_has_no_return():
+    prices = {
+        "AAPL": [("2024-01-02", 100.0, 100.0), ("2024-06-03", 98.0, 98.0)],
+        "VOO": [("2024-01-02", 200.0, 200.0), ("2024-06-03", 260.0, 260.0)],
+    }
+    transactions = [
+        _buy("AAPL", "2024-01-02", 1000.0, shares=10.0),
+        _sell("AAPL", "2024-06-03", 980.0, shares=10.0),
+    ]
+
+    positions = _positions(transactions, [], prices)
+    series = _series(
+        transactions, [], prices, {"AAPL": [], "VOO": []}, prices, {"VOO": []}
+    )
+    summary = analysis.summarize(
+        series, sum(position["cost_basis"] for position in positions)
+    )
+
+    assert positions[0]["cost_basis"] == 0.0
+    assert summary["profit"] == pytest.approx(-20.0)
+    assert summary["return_pct"] is None
 
 
 def test_series_values_a_pre_split_point_in_today_share_units():
@@ -321,6 +369,45 @@ def test_with_live_close_does_not_mutate_the_input():
     analysis.with_live_close(prices, {"AAPL": 125.0}, "2024-06-04")
 
     assert prices == {"AAPL": [("2024-06-03", 120.0, 120.0)]}
+
+
+def test_income_projection_sums_the_trailing_year_for_held_symbols():
+    states = {
+        "AAPL": {"units": 10.0},
+        "MSFT": {"units": 5.0},
+        "OLD": {"units": 0.0},
+    }
+    dividends = {
+        "AAPL": [("2025-03-01", 0.25), ("2025-09-01", 0.25)],
+        "MSFT": [],
+        "OLD": [("2025-06-01", 2.0)],
+    }
+
+    projection = analysis.income_projection(states, dividends, "2026-01-01", 1000.0)
+
+    # Two 0.25 payments on 10 units. MSFT pays nothing and OLD is fully sold.
+    assert projection["forward_income"] == 5.0
+    assert projection["forward_yield_pct"] == 0.5
+    assert projection["dividend_growth_pct"] is None
+
+
+def test_income_projection_compares_the_trailing_year_with_the_prior_one():
+    states = {"AAPL": {"units": 10.0}}
+    dividends = {
+        "AAPL": [
+            ("2024-03-01", 0.20),
+            ("2024-09-01", 0.20),
+            ("2025-03-01", 0.25),
+            ("2025-09-01", 0.25),
+        ]
+    }
+
+    projection = analysis.income_projection(states, dividends, "2026-01-01", 2000.0)
+
+    # 0.50 per share this year against 0.40 last year, times 10 units.
+    assert projection["forward_income"] == 5.0
+    assert projection["forward_yield_pct"] == 0.25
+    assert projection["dividend_growth_pct"] == 25.0
 
 
 def test_an_empty_ledger_summarizes_to_zeros():

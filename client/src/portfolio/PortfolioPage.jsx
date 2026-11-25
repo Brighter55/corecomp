@@ -7,7 +7,6 @@ import {
   formatPctLabel,
   formatRangeDate,
   holdingsFor,
-  incomeMetrics,
   irr,
   monthlyReturns,
   slicePoints,
@@ -49,11 +48,11 @@ const INFO = {
   value:
     "Tracks the market value of your holdings against the selected benchmark. The dashed line is net cash invested, including contributions over time. Hover or tap the chart to inspect a date.",
   profit:
-    "Total gain measured against net contributions. The percentage is the simple return on invested capital, and the daily line compares the latest close with the prior session.",
+    "Total gain measured against net contributions. The percentage is the simple return on the cost basis of the holdings you still own, and the daily line compares the latest close with the prior session.",
   irr:
     "Internal rate of return, a money-weighted annualized return that accounts for the timing of contributions and withdrawals. The secondary figure is the return on current holdings only.",
   passive:
-    "Trailing twelve-month dividend income, shown as a yield on current portfolio value. Growth compares this year with the prior year.",
+    "Estimated dividend income from your current holdings over the next twelve months, shown as a yield on current portfolio value. Growth compares the trailing year with the year before it.",
   perf:
     "Shows the gain or loss in dollars from the start of the selected range. The zero line separates gains from losses.",
   dyn:
@@ -150,7 +149,6 @@ export default function PortfolioPage() {
   const todayChange = last && previous ? last.value - previous.value : 0;
   const todayPct = previous && previous.value ? (todayChange / previous.value) * 100 : 0;
 
-  const income = useMemo(() => incomeMetrics(points), [points]);
   const cashflows = useMemo(
     () =>
       buildCashflows(
@@ -207,16 +205,16 @@ export default function PortfolioPage() {
 
   const kpis = {
     value: summary.value || 0,
-    invested: summary.invested || 0,
+    costBasis: summary.cost_basis || 0,
     profit: summary.profit || 0,
     returnPct: summary.return_pct,
     todayChange,
     todayPct,
     irr: irrValue,
     holdingsReturn: summary.return_pct,
-    incomePct: income.yieldPct,
-    annualIncome: income.annual,
-    incomeGrowth: income.growthPct,
+    forwardIncome: summary.forward_income || 0,
+    forwardYieldPct: summary.forward_yield_pct,
+    dividendGrowthPct: summary.dividend_growth_pct,
   };
 
   const drawerContent = useMemo(() => {

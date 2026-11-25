@@ -56,12 +56,16 @@ const ANALYSIS = {
   summary: {
     value: 1200,
     invested: 1000,
+    cost_basis: 900,
     dividends: 0,
     profit: 200,
     return_pct: 20,
     benchmark_value: 1100,
     benchmark_profit: 100,
     benchmark_return_pct: 10,
+    forward_income: 48.5,
+    forward_yield_pct: 4.0417,
+    dividend_growth_pct: 12,
   },
   series: {
     dates: ["2024-01-02", "2024-06-03", "2025-01-02"],
@@ -124,13 +128,37 @@ describe("PortfolioPage", () => {
     expect(screen.getByText("Transactions")).toBeInTheDocument();
   });
 
+  test("shows the cost basis and the forward income estimate", async () => {
+    render(<PortfolioPage />);
+    await screen.findByText("Core Portfolio");
+
+    const valueCard = screen.getByRole("article", { name: "Value" });
+    expect(within(valueCard).getByText(/\$900\.00 cost basis/)).toBeInTheDocument();
+    expect(within(valueCard).queryByText(/invested/)).not.toBeInTheDocument();
+
+    const incomeCard = screen.getByRole("article", { name: "Passive income" });
+    expect(within(incomeCard).getByText("4.04%")).toBeInTheDocument();
+    expect(within(incomeCard).getByText("12%")).toBeInTheDocument();
+    expect(within(incomeCard).getByText("$48.50")).toBeInTheDocument();
+    expect(within(incomeCard).getByText(/est\. annually/)).toBeInTheDocument();
+  });
+
   test("shows the empty state when the ledger has no positions", async () => {
     respond({
       ledger: [],
       analysis: {
         ...ANALYSIS,
         positions: [],
-        summary: { ...ANALYSIS.summary, value: 0, invested: 0, profit: 0 },
+        summary: {
+          ...ANALYSIS.summary,
+          value: 0,
+          invested: 0,
+          cost_basis: 0,
+          profit: 0,
+          forward_income: 0,
+          forward_yield_pct: null,
+          dividend_growth_pct: null,
+        },
         series: {
           dates: [],
           value: [],

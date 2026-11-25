@@ -5,7 +5,6 @@ import {
   buildCashflows,
   formatPctLabel,
   holdingsFor,
-  incomeMetrics,
   irr,
   monthlyReturns,
   profitOf,
@@ -85,12 +84,6 @@ describe("series transforms", () => {
     expect(months[1].pct).toBeCloseTo(21.0, 6);
     // December 2024: (1300 + 15) / 1200 - 1
     expect(months[2].pct).toBeCloseTo(9.5833, 3);
-  });
-
-  it("computes trailing income and its growth", () => {
-    const metrics = incomeMetrics(toPoints(SERIES));
-    expect(metrics.annual).toBe(40);
-    expect(metrics.yieldPct).toBeCloseTo((40 / 1500) * 100, 6);
   });
 });
 

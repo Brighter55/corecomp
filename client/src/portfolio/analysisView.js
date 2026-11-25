@@ -139,15 +139,6 @@ export function slicePoints(points, range, custom) {
   return points.filter((point) => point.date >= start && (!end || point.date <= end));
 }
 
-export function valueAt(points, iso, key) {
-  let value = 0;
-  for (const point of points) {
-    if (point.date <= iso) value = point[key];
-    else break;
-  }
-  return value;
-}
-
 export function monthlyReturns(points, range) {
   if (points.length < 2) return [];
   const byMonth = new Map();
@@ -177,22 +168,6 @@ export function monthlyReturns(points, range) {
     });
   }
   return result;
-}
-
-export function incomeMetrics(points) {
-  if (!points.length) return { annual: 0, yieldPct: null, growthPct: null };
-  const last = points[points.length - 1];
-  const oneYearAgo = shiftDays(last.date, -365);
-  const twoYearsAgo = shiftDays(last.date, -730);
-  const trailingFrom = valueAt(points, oneYearAgo, "dividends");
-  const priorFrom = valueAt(points, twoYearsAgo, "dividends");
-  const annual = last.dividends - trailingFrom;
-  const prior = trailingFrom - priorFrom;
-  return {
-    annual,
-    yieldPct: last.value ? (annual / last.value) * 100 : null,
-    growthPct: prior ? (annual / prior - 1) * 100 : null,
-  };
 }
 
 export function buildCashflows(ledger, terminalValue, terminalDate) {

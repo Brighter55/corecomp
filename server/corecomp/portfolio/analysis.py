@@ -11,9 +11,10 @@ units, so the same adjustment applies before multiplying.
 
 Profit. `invested` is net cash contributed, meaning buys minus sells.
 `profit = value + dividends - invested`, which counts realized gains from a sale
-as profit and does not double count the cash received. A return divides that
-profit by the dollars actually purchased, so a position fully sold at a loss
-reports the loss rather than -100%.
+as profit and does not double count the cash received. Returns divide that
+profit by cost basis: the summary uses the total cost basis of the holdings
+still owned, and a position uses its own, falling back to the dollars purchased
+when it is fully sold so the loss still shows.
 """
 
 from bisect import bisect_right
@@ -156,11 +157,6 @@ def _buy_amounts(transactions):
     return totals
 
 
-def total_purchased(transactions):
-    """Dollars spent on BUY rows across the whole ledger."""
-    return sum(_buy_amounts(transactions).values())
-
-
 def _invested_pairs(transactions):
     pairs = []
     for tx in transactions:
@@ -266,8 +262,8 @@ def build_positions(transactions, splits, prices, states, dividends, end):
         realized = state["realized"]
         dividends_paid = dividends_by_symbol.get(symbol, 0.0)
         profit = market_value - cost_basis + realized + dividends_paid
-        purchased = bought.get(symbol, 0.0)
-        lifetime = round(profit / purchased * 100, 4) if purchased else None
+        denominator = cost_basis if cost_basis > 0 else bought.get(symbol, 0.0)
+        lifetime = round(profit / denominator * 100, 4) if denominator else None
 
         period_returns = {}
         for period in PERIODS:
@@ -306,6 +302,48 @@ def build_positions(transactions, splits, prices, states, dividends, end):
 
     positions.sort(key=lambda row: row["market_value"], reverse=True)
     return positions
+
+
+def income_projection(states, dividends, end, total_value):
+    """Forward dividend income from the units held now.
+
+    Provider rows are split-adjusted, so the current unit count multiplies the
+    per-share amounts directly. Gross of foreign withholding.
+    """
+    end_day = date.fromisoformat(_day(end))
+    end_iso = end_day.isoformat()
+    current_from = (end_day - timedelta(days=365)).isoformat()
+    prior_from = (end_day - timedelta(days=730)).isoformat()
+
+    current_total = 0.0
+    prior_total = 0.0
+    for symbol, state in (states or {}).items():
+        units = state.get("units", 0.0)
+        if units <= 0:
+            continue
+        for ex_date, amount in (dividends or {}).get(symbol, []):
+            per_share = _to_float(amount) or 0.0
+            if not per_share:
+                continue
+            day = _day(ex_date)
+            if current_from <= day <= end_iso:
+                current_total += per_share * units
+            elif prior_from <= day < current_from:
+                prior_total += per_share * units
+
+    current_income = round(current_total, 2)
+    prior_income = round(prior_total, 2)
+    return {
+        "forward_income": current_income,
+        "forward_yield_pct": (
+            round(current_income / total_value * 100, 4) if total_value else None
+        ),
+        "dividend_growth_pct": (
+            round((current_income - prior_income) / prior_income * 100, 4)
+            if prior_income
+            else None
+        ),
+    }
 
 
 def with_live_close(prices, quotes, day):
@@ -425,7 +463,7 @@ def build_series(
     return series
 
 
-def summarize(series, cost_purchased):
+def summarize(series, cost_basis):
     """Headline numbers from the last point of a series."""
     if not series["dates"]:
         return {
@@ -451,7 +489,7 @@ def summarize(series, cost_purchased):
         "dividends": dividends,
         "profit": profit,
         "return_pct": (
-            round(profit / cost_purchased * 100, 4) if cost_purchased else None
+            round(profit / cost_basis * 100, 4) if cost_basis else None
         ),
         "benchmark_value": round(benchmark_value, 2),
         "benchmark_profit": round(benchmark_value - invested, 2),
