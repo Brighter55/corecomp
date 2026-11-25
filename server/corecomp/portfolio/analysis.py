@@ -256,12 +256,14 @@ def build_positions(transactions, splits, prices, states, dividends, end):
     positions = []
     for symbol, state in states.items():
         units = state["units"]
+        cost_basis = state["cost_basis"]
         latest_date, latest = _latest(index, symbol)
         market_value = units * latest if latest is not None else 0.0
-        # A fully sold symbol and a fraction of a cent of dust are not holdings.
-        if units == 0 or round(market_value, 2) == 0:
+        # A fully sold symbol is not a holding. Neither is a fraction of a cent
+        # of dust with no cost, which is what fractional rounding leaves behind.
+        # A position with cost but no price row is still held, so it stays.
+        if units == 0 or (round(market_value, 2) == 0 and round(cost_basis, 2) == 0):
             continue
-        cost_basis = state["cost_basis"]
         realized = state["realized"]
         dividends_paid = dividends_by_symbol.get(symbol, 0.0)
         profit = market_value - cost_basis + realized + dividends_paid
