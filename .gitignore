@@ -76,3 +76,5 @@ client/e2e/.auth
 # repo is public, so the account history must never be committed. Tests use a
 # synthetic fixture instead.
 docs/robinhood-sample.csv
+docs/Snowball_Export_My portfolio_11_25_2026.csv
+docs/
