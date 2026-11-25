@@ -31,6 +31,7 @@
   --line-strong: rgba(26, 36, 30, .22);
   --brand: #3A5A40;
   --brand-deep: #2B4432;
+  --brand-text: #2B4432;
   --gain: #376B47;
   --gain-bar: #6FA98B;
   --gain-soft: rgba(84, 142, 111, .16);
@@ -67,6 +68,10 @@
   --line-strong: rgba(255, 255, 255, .24);
   --brand: #A3B18A;
   --brand-deep: #3A5A40;
+  /* `--brand-deep` fills buttons (white text on it), so it has to stay dark.
+     Text that sits on the sage-tinted `--sage-soft` chips needs the opposite:
+     a light accent in dark mode. */
+  --brand-text: #D2E0BB;
   --gain: #8FD08C;
   --gain-bar: #6FA98B;
   --gain-soft: rgba(143, 208, 140, .16);
@@ -166,7 +171,7 @@
   text-decoration: none;
 }
 .portfolio-page .main-nav a:hover { background: var(--surface-soft); color: var(--ink); }
-.portfolio-page .main-nav a.is-current { background: var(--sage-soft); color: var(--brand-deep); font-weight: 600; }
+.portfolio-page .main-nav a.is-current { background: var(--sage-soft); color: var(--brand-text); font-weight: 600; }
 .portfolio-page .appbar-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 .portfolio-page .account {
   display: flex;
@@ -466,7 +471,7 @@
   cursor: pointer;
 }
 .portfolio-page .link-btn:hover { text-decoration: underline; }
-.portfolio-page .compare-btn.is-on { background: var(--sage-soft); color: var(--brand-deep); }
+.portfolio-page .compare-btn.is-on { background: var(--sage-soft); color: var(--brand-text); }
 .portfolio-page .tutorial-link { margin-left: auto; }
 .portfolio-page .insight {
   display: flex;
@@ -509,7 +514,7 @@
   cursor: pointer;
 }
 .portfolio-page .tab:hover { background: var(--surface-soft); color: var(--ink); }
-.portfolio-page .tab.is-active { background: var(--sage-soft); color: var(--brand-deep); font-weight: 700; }
+.portfolio-page .tab.is-active { background: var(--sage-soft); color: var(--brand-text); font-weight: 700; }
 .portfolio-page .tab.icon-tab { width: 32px; min-width: 32px; padding: 0; color: var(--ink-soft); }
 .portfolio-page .tab.icon-tab .od-icon { --od-icon-size: 15px; }
 .portfolio-page .range-summary {
@@ -611,7 +616,7 @@
   color: var(--ink-soft);
   cursor: pointer;
 }
-.portfolio-page .foot-btn:hover { color: var(--brand-deep); }
+.portfolio-page .foot-btn:hover { color: var(--brand-text); }
 .portfolio-page .foot-btn .od-icon { --od-icon-size: 15px; color: var(--muted); }
 .portfolio-page .foot-btn .arrow { transition: transform .18s ease; }
 .portfolio-page .foot-btn:hover .arrow { transform: translateX(3px); }
@@ -636,7 +641,7 @@
   cursor: pointer;
 }
 .portfolio-page .segmented button:hover { color: var(--ink); }
-.portfolio-page .segmented button.is-active { background: var(--sage-soft); color: var(--brand-deep); }
+.portfolio-page .segmented button.is-active { background: var(--sage-soft); color: var(--brand-text); }
 .portfolio-page .segmented .od-icon { --od-icon-size: 15px; }
 .portfolio-page .bars-plot {
   --label-w: 64px;
@@ -915,11 +920,11 @@
   border: 1px solid var(--line);
   border-radius: 50%;
   background: var(--sage-soft);
-  color: var(--brand-deep);
+  color: var(--brand-text);
   box-shadow: 0 2px 6px rgba(26, 36, 30, .1);
   cursor: pointer;
 }
-.portfolio-page .to-top:hover { background: #DFE8D5; }
+.portfolio-page .to-top:hover { background: var(--sage-line); }
 .portfolio-page .to-top .od-icon { --od-icon-size: 18px; }
 .portfolio-page dialog[open] .modal { animation: modalIn .18s ease-out; }
 .portfolio-page .drawer[open] { animation: drawerIn .24s cubic-bezier(.2, .8, .2, 1); }
@@ -1088,7 +1093,7 @@
 }
 .portfolio-page .ico-trade { background: var(--gain-soft); color: var(--brand); }
 .portfolio-page .ico-div { background: rgba(192, 138, 46, .16); color: var(--chart-bench); }
-.portfolio-page .ico-split { background: rgba(52, 78, 65, .13); color: var(--brand-deep); }
+.portfolio-page .ico-split { background: rgba(52, 78, 65, .13); color: var(--brand-text); }
 .portfolio-page .ico-import { background: rgba(91, 125, 160, .15); color: var(--chart-bench2); }
 .portfolio-page .add-menu-text { display: block; min-width: 0; }
 .portfolio-page .add-menu-text strong { display: block; font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.35; }
